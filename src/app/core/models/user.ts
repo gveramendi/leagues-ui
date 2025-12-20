@@ -1,5 +1,6 @@
 import { Role } from '@core/models/role';
 import { Resource } from '@core/models/resource';
+import { RouteInfo } from '../../layout/sidebar/sidebar.metadata';
 
 export class User {
   id!: number;
@@ -14,6 +15,9 @@ export class User {
 
   // Resources with permissions (populated after fetching permissions)
   resources?: Resource[];
+
+  // Menus from login response (dynamic sidebar)
+  menus?: RouteInfo[];
 
   // Token metadata
   tokenType?: string;
@@ -33,6 +37,7 @@ export interface AuthResponse {
     firstName: string;
     lastName: string;
     roles: string[];
+    menus: RouteInfo[];
     issuedAt: string;
     expiresAt: string;
   };

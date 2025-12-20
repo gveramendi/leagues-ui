@@ -62,6 +62,7 @@ export class AuthService {
           tokenType: data.tokenType,
           expiresIn: data.expiresIn,
           roles: data.roles, // Array of role names (strings)
+          menus: data.menus, // Dynamic sidebar menus
           issuedAt: data.issuedAt,
           expiresAt: data.expiresAt,
         };
