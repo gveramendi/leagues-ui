@@ -1,0 +1,186 @@
+{
+  "routes": [
+    {
+      "path": "/dashboard/main",
+      "title": "MENUITEMS.HOME.TEXT",
+      "iconType": "feather",
+      "icon": "home",
+      "class": "",
+      "groupTitle": false,
+      "badge": "",
+      "badgeClass": "",
+      "submenu": []
+    },
+    {
+      "path": "",
+      "title": "Settings",
+      "iconType": "feather",
+      "icon": "settings",
+      "class": "menu-toggle",
+      "groupTitle": false,
+      "badge": "",
+      "badgeClass": "",
+      "groupName": "settings",
+      "submenu": [
+        {
+          "path": "/settings/users",
+          "title": "Users",
+          "iconType": "feather",
+          "icon": "users",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
+          "path": "/settings/roles",
+          "title": "Roles",
+          "iconType": "feather",
+          "icon": "shield",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
+          "path": "/settings/permissions",
+          "title": "Permissions",
+          "iconType": "feather",
+          "icon": "lock",
+          "class": "",
+          "groupTitle": false,
+          "badge": "3",
+          "badgeClass": "badge bg-warning",
+          "submenu": []
+        },
+        {
+          "path": "/settings/profile",
+          "title": "Profile",
+          "iconType": "feather",
+          "icon": "user",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        }
+      ]
+    },
+    {
+      "path": "",
+      "title": "Sales",
+      "iconType": "feather",
+      "icon": "trending-up",
+      "class": "menu-toggle",
+      "groupTitle": false,
+      "badge": "",
+      "badgeClass": "",
+      "groupName": "sales",
+      "submenu": [
+        {
+          "path": "/sales/orders",
+          "title": "Orders",
+          "iconType": "feather",
+          "icon": "shopping-cart",
+          "class": "",
+          "groupTitle": false,
+          "badge": "12",
+          "badgeClass": "badge bg-success",
+          "submenu": []
+        },
+        {
+          "path": "/sales/products",
+          "title": "Products",
+          "iconType": "feather",
+          "icon": "package",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
+          "path": "/sales/customers",
+          "title": "Customers",
+          "iconType": "feather",
+          "icon": "users",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
+          "path": "/sales/reports",
+          "title": "Reports",
+          "iconType": "feather",
+          "icon": "bar-chart-2",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        }
+      ]
+    },
+    {
+      "path": "",
+      "title": "Leagues",
+      "iconType": "feather",
+      "icon": "award",
+      "class": "menu-toggle",
+      "groupTitle": false,
+      "badge": "",
+      "badgeClass": "",
+      "groupName": "leagues",
+      "submenu": [
+        {
+          "path": "/leagues/list",
+          "title": "All Leagues",
+          "iconType": "feather",
+          "icon": "list",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
+          "path": "/leagues/teams",
+          "title": "Teams",
+          "iconType": "feather",
+          "icon": "users",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
+          "path": "/leagues/matches",
+          "title": "Matches",
+          "iconType": "feather",
+          "icon": "calendar",
+          "class": "",
+          "groupTitle": false,
+          "badge": "5",
+          "badgeClass": "badge bg-info",
+          "submenu": []
+        },
+        {
+          "path": "/leagues/standings",
+          "title": "Standings",
+          "iconType": "feather",
+          "icon": "bar-chart",
+          "class": "",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        }
+      ]
+    }
+  ]
+}
