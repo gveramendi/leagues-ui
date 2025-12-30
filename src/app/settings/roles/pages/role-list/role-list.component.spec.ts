@@ -2,14 +2,18 @@ import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angul
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
 import { TranslateModule } from '@ngx-translate/core';
+import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import { RoleListComponent } from './role-list.component';
-import { RoleService, PageResponse, RoleResponse, SuccessResponse } from '@core';
+import { RoleService, PageResponse, RoleResponse, SuccessResponse, CreateRoleRequest } from '@core';
 
 describe('RoleListComponent', () => {
   let component: RoleListComponent;
   let fixture: ComponentFixture<RoleListComponent>;
   let roleServiceSpy: jasmine.SpyObj<RoleService>;
+  let modalServiceSpy: jasmine.SpyObj<NgbModal>;
+  let toastrSpy: jasmine.SpyObj<ToastrService>;
 
   const mockRolesResponse: SuccessResponse<PageResponse<RoleResponse>> = {
     message: 'Success',
@@ -29,9 +33,18 @@ describe('RoleListComponent', () => {
     },
   };
 
+  const mockCreateResponse: SuccessResponse<RoleResponse> = {
+    message: 'Role created successfully',
+    data: { id: 4, name: 'NewRole', description: 'New role description' },
+  };
+
   beforeEach(waitForAsync(() => {
-    const spy = jasmine.createSpyObj('RoleService', ['searchRoles']);
-    spy.searchRoles.and.returnValue(of(mockRolesResponse));
+    const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create']);
+    roleServiceMock.searchRoles.and.returnValue(of(mockRolesResponse));
+    roleServiceMock.create.and.returnValue(of(mockCreateResponse));
+
+    const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
+    const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
 
     TestBed.configureTestingModule({
       imports: [
@@ -40,10 +53,17 @@ describe('RoleListComponent', () => {
         RouterTestingModule,
         TranslateModule.forRoot(),
       ],
-      providers: [{ provide: RoleService, useValue: spy }],
+      providers: [
+        { provide: RoleService, useValue: roleServiceMock },
+        { provide: NgbModal, useValue: modalMock },
+        { provide: ToastrService, useValue: toastrMock },
+        provideToastr(),
+      ],
     }).compileComponents();
 
     roleServiceSpy = TestBed.inject(RoleService) as jasmine.SpyObj<RoleService>;
+    modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
+    toastrSpy = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
   }));
 
   beforeEach(() => {
@@ -205,6 +225,100 @@ describe('RoleListComponent', () => {
       tick();
 
       expect(component.page).toBe(0);
+    }));
+  });
+
+  describe('roleForm', () => {
+    it('should initialize with empty values', () => {
+      expect(component.roleForm.get('name')?.value).toBeFalsy();
+      expect(component.roleForm.get('description')?.value).toBeFalsy();
+    });
+
+    it('should be invalid when name is empty', () => {
+      component.roleForm.patchValue({ name: '', description: '' });
+      expect(component.roleForm.invalid).toBeTrue();
+    });
+
+    it('should be invalid when name is too short', () => {
+      component.roleForm.patchValue({ name: 'A', description: '' });
+      expect(component.roleForm.get('name')?.errors?.['minlength']).toBeTruthy();
+    });
+
+    it('should be invalid when name exceeds max length', () => {
+      component.roleForm.patchValue({ name: 'A'.repeat(51), description: '' });
+      expect(component.roleForm.get('name')?.errors?.['maxlength']).toBeTruthy();
+    });
+
+    it('should be invalid when description exceeds max length', () => {
+      component.roleForm.patchValue({ name: 'ValidName', description: 'A'.repeat(256) });
+      expect(component.roleForm.get('description')?.errors?.['maxlength']).toBeTruthy();
+    });
+
+    it('should be valid with correct values', () => {
+      component.roleForm.patchValue({ name: 'ValidRole', description: 'Valid description' });
+      expect(component.roleForm.valid).toBeTrue();
+    });
+  });
+
+  describe('openAddModal', () => {
+    it('should reset form and open modal', () => {
+      component.roleForm.patchValue({ name: 'OldValue', description: 'OldDesc' });
+      const mockContent = {};
+
+      component.openAddModal(mockContent);
+
+      expect(component.roleForm.get('name')?.value).toBeFalsy();
+      expect(component.roleForm.get('description')?.value).toBeFalsy();
+      expect(modalServiceSpy.open).toHaveBeenCalledWith(mockContent, {
+        ariaLabelledBy: 'modal-basic-title',
+        size: 'lg',
+      });
+    });
+  });
+
+  describe('onAddRoleSave', () => {
+    it('should not call service if form is invalid', () => {
+      component.roleForm.patchValue({ name: '', description: '' });
+      roleServiceSpy.create.calls.reset();
+
+      component.onAddRoleSave();
+
+      expect(roleServiceSpy.create).not.toHaveBeenCalled();
+    });
+
+    it('should call service with correct data when form is valid', fakeAsync(() => {
+      component.roleForm.patchValue({ name: 'NewRole', description: 'New description' });
+      roleServiceSpy.searchRoles.calls.reset();
+
+      component.onAddRoleSave();
+      tick();
+
+      expect(roleServiceSpy.create).toHaveBeenCalledWith({
+        name: 'NewRole',
+        description: 'New description',
+      });
+    }));
+
+    it('should show success toast and reload roles on successful creation', fakeAsync(() => {
+      component.roleForm.patchValue({ name: 'NewRole', description: 'New description' });
+      roleServiceSpy.searchRoles.calls.reset();
+
+      component.onAddRoleSave();
+      tick();
+
+      expect(toastrSpy.success).toHaveBeenCalledWith('Role created successfully');
+      expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
+      expect(roleServiceSpy.searchRoles).toHaveBeenCalled();
+    }));
+
+    it('should show error toast on creation failure', fakeAsync(() => {
+      component.roleForm.patchValue({ name: 'NewRole', description: 'New description' });
+      roleServiceSpy.create.and.returnValue(throwError(() => ({ message: 'Creation failed' })));
+
+      component.onAddRoleSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Creation failed');
     }));
   });
 });

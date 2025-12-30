@@ -10,14 +10,27 @@
     "ID": "ID",
     "NAME": "Name",
     "DESCRIPTION": "Description",
-    "ACTIONS": "Actions"
+    "ACTIONS": "Actions",
+    "SAVE": "Save",
+    "CLOSE": "Close",
+    "CANCEL": "Cancel",
+    "EDIT": "Edit",
+    "DELETE": "Delete"
+  },
+  "VALIDATION": {
+    "REQUIRED": "This field is required",
+    "MIN_LENGTH": "Minimum length is {{min}} characters",
+    "MAX_LENGTH": "Maximum length is {{max}} characters"
   },
   "SETTINGS": {
     "TEXT": "Settings"
   },
   "ROLES": {
     "TITLE": "Roles",
-    "SEARCH_PLACEHOLDER": "Search roles..."
+    "SEARCH_PLACEHOLDER": "Search roles...",
+    "ADD_NEW": "Add New Role",
+    "NAME_PLACEHOLDER": "Enter role name",
+    "DESCRIPTION_PLACEHOLDER": "Enter role description"
   },
   "MENUITEMS": {
     "USER":{

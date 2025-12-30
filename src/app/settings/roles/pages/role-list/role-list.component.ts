@@ -1,15 +1,35 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import {
+  FormsModule,
+  ReactiveFormsModule,
+  UntypedFormBuilder,
+  UntypedFormGroup,
+  Validators,
+} from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DatatableComponent, NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { TranslateModule } from '@ngx-translate/core';
-import { PageResponse, RoleResponse, RoleService } from '@core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { ToastrService } from 'ngx-toastr';
+import {
+  CreateRoleRequest,
+  PageResponse,
+  RoleResponse,
+  RoleService,
+} from '@core';
 
 @Component({
   selector: 'app-role-list',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterLink, NgxDatatableModule, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    RouterLink,
+    NgxDatatableModule,
+    TranslateModule,
+  ],
   templateUrl: './role-list.component.html',
   styleUrls: ['./role-list.component.scss'],
 })
@@ -25,10 +45,27 @@ export class RoleListComponent implements OnInit {
   totalElements = 0;
   loading = false;
 
-  constructor(private roleService: RoleService) {}
+  // Form for creating new role
+  roleForm!: UntypedFormGroup;
+
+  constructor(
+    private roleService: RoleService,
+    private fb: UntypedFormBuilder,
+    private modalService: NgbModal,
+    private toastr: ToastrService
+  ) {
+    this.initForm();
+  }
 
   ngOnInit(): void {
     this.loadRoles();
+  }
+
+  private initForm(): void {
+    this.roleForm = this.fb.group({
+      name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      description: ['', [Validators.maxLength(255)]],
+    });
   }
 
   loadRoles(): void {
@@ -75,5 +112,38 @@ export class RoleListComponent implements OnInit {
     this.sort = `${sortColumn.prop},${direction}`;
     this.page = 0;
     this.loadRoles();
+  }
+
+  // Open modal to add new role
+  openAddModal(content: any): void {
+    this.roleForm.reset();
+    this.modalService.open(content, {
+      ariaLabelledBy: 'modal-basic-title',
+      size: 'lg',
+    });
+  }
+
+  // Save new role
+  onAddRoleSave(): void {
+    if (this.roleForm.invalid) {
+      return;
+    }
+
+    const request: CreateRoleRequest = {
+      name: this.roleForm.value.name,
+      description: this.roleForm.value.description,
+    };
+
+    this.roleService.create(request).subscribe({
+      next: (response) => {
+        this.toastr.success(response.message);
+        this.modalService.dismissAll();
+        this.roleForm.reset();
+        this.loadRoles();
+      },
+      error: (error) => {
+        this.toastr.error(error.message || 'Error creating role');
+      },
+    });
   }
 }

@@ -40,6 +40,16 @@
                           />
                         </div>
                       </div>
+                      <div class="header-buttons-left">
+                        <div class="tbl-btn-style">
+                          <button
+                            class="btn btn-icon icon-left btn-primary rounded-button"
+                            (click)="openAddModal(addRoleModal)"
+                          >
+                            <i class="material-icons">add</i>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -96,3 +106,67 @@
     </div>
   </div>
 </section>
+
+<!-- Add Role Modal -->
+<ng-template #addRoleModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ 'ROLES.ADD_NEW' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="roleForm" (ngSubmit)="onAddRoleSave()">
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">
+            {{ 'COMMON.NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'ROLES.NAME_PLACEHOLDER' | translate"
+            formControlName="name"
+          />
+          @if (roleForm.get('name')?.invalid && roleForm.get('name')?.touched) {
+            <small class="form-text text-danger">
+              @if (roleForm.get('name')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (roleForm.get('name')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (roleForm.get('name')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 50 } }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+          <textarea
+            class="form-control"
+            [placeholder]="'ROLES.DESCRIPTION_PLACEHOLDER' | translate"
+            formControlName="description"
+            rows="3"
+          ></textarea>
+          @if (roleForm.get('description')?.invalid && roleForm.get('description')?.touched) {
+            <small class="form-text text-danger">
+              @if (roleForm.get('description')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 255 } }}
+              }
+            </small>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="roleForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

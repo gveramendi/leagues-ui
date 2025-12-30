@@ -11,4 +11,10 @@ export { Role } from './models/role';
 export { Resource } from './models/resource';
 export { Permission } from './models/permission';
 export { InConfiguration } from './models/config.interface';
-export { SuccessResponse, PageResponse, RoleResponse } from './models/response';
+export {
+  SuccessResponse,
+  PageResponse,
+  RoleResponse,
+  CreateRoleRequest,
+  UpdateRoleRequest,
+} from './models/response';

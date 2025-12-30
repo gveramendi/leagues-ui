@@ -10,14 +10,27 @@
     "ID": "ID",
     "NAME": "Name",
     "DESCRIPTION": "Beschreibung",
-    "ACTIONS": "Aktionen"
+    "ACTIONS": "Aktionen",
+    "SAVE": "Speichern",
+    "CLOSE": "Schließen",
+    "CANCEL": "Abbrechen",
+    "EDIT": "Bearbeiten",
+    "DELETE": "Löschen"
+  },
+  "VALIDATION": {
+    "REQUIRED": "Dieses Feld ist erforderlich",
+    "MIN_LENGTH": "Die Mindestlänge beträgt {{min}} Zeichen",
+    "MAX_LENGTH": "Die maximale Länge beträgt {{max}} Zeichen"
   },
   "SETTINGS": {
     "TEXT": "Einstellungen"
   },
   "ROLES": {
     "TITLE": "Rollen",
-    "SEARCH_PLACEHOLDER": "Rollen suchen..."
+    "SEARCH_PLACEHOLDER": "Rollen suchen...",
+    "ADD_NEW": "Neue Rolle hinzufügen",
+    "NAME_PLACEHOLDER": "Rollenname eingeben",
+    "DESCRIPTION_PLACEHOLDER": "Rollenbeschreibung eingeben"
   },
   "MENUITEMS": {
     "USER":{
