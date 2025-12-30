@@ -15,7 +15,9 @@
     "CLOSE": "Close",
     "CANCEL": "Cancel",
     "EDIT": "Edit",
-    "DELETE": "Delete"
+    "DELETE": "Delete",
+    "YES": "Yes",
+    "NO": "No"
   },
   "VALIDATION": {
     "REQUIRED": "This field is required",
@@ -30,7 +32,9 @@
     "SEARCH_PLACEHOLDER": "Search roles...",
     "ADD_NEW": "Add New Role",
     "NAME_PLACEHOLDER": "Enter role name",
-    "DESCRIPTION_PLACEHOLDER": "Enter role description"
+    "DESCRIPTION_PLACEHOLDER": "Enter role description",
+    "DELETE_CONFIRM_TITLE": "Are you sure?",
+    "DELETE_CONFIRM_MESSAGE": "You are about to delete the role '{{name}}'. This action cannot be undone."
   },
   "MENUITEMS": {
     "USER":{

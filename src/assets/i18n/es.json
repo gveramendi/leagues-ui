@@ -15,7 +15,9 @@
     "CLOSE": "Cerrar",
     "CANCEL": "Cancelar",
     "EDIT": "Editar",
-    "DELETE": "Eliminar"
+    "DELETE": "Eliminar",
+    "YES": "Sí",
+    "NO": "No"
   },
   "VALIDATION": {
     "REQUIRED": "Este campo es obligatorio",
@@ -30,7 +32,9 @@
     "SEARCH_PLACEHOLDER": "Buscar roles...",
     "ADD_NEW": "Agregar Nuevo Rol",
     "NAME_PLACEHOLDER": "Ingrese el nombre del rol",
-    "DESCRIPTION_PLACEHOLDER": "Ingrese la descripción del rol"
+    "DESCRIPTION_PLACEHOLDER": "Ingrese la descripción del rol",
+    "DELETE_CONFIRM_TITLE": "¿Está seguro?",
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el rol '{{name}}'. Esta acción no se puede deshacer."
   },
   "MENUITEMS": {
     "USER":{

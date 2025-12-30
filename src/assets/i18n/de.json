@@ -15,7 +15,9 @@
     "CLOSE": "Schließen",
     "CANCEL": "Abbrechen",
     "EDIT": "Bearbeiten",
-    "DELETE": "Löschen"
+    "DELETE": "Löschen",
+    "YES": "Ja",
+    "NO": "Nein"
   },
   "VALIDATION": {
     "REQUIRED": "Dieses Feld ist erforderlich",
@@ -30,7 +32,9 @@
     "SEARCH_PLACEHOLDER": "Rollen suchen...",
     "ADD_NEW": "Neue Rolle hinzufügen",
     "NAME_PLACEHOLDER": "Rollenname eingeben",
-    "DESCRIPTION_PLACEHOLDER": "Rollenbeschreibung eingeben"
+    "DESCRIPTION_PLACEHOLDER": "Rollenbeschreibung eingeben",
+    "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
+    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, die Rolle '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "MENUITEMS": {
     "USER":{

@@ -1,10 +1,11 @@
 import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
 import { HttpClientTestingModule } from '@angular/common/http/testing';
 import { RouterTestingModule } from '@angular/router/testing';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal, NgbModalRef } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
+import Swal, { SweetAlertResult } from 'sweetalert2';
 import { RoleListComponent } from './role-list.component';
 import { RoleService, PageResponse, RoleResponse, SuccessResponse, CreateRoleRequest } from '@core';
 
@@ -38,10 +39,16 @@ describe('RoleListComponent', () => {
     data: { id: 4, name: 'NewRole', description: 'New role description' },
   };
 
+  const mockDeleteResponse: SuccessResponse<void> = {
+    message: 'Role deleted successfully',
+    data: undefined as unknown as void,
+  };
+
   beforeEach(waitForAsync(() => {
-    const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create']);
+    const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create', 'delete']);
     roleServiceMock.searchRoles.and.returnValue(of(mockRolesResponse));
     roleServiceMock.create.and.returnValue(of(mockCreateResponse));
+    roleServiceMock.delete.and.returnValue(of(mockDeleteResponse));
 
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
     const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
@@ -311,7 +318,17 @@ describe('RoleListComponent', () => {
       expect(roleServiceSpy.searchRoles).toHaveBeenCalled();
     }));
 
-    it('should show error toast on creation failure', fakeAsync(() => {
+    it('should show error toast on creation failure with string error', fakeAsync(() => {
+      component.roleForm.patchValue({ name: 'NewRole', description: 'New description' });
+      roleServiceSpy.create.and.returnValue(throwError(() => 'Creation failed'));
+
+      component.onAddRoleSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Creation failed');
+    }));
+
+    it('should show error toast on creation failure with object error', fakeAsync(() => {
       component.roleForm.patchValue({ name: 'NewRole', description: 'New description' });
       roleServiceSpy.create.and.returnValue(throwError(() => ({ message: 'Creation failed' })));
 
@@ -319,6 +336,93 @@ describe('RoleListComponent', () => {
       tick();
 
       expect(toastrSpy.error).toHaveBeenCalledWith('Creation failed');
+    }));
+
+    it('should show default error toast on creation failure with undefined error', fakeAsync(() => {
+      component.roleForm.patchValue({ name: 'NewRole', description: 'New description' });
+      roleServiceSpy.create.and.returnValue(throwError(() => undefined));
+
+      component.onAddRoleSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Error creating role');
+    }));
+  });
+
+  describe('deleteRole', () => {
+    const mockRole: RoleResponse = { id: 1, name: 'Admin', description: 'Administrator role' };
+
+    it('should show confirmation dialog when deleting', fakeAsync(() => {
+      const swalSpy = spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true } as SweetAlertResult)
+      );
+
+      component.deleteRole(mockRole);
+      tick();
+
+      expect(swalSpy).toHaveBeenCalled();
+    }));
+
+    it('should call delete service when confirmed', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      roleServiceSpy.searchRoles.calls.reset();
+
+      component.deleteRole(mockRole);
+      tick();
+
+      expect(roleServiceSpy.delete).toHaveBeenCalledWith(1);
+      expect(toastrSpy.success).toHaveBeenCalledWith('Role deleted successfully');
+      expect(roleServiceSpy.searchRoles).toHaveBeenCalled();
+    }));
+
+    it('should not call delete service when cancelled', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true } as SweetAlertResult)
+      );
+      roleServiceSpy.delete.calls.reset();
+
+      component.deleteRole(mockRole);
+      tick();
+
+      expect(roleServiceSpy.delete).not.toHaveBeenCalled();
+    }));
+
+    it('should show error toast on delete failure with string error', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      roleServiceSpy.delete.and.returnValue(throwError(() => 'Delete failed'));
+
+      component.deleteRole(mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Delete failed');
+    }));
+
+    it('should show error toast on delete failure with object error', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      roleServiceSpy.delete.and.returnValue(throwError(() => ({ message: 'Delete failed' })));
+
+      component.deleteRole(mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Delete failed');
+    }));
+
+    it('should show default error toast on delete failure with undefined error', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      roleServiceSpy.delete.and.returnValue(throwError(() => undefined));
+
+      component.deleteRole(mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Error deleting role');
     }));
   });
 });

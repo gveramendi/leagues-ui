@@ -9,9 +9,10 @@ import {
 } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { DatatableComponent, NgxDatatableModule } from '@swimlane/ngx-datatable';
-import { TranslateModule } from '@ngx-translate/core';
+import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
+import Swal from 'sweetalert2';
 import {
   CreateRoleRequest,
   PageResponse,
@@ -52,7 +53,8 @@ export class RoleListComponent implements OnInit {
     private roleService: RoleService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
-    private toastr: ToastrService
+    private toastr: ToastrService,
+    private translate: TranslateService
   ) {
     this.initForm();
   }
@@ -142,8 +144,42 @@ export class RoleListComponent implements OnInit {
         this.loadRoles();
       },
       error: (error) => {
-        this.toastr.error(error.message || 'Error creating role');
+        let errorMessage = 'Error creating role';
+        if (error) {
+          errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+        }
+        this.toastr.error(errorMessage);
       },
+    });
+  }
+
+  // Delete role with confirmation
+  deleteRole(row: RoleResponse): void {
+    Swal.fire({
+      title: this.translate.instant('ROLES.DELETE_CONFIRM_TITLE'),
+      text: this.translate.instant('ROLES.DELETE_CONFIRM_MESSAGE', { name: row.name }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8963ff',
+      cancelButtonColor: '#fb7823',
+      confirmButtonText: this.translate.instant('COMMON.YES'),
+      cancelButtonText: this.translate.instant('COMMON.NO'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.roleService.delete(row.id).subscribe({
+          next: (response) => {
+            this.toastr.success(response.message);
+            this.loadRoles();
+          },
+          error: (error) => {
+            let errorMessage = 'Error deleting role';
+            if (error) {
+              errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+            }
+            this.toastr.error(errorMessage);
+          },
+        });
+      }
     });
   }
 }
