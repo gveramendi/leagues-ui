@@ -42,3 +42,26 @@ export interface CreateRoleRequest {
 export interface UpdateRoleRequest {
   description?: string;
 }
+
+// User interfaces
+export interface UserResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  email: string;
+  roles: string[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateUserRequest {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+}
+
+export interface UpdateUserRequest {
+  firstName?: string;
+  lastName?: string;
+}

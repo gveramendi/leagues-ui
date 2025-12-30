@@ -4,6 +4,7 @@ export { DirectionService } from './service/direction.service';
 export { LanguageService } from './service/language.service';
 export { RightSidebarService } from './service/rightsidebar.service';
 export { RoleService } from './service/role.service';
+export { UserService } from './service/user.service';
 
 // models
 export { User, AuthResponse, AuthData } from './models/user';
@@ -19,4 +20,7 @@ export {
   RoleResponse,
   CreateRoleRequest,
   UpdateRoleRequest,
+  UserResponse,
+  CreateUserRequest,
+  UpdateUserRequest,
 } from './models/response';
