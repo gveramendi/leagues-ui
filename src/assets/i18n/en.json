@@ -55,7 +55,17 @@
     "PASSWORD_PLACEHOLDER": "Enter password",
     "EMAIL_NOT_EDITABLE": "Email address cannot be changed",
     "DELETE_CONFIRM_TITLE": "Are you sure?",
-    "DELETE_CONFIRM_MESSAGE": "You are about to delete the user '{{name}}'. This action cannot be undone."
+    "DELETE_CONFIRM_MESSAGE": "You are about to delete the user '{{name}}'. This action cannot be undone.",
+    "USER": "User",
+    "MANAGE_ROLES": "Manage Roles",
+    "CURRENT_ROLES": "Current Roles",
+    "AVAILABLE_ROLES": "Available Roles",
+    "ADD_ROLE": "Add",
+    "REMOVE_ROLE": "Remove role",
+    "NO_ROLES_ASSIGNED": "No roles assigned",
+    "NO_ROLES_AVAILABLE": "No roles available to add",
+    "REMOVE_ROLE_CONFIRM_TITLE": "Remove Role?",
+    "REMOVE_ROLE_CONFIRM_MESSAGE": "Are you sure you want to remove the role '{{role}}' from this user?"
   },
   "MENUITEMS": {
     "USER":{

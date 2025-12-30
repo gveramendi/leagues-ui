@@ -55,7 +55,17 @@
     "PASSWORD_PLACEHOLDER": "Ingrese la contraseña",
     "EMAIL_NOT_EDITABLE": "El correo electrónico no se puede cambiar",
     "DELETE_CONFIRM_TITLE": "¿Está seguro?",
-    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el usuario '{{name}}'. Esta acción no se puede deshacer."
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el usuario '{{name}}'. Esta acción no se puede deshacer.",
+    "USER": "Usuario",
+    "MANAGE_ROLES": "Gestionar Roles",
+    "CURRENT_ROLES": "Roles Actuales",
+    "AVAILABLE_ROLES": "Roles Disponibles",
+    "ADD_ROLE": "Agregar",
+    "REMOVE_ROLE": "Remover rol",
+    "NO_ROLES_ASSIGNED": "Sin roles asignados",
+    "NO_ROLES_AVAILABLE": "No hay roles disponibles para agregar",
+    "REMOVE_ROLE_CONFIRM_TITLE": "¿Remover Rol?",
+    "REMOVE_ROLE_CONFIRM_MESSAGE": "¿Está seguro que desea remover el rol '{{role}}' de este usuario?"
   },
   "MENUITEMS": {
     "USER":{

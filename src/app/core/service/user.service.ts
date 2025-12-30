@@ -105,4 +105,25 @@ export class UserService {
   existsByEmail(email: string): Observable<boolean> {
     return this.http.get<boolean>(`${this.apiUrl}/exists/${email}`);
   }
+
+  /**
+   * POST /api/users/{userId}/roles/{roleId}
+   * Add a role to a user
+   */
+  addRole(userId: number, roleId: number): Observable<ApiResponse<UserResponse>> {
+    return this.http.post<ApiResponse<UserResponse>>(
+      `${this.apiUrl}/${userId}/roles/${roleId}`,
+      {}
+    );
+  }
+
+  /**
+   * DELETE /api/users/{userId}/roles/{roleId}
+   * Remove a role from a user
+   */
+  removeRole(userId: number, roleId: number): Observable<ApiResponse<UserResponse>> {
+    return this.http.delete<ApiResponse<UserResponse>>(
+      `${this.apiUrl}/${userId}/roles/${roleId}`
+    );
+  }
 }

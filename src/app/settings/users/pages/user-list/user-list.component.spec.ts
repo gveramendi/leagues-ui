@@ -7,12 +7,13 @@ import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { UserListComponent } from './user-list.component';
-import { UserService, ApiResponse, UserResponse, CreateUserRequest, UpdateUserRequest } from '@core';
+import { UserService, RoleService, ApiResponse, UserResponse, RoleResponse, CreateUserRequest, UpdateUserRequest } from '@core';
 
 describe('UserListComponent', () => {
   let component: UserListComponent;
   let fixture: ComponentFixture<UserListComponent>;
   let userServiceSpy: jasmine.SpyObj<UserService>;
+  let roleServiceSpy: jasmine.SpyObj<RoleService>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let toastrSpy: jasmine.SpyObj<ToastrService>;
 
@@ -75,12 +76,56 @@ describe('UserListComponent', () => {
     },
   };
 
+  const mockRoles: RoleResponse[] = [
+    { id: 1, name: 'ROLE_USER', description: 'User role' },
+    { id: 2, name: 'ROLE_ADMIN', description: 'Admin role' },
+    { id: 3, name: 'ROLE_MANAGER', description: 'Manager role' },
+  ];
+
+  const mockRolesResponse: ApiResponse<RoleResponse[]> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Success',
+    },
+    body: {
+      data: mockRoles,
+    },
+  };
+
+  const mockAddRoleResponse: ApiResponse<UserResponse> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Role added successfully',
+    },
+    body: {
+      data: { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', roles: ['ROLE_USER', 'ROLE_ADMIN'] },
+    },
+  };
+
+  const mockRemoveRoleResponse: ApiResponse<UserResponse> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Role removed successfully',
+    },
+    body: {
+      data: { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', roles: [] },
+    },
+  };
+
   beforeEach(waitForAsync(() => {
-    const userServiceMock = jasmine.createSpyObj('UserService', ['searchUsers', 'create', 'update', 'delete']);
+    const userServiceMock = jasmine.createSpyObj('UserService', ['searchUsers', 'create', 'update', 'delete', 'addRole', 'removeRole']);
     userServiceMock.searchUsers.and.returnValue(of(mockUsersResponse));
     userServiceMock.create.and.returnValue(of(mockCreateResponse));
     userServiceMock.update.and.returnValue(of(mockUpdateResponse));
     userServiceMock.delete.and.returnValue(of(mockDeleteResponse));
+    userServiceMock.addRole.and.returnValue(of(mockAddRoleResponse));
+    userServiceMock.removeRole.and.returnValue(of(mockRemoveRoleResponse));
+
+    const roleServiceMock = jasmine.createSpyObj('RoleService', ['getAll']);
+    roleServiceMock.getAll.and.returnValue(of(mockRolesResponse));
 
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
     const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
@@ -94,6 +139,7 @@ describe('UserListComponent', () => {
       ],
       providers: [
         { provide: UserService, useValue: userServiceMock },
+        { provide: RoleService, useValue: roleServiceMock },
         { provide: NgbModal, useValue: modalMock },
         { provide: ToastrService, useValue: toastrMock },
         provideToastr(),
@@ -101,6 +147,7 @@ describe('UserListComponent', () => {
     }).compileComponents();
 
     userServiceSpy = TestBed.inject(UserService) as jasmine.SpyObj<UserService>;
+    roleServiceSpy = TestBed.inject(RoleService) as jasmine.SpyObj<RoleService>;
     modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     toastrSpy = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
   }));
@@ -613,6 +660,173 @@ describe('UserListComponent', () => {
       tick();
 
       expect(toastrSpy.error).toHaveBeenCalledWith('Error deleting user');
+    }));
+  });
+
+  describe('openRolesModal', () => {
+    const mockUser: UserResponse = { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', roles: ['ROLE_USER'] };
+
+    it('should set managingRolesUser and load available roles', fakeAsync(() => {
+      const mockContent = {};
+
+      component.openRolesModal(mockContent, mockUser);
+      tick();
+
+      expect(component.managingRolesUser).toEqual(mockUser);
+      expect(roleServiceSpy.getAll).toHaveBeenCalled();
+      expect(component.availableRoles).toEqual(mockRoles);
+      expect(modalServiceSpy.open).toHaveBeenCalledWith(mockContent, {
+        ariaLabelledBy: 'modal-roles-title',
+        size: 'lg',
+      });
+    }));
+
+    it('should handle error when loading roles fails', fakeAsync(() => {
+      const consoleSpy = spyOn(console, 'error');
+      roleServiceSpy.getAll.and.returnValue(throwError(() => new Error('Network error')));
+      const mockContent = {};
+
+      component.openRolesModal(mockContent, mockUser);
+      tick();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      expect(component.loadingRoles).toBeFalse();
+    }));
+  });
+
+  describe('userHasRole', () => {
+    it('should return true if user has the role', () => {
+      component.managingRolesUser = { id: 1, firstName: 'John', lastName: 'Doe', email: 'test@test.com', roles: ['ROLE_USER', 'ROLE_ADMIN'] };
+
+      expect(component.userHasRole('ROLE_USER')).toBeTrue();
+      expect(component.userHasRole('ROLE_ADMIN')).toBeTrue();
+    });
+
+    it('should return false if user does not have the role', () => {
+      component.managingRolesUser = { id: 1, firstName: 'John', lastName: 'Doe', email: 'test@test.com', roles: ['ROLE_USER'] };
+
+      expect(component.userHasRole('ROLE_ADMIN')).toBeFalse();
+    });
+
+    it('should return false if managingRolesUser is null', () => {
+      component.managingRolesUser = null;
+
+      expect(component.userHasRole('ROLE_USER')).toBeFalse();
+    });
+  });
+
+  describe('addRoleToUser', () => {
+    const mockUser: UserResponse = { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', roles: ['ROLE_USER'] };
+    const mockRole: RoleResponse = { id: 2, name: 'ROLE_ADMIN', description: 'Admin role' };
+
+    beforeEach(() => {
+      component.managingRolesUser = mockUser;
+    });
+
+    it('should not call service if managingRolesUser is null', () => {
+      component.managingRolesUser = null;
+      userServiceSpy.addRole.calls.reset();
+
+      component.addRoleToUser(mockRole);
+
+      expect(userServiceSpy.addRole).not.toHaveBeenCalled();
+    });
+
+    it('should call addRole service with correct parameters', fakeAsync(() => {
+      userServiceSpy.searchUsers.calls.reset();
+
+      component.addRoleToUser(mockRole);
+      tick();
+
+      expect(userServiceSpy.addRole).toHaveBeenCalledWith(1, 2);
+    }));
+
+    it('should show success toast and update user on successful add', fakeAsync(() => {
+      userServiceSpy.searchUsers.calls.reset();
+
+      component.addRoleToUser(mockRole);
+      tick();
+
+      expect(toastrSpy.success).toHaveBeenCalledWith('Role added successfully');
+      expect(component.managingRolesUser?.roles).toContain('ROLE_ADMIN');
+      expect(userServiceSpy.searchUsers).toHaveBeenCalled();
+    }));
+
+    it('should show error toast on add role failure', fakeAsync(() => {
+      userServiceSpy.addRole.and.returnValue(throwError(() => 'Add role failed'));
+
+      component.addRoleToUser(mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Add role failed');
+    }));
+  });
+
+  describe('removeRoleFromUser', () => {
+    const mockUser: UserResponse = { id: 1, firstName: 'John', lastName: 'Doe', email: 'john.doe@example.com', roles: ['ROLE_USER', 'ROLE_ADMIN'] };
+    const mockRole: RoleResponse = { id: 2, name: 'ROLE_ADMIN', description: 'Admin role' };
+
+    beforeEach(() => {
+      component.managingRolesUser = mockUser;
+    });
+
+    it('should not call service if managingRolesUser is null', fakeAsync(() => {
+      component.managingRolesUser = null;
+      userServiceSpy.removeRole.calls.reset();
+
+      component.removeRoleFromUser(mockRole);
+      tick();
+
+      expect(userServiceSpy.removeRole).not.toHaveBeenCalled();
+    }));
+
+    it('should show confirmation dialog when removing role', fakeAsync(() => {
+      const swalSpy = spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true } as SweetAlertResult)
+      );
+
+      component.removeRoleFromUser(mockRole);
+      tick();
+
+      expect(swalSpy).toHaveBeenCalled();
+    }));
+
+    it('should call removeRole service when confirmed', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      userServiceSpy.searchUsers.calls.reset();
+
+      component.removeRoleFromUser(mockRole);
+      tick();
+
+      expect(userServiceSpy.removeRole).toHaveBeenCalledWith(1, 2);
+      expect(toastrSpy.success).toHaveBeenCalledWith('Role removed successfully');
+      expect(userServiceSpy.searchUsers).toHaveBeenCalled();
+    }));
+
+    it('should not call removeRole service when cancelled', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true } as SweetAlertResult)
+      );
+      userServiceSpy.removeRole.calls.reset();
+
+      component.removeRoleFromUser(mockRole);
+      tick();
+
+      expect(userServiceSpy.removeRole).not.toHaveBeenCalled();
+    }));
+
+    it('should show error toast on remove role failure', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      userServiceSpy.removeRole.and.returnValue(throwError(() => 'Remove role failed'));
+
+      component.removeRoleFromUser(mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Remove role failed');
     }));
   });
 });

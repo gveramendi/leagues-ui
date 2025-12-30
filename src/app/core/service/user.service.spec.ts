@@ -285,4 +285,53 @@ describe('UserService', () => {
       req.flush(false);
     });
   });
+
+  describe('addRole', () => {
+    it('should add a role to a user', () => {
+      const mockResponse: ApiResponse<UserResponse> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Role added to user john.doe@example.com successfully!',
+        },
+        body: {
+          data: { ...mockUser, roles: ['ROLE_USER', 'ROLE_ADMIN'] },
+        },
+      };
+
+      service.addRole(1, 2).subscribe((response) => {
+        expect(response.body.data.roles).toContain('ROLE_ADMIN');
+        expect(response.header.message).toContain('Role added');
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/roles/2`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual({});
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('removeRole', () => {
+    it('should remove a role from a user', () => {
+      const mockResponse: ApiResponse<UserResponse> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Role removed from user john.doe@example.com successfully!',
+        },
+        body: {
+          data: { ...mockUser, roles: [] },
+        },
+      };
+
+      service.removeRole(1, 2).subscribe((response) => {
+        expect(response.body.data.roles.length).toBe(0);
+        expect(response.header.message).toContain('Role removed');
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/roles/2`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(mockResponse);
+    });
+  });
 });

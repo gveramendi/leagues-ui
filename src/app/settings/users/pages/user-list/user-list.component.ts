@@ -15,6 +15,8 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import {
   CreateUserRequest,
+  RoleResponse,
+  RoleService,
   UpdateUserRequest,
   UserResponse,
   UserService,
@@ -53,8 +55,14 @@ export class UserListComponent implements OnInit {
   editUserForm!: UntypedFormGroup;
   editingUser: UserResponse | null = null;
 
+  // Roles management
+  managingRolesUser: UserResponse | null = null;
+  availableRoles: RoleResponse[] = [];
+  loadingRoles = false;
+
   constructor(
     private userService: UserService,
+    private roleService: RoleService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -231,6 +239,89 @@ export class UserListComponent implements OnInit {
           },
           error: (error) => {
             let errorMessage = 'Error deleting user';
+            if (error) {
+              errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+            }
+            this.toastr.error(errorMessage);
+          },
+        });
+      }
+    });
+  }
+
+  // Open modal to manage user roles
+  openRolesModal(content: any, row: UserResponse): void {
+    this.managingRolesUser = row;
+    this.loadAvailableRoles();
+    this.modalService.open(content, {
+      ariaLabelledBy: 'modal-roles-title',
+      size: 'lg',
+    });
+  }
+
+  // Load all available roles
+  private loadAvailableRoles(): void {
+    this.loadingRoles = true;
+    this.roleService.getAll().subscribe({
+      next: (response) => {
+        this.availableRoles = response.body.data;
+        this.loadingRoles = false;
+      },
+      error: (error) => {
+        console.error('Error loading roles:', error);
+        this.loadingRoles = false;
+      },
+    });
+  }
+
+  // Check if user has a specific role
+  userHasRole(roleName: string): boolean {
+    return this.managingRolesUser?.roles?.includes(roleName) || false;
+  }
+
+  // Add role to user
+  addRoleToUser(role: RoleResponse): void {
+    if (!this.managingRolesUser) return;
+
+    this.userService.addRole(this.managingRolesUser.id, role.id).subscribe({
+      next: (response) => {
+        this.toastr.success(response.header.message);
+        this.managingRolesUser = response.body.data;
+        this.loadUsers();
+      },
+      error: (error) => {
+        let errorMessage = 'Error adding role';
+        if (error) {
+          errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+        }
+        this.toastr.error(errorMessage);
+      },
+    });
+  }
+
+  // Remove role from user
+  removeRoleFromUser(role: RoleResponse): void {
+    if (!this.managingRolesUser) return;
+
+    Swal.fire({
+      title: this.translate.instant('USERS.REMOVE_ROLE_CONFIRM_TITLE'),
+      text: this.translate.instant('USERS.REMOVE_ROLE_CONFIRM_MESSAGE', { role: role.name }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8963ff',
+      cancelButtonColor: '#fb7823',
+      confirmButtonText: this.translate.instant('COMMON.YES'),
+      cancelButtonText: this.translate.instant('COMMON.NO'),
+    }).then((result) => {
+      if (result.isConfirmed && this.managingRolesUser) {
+        this.userService.removeRole(this.managingRolesUser.id, role.id).subscribe({
+          next: (response) => {
+            this.toastr.success(response.header.message);
+            this.managingRolesUser = response.body.data;
+            this.loadUsers();
+          },
+          error: (error) => {
+            let errorMessage = 'Error removing role';
             if (error) {
               errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
             }

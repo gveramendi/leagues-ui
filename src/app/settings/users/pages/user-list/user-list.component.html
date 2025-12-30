@@ -122,12 +122,15 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column name="Actions" [sortable]="false" [width]="140">
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="180">
                 <ng-template ngx-datatable-header-template>
                   {{ 'COMMON.ACTIONS' | translate }}
                 </ng-template>
                 <ng-template let-row="row" ngx-datatable-cell-template>
                   <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openRolesModal(manageRolesModal, row)" [title]="'USERS.MANAGE_ROLES' | translate">
+                      <i class="fas fa-user-tag"></i>
+                    </button>
                     <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editUserModal, row)" [title]="'COMMON.EDIT' | translate">
                       <i class="fas fa-pencil-alt"></i>
                     </button>
@@ -262,6 +265,76 @@
         </button>
       </div>
     </form>
+  </div>
+</ng-template>
+
+<!-- Manage Roles Modal -->
+<ng-template #manageRolesModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-roles-title">
+      {{ 'USERS.MANAGE_ROLES' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="mb-3">
+      <label class="form-label">{{ 'USERS.USER' | translate }}</label>
+      <input type="text" class="form-control" [value]="managingRolesUser?.firstName + ' ' + managingRolesUser?.lastName + ' (' + managingRolesUser?.email + ')'" disabled />
+    </div>
+
+    <div class="mb-4">
+      <label class="form-label fw-bold">{{ 'USERS.CURRENT_ROLES' | translate }}</label>
+      <div class="d-flex flex-wrap gap-2">
+        @for (roleName of managingRolesUser?.roles; track roleName) {
+          <span class="badge bg-primary d-flex align-items-center gap-1" style="font-size: 0.9rem; padding: 0.5rem 0.75rem;">
+            {{ roleName }}
+            @for (role of availableRoles; track role.id) {
+              @if (role.name === roleName) {
+                <button type="button" class="btn-close btn-close-white ms-1" style="font-size: 0.6rem;" (click)="removeRoleFromUser(role)" [title]="'USERS.REMOVE_ROLE' | translate"></button>
+              }
+            }
+          </span>
+        } @empty {
+          <span class="text-muted fst-italic">{{ 'USERS.NO_ROLES_ASSIGNED' | translate }}</span>
+        }
+      </div>
+    </div>
+
+    <div>
+      <label class="form-label fw-bold">{{ 'USERS.AVAILABLE_ROLES' | translate }}</label>
+      @if (loadingRoles) {
+        <div class="text-center py-3">
+          <div class="spinner-border spinner-border-sm" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      } @else {
+        <div class="list-group">
+          @for (role of availableRoles; track role.id) {
+            @if (!userHasRole(role.name)) {
+              <div class="list-group-item d-flex justify-content-between align-items-center">
+                <div>
+                  <strong>{{ role.name }}</strong>
+                  @if (role.description) {
+                    <br><small class="text-muted">{{ role.description }}</small>
+                  }
+                </div>
+                <button type="button" class="btn btn-sm btn-outline-primary" (click)="addRoleToUser(role)">
+                  <i class="fas fa-plus me-1"></i>{{ 'USERS.ADD_ROLE' | translate }}
+                </button>
+              </div>
+            }
+          } @empty {
+            <div class="list-group-item text-muted fst-italic">{{ 'USERS.NO_ROLES_AVAILABLE' | translate }}</div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close()">
+      {{ 'COMMON.CLOSE' | translate }}
+    </button>
   </div>
 </ng-template>
 

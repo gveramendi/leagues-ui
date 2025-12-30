@@ -55,7 +55,17 @@
     "PASSWORD_PLACEHOLDER": "Passwort eingeben",
     "EMAIL_NOT_EDITABLE": "Die E-Mail-Adresse kann nicht geändert werden",
     "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
-    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, den Benutzer '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
+    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, den Benutzer '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "USER": "Benutzer",
+    "MANAGE_ROLES": "Rollen verwalten",
+    "CURRENT_ROLES": "Aktuelle Rollen",
+    "AVAILABLE_ROLES": "Verfügbare Rollen",
+    "ADD_ROLE": "Hinzufügen",
+    "REMOVE_ROLE": "Rolle entfernen",
+    "NO_ROLES_ASSIGNED": "Keine Rollen zugewiesen",
+    "NO_ROLES_AVAILABLE": "Keine Rollen zum Hinzufügen verfügbar",
+    "REMOVE_ROLE_CONFIRM_TITLE": "Rolle entfernen?",
+    "REMOVE_ROLE_CONFIRM_MESSAGE": "Sind Sie sicher, dass Sie die Rolle '{{role}}' von diesem Benutzer entfernen möchten?"
   },
   "MENUITEMS": {
     "USER":{
