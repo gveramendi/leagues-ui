@@ -31,8 +31,10 @@
     "TITLE": "Roles",
     "SEARCH_PLACEHOLDER": "Buscar roles...",
     "ADD_NEW": "Agregar Nuevo Rol",
+    "EDIT": "Editar Rol",
     "NAME_PLACEHOLDER": "Ingrese el nombre del rol",
     "DESCRIPTION_PLACEHOLDER": "Ingrese la descripción del rol",
+    "NAME_NOT_EDITABLE": "El nombre del rol no se puede cambiar",
     "DELETE_CONFIRM_TITLE": "¿Está seguro?",
     "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el rol '{{name}}'. Esta acción no se puede deshacer."
   },

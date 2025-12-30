@@ -7,7 +7,7 @@ import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { RoleListComponent } from './role-list.component';
-import { RoleService, ApiResponse, RoleResponse, CreateRoleRequest } from '@core';
+import { RoleService, ApiResponse, RoleResponse, CreateRoleRequest, UpdateRoleRequest } from '@core';
 
 describe('RoleListComponent', () => {
   let component: RoleListComponent;
@@ -64,10 +64,22 @@ describe('RoleListComponent', () => {
     },
   };
 
+  const mockUpdateResponse: ApiResponse<RoleResponse> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Role updated successfully',
+    },
+    body: {
+      data: { id: 1, name: 'Admin', description: 'Updated description' },
+    },
+  };
+
   beforeEach(waitForAsync(() => {
-    const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create', 'delete']);
+    const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create', 'update', 'delete']);
     roleServiceMock.searchRoles.and.returnValue(of(mockRolesResponse));
     roleServiceMock.create.and.returnValue(of(mockCreateResponse));
+    roleServiceMock.update.and.returnValue(of(mockUpdateResponse));
     roleServiceMock.delete.and.returnValue(of(mockDeleteResponse));
 
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
@@ -443,6 +455,135 @@ describe('RoleListComponent', () => {
       tick();
 
       expect(toastrSpy.error).toHaveBeenCalledWith('Error deleting role');
+    }));
+  });
+
+  describe('editRoleForm', () => {
+    it('should initialize with empty values', () => {
+      expect(component.editRoleForm.get('description')?.value).toBeFalsy();
+    });
+
+    it('should be invalid when description exceeds max length', () => {
+      component.editRoleForm.patchValue({ description: 'A'.repeat(256) });
+      expect(component.editRoleForm.get('description')?.errors?.['maxlength']).toBeTruthy();
+    });
+
+    it('should be valid with correct values', () => {
+      component.editRoleForm.patchValue({ description: 'Valid description' });
+      expect(component.editRoleForm.valid).toBeTrue();
+    });
+
+    it('should be valid with empty description', () => {
+      component.editRoleForm.patchValue({ description: '' });
+      expect(component.editRoleForm.valid).toBeTrue();
+    });
+  });
+
+  describe('openEditModal', () => {
+    it('should set editingRole and populate form', () => {
+      const mockRole: RoleResponse = { id: 1, name: 'Admin', description: 'Administrator role' };
+      const mockContent = {};
+
+      component.openEditModal(mockContent, mockRole);
+
+      expect(component.editingRole).toEqual(mockRole);
+      expect(component.editRoleForm.get('description')?.value).toBe('Administrator role');
+      expect(modalServiceSpy.open).toHaveBeenCalledWith(mockContent, {
+        ariaLabelledBy: 'modal-edit-title',
+        size: 'lg',
+      });
+    });
+
+    it('should handle role with no description', () => {
+      const mockRole: RoleResponse = { id: 1, name: 'Admin' };
+      const mockContent = {};
+
+      component.openEditModal(mockContent, mockRole);
+
+      expect(component.editingRole).toEqual(mockRole);
+      expect(component.editRoleForm.get('description')?.value).toBe('');
+    });
+  });
+
+  describe('onEditRoleSave', () => {
+    const mockRole: RoleResponse = { id: 1, name: 'Admin', description: 'Administrator role' };
+
+    beforeEach(() => {
+      component.editingRole = mockRole;
+    });
+
+    it('should not call service if form is invalid', () => {
+      component.editRoleForm.patchValue({ description: 'A'.repeat(256) });
+      roleServiceSpy.update.calls.reset();
+
+      component.onEditRoleSave();
+
+      expect(roleServiceSpy.update).not.toHaveBeenCalled();
+    });
+
+    it('should not call service if editingRole is null', () => {
+      component.editingRole = null;
+      component.editRoleForm.patchValue({ description: 'New description' });
+      roleServiceSpy.update.calls.reset();
+
+      component.onEditRoleSave();
+
+      expect(roleServiceSpy.update).not.toHaveBeenCalled();
+    });
+
+    it('should call service with correct data when form is valid', fakeAsync(() => {
+      component.editRoleForm.patchValue({ description: 'Updated description' });
+      roleServiceSpy.searchRoles.calls.reset();
+
+      component.onEditRoleSave();
+      tick();
+
+      expect(roleServiceSpy.update).toHaveBeenCalledWith(1, {
+        description: 'Updated description',
+      });
+    }));
+
+    it('should show success toast and reload roles on successful update', fakeAsync(() => {
+      component.editRoleForm.patchValue({ description: 'Updated description' });
+      roleServiceSpy.searchRoles.calls.reset();
+
+      component.onEditRoleSave();
+      tick();
+
+      expect(toastrSpy.success).toHaveBeenCalledWith('Role updated successfully');
+      expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
+      expect(component.editingRole).toBeNull();
+      expect(roleServiceSpy.searchRoles).toHaveBeenCalled();
+    }));
+
+    it('should show error toast on update failure with string error', fakeAsync(() => {
+      component.editRoleForm.patchValue({ description: 'Updated description' });
+      roleServiceSpy.update.and.returnValue(throwError(() => 'Update failed'));
+
+      component.onEditRoleSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Update failed');
+    }));
+
+    it('should show error toast on update failure with object error', fakeAsync(() => {
+      component.editRoleForm.patchValue({ description: 'Updated description' });
+      roleServiceSpy.update.and.returnValue(throwError(() => ({ message: 'Update failed' })));
+
+      component.onEditRoleSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Update failed');
+    }));
+
+    it('should show default error toast on update failure with undefined error', fakeAsync(() => {
+      component.editRoleForm.patchValue({ description: 'Updated description' });
+      roleServiceSpy.update.and.returnValue(throwError(() => undefined));
+
+      component.onEditRoleSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Error updating role');
     }));
   });
 });

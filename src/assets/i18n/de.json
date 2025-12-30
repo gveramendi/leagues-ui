@@ -31,8 +31,10 @@
     "TITLE": "Rollen",
     "SEARCH_PLACEHOLDER": "Rollen suchen...",
     "ADD_NEW": "Neue Rolle hinzufügen",
+    "EDIT": "Rolle bearbeiten",
     "NAME_PLACEHOLDER": "Rollenname eingeben",
     "DESCRIPTION_PLACEHOLDER": "Rollenbeschreibung eingeben",
+    "NAME_NOT_EDITABLE": "Der Rollenname kann nicht geändert werden",
     "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
     "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, die Rolle '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
   },

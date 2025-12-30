@@ -17,6 +17,7 @@ import {
   CreateRoleRequest,
   RoleResponse,
   RoleService,
+  UpdateRoleRequest,
 } from '@core';
 
 @Component({
@@ -48,6 +49,10 @@ export class RoleListComponent implements OnInit {
   // Form for creating new role
   roleForm!: UntypedFormGroup;
 
+  // Form for editing role
+  editRoleForm!: UntypedFormGroup;
+  editingRole: RoleResponse | null = null;
+
   constructor(
     private roleService: RoleService,
     private fb: UntypedFormBuilder,
@@ -56,6 +61,7 @@ export class RoleListComponent implements OnInit {
     private translate: TranslateService
   ) {
     this.initForm();
+    this.initEditForm();
   }
 
   ngOnInit(): void {
@@ -65,6 +71,12 @@ export class RoleListComponent implements OnInit {
   private initForm(): void {
     this.roleForm = this.fb.group({
       name: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
+      description: ['', [Validators.maxLength(255)]],
+    });
+  }
+
+  private initEditForm(): void {
+    this.editRoleForm = this.fb.group({
       description: ['', [Validators.maxLength(255)]],
     });
   }
@@ -143,6 +155,46 @@ export class RoleListComponent implements OnInit {
       },
       error: (error) => {
         let errorMessage = 'Error creating role';
+        if (error) {
+          errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+        }
+        this.toastr.error(errorMessage);
+      },
+    });
+  }
+
+  // Open modal to edit role
+  openEditModal(content: any, row: RoleResponse): void {
+    this.editingRole = row;
+    this.editRoleForm.patchValue({
+      description: row.description || '',
+    });
+    this.modalService.open(content, {
+      ariaLabelledBy: 'modal-edit-title',
+      size: 'lg',
+    });
+  }
+
+  // Save edited role
+  onEditRoleSave(): void {
+    if (this.editRoleForm.invalid || !this.editingRole) {
+      return;
+    }
+
+    const request: UpdateRoleRequest = {
+      description: this.editRoleForm.value.description,
+    };
+
+    this.roleService.update(this.editingRole.id, request).subscribe({
+      next: (response) => {
+        this.toastr.success(response.header.message);
+        this.modalService.dismissAll();
+        this.editRoleForm.reset();
+        this.editingRole = null;
+        this.loadRoles();
+      },
+      error: (error) => {
+        let errorMessage = 'Error updating role';
         if (error) {
           errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
         }

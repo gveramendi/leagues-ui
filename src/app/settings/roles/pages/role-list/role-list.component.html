@@ -100,14 +100,19 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column name="Actions" [sortable]="false" [width]="100">
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="140">
                 <ng-template ngx-datatable-header-template>
                   {{ 'COMMON.ACTIONS' | translate }}
                 </ng-template>
                 <ng-template let-row="row" ngx-datatable-cell-template>
-                  <button class="btn btn-tbl-delete btn-sm" (click)="deleteRole(row)" [title]="'COMMON.DELETE' | translate">
-                    <i class="far fa-trash-alt"></i>
-                  </button>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editRoleModal, row)" [title]="'COMMON.EDIT' | translate">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteRole(row)" [title]="'COMMON.DELETE' | translate">
+                      <i class="far fa-trash-alt"></i>
+                    </button>
+                  </div>
                 </ng-template>
               </ngx-datatable-column>
             </ngx-datatable>
@@ -172,6 +177,58 @@
       </div>
       <div class="modal-footer">
         <button type="submit" class="btn btn-primary" [disabled]="roleForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit Role Modal -->
+<ng-template #editRoleModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-title">
+      {{ 'ROLES.EDIT' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editRoleForm" (ngSubmit)="onEditRoleSave()">
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'COMMON.NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="editingRole?.name"
+            disabled
+          />
+          <small class="form-text text-muted">
+            {{ 'ROLES.NAME_NOT_EDITABLE' | translate }}
+          </small>
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+          <textarea
+            class="form-control"
+            [placeholder]="'ROLES.DESCRIPTION_PLACEHOLDER' | translate"
+            formControlName="description"
+            rows="3"
+          ></textarea>
+          @if (editRoleForm.get('description')?.invalid && editRoleForm.get('description')?.touched) {
+            <small class="form-text text-danger">
+              @if (editRoleForm.get('description')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 255 } }}
+              }
+            </small>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="editRoleForm.invalid">
           {{ 'COMMON.SAVE' | translate }}
         </button>
         <button type="button" class="btn btn-light" (click)="modal.close()">

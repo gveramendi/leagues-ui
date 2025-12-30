@@ -31,8 +31,10 @@
     "TITLE": "Roles",
     "SEARCH_PLACEHOLDER": "Search roles...",
     "ADD_NEW": "Add New Role",
+    "EDIT": "Edit Role",
     "NAME_PLACEHOLDER": "Enter role name",
     "DESCRIPTION_PLACEHOLDER": "Enter role description",
+    "NAME_NOT_EDITABLE": "Role name cannot be changed",
     "DELETE_CONFIRM_TITLE": "Are you sure?",
     "DELETE_CONFIRM_MESSAGE": "You are about to delete the role '{{name}}'. This action cannot be undone."
   },
