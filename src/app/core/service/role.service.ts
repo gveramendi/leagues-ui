@@ -3,10 +3,9 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import {
+  ApiResponse,
   CreateRoleRequest,
-  PageResponse,
   RoleResponse,
-  SuccessResponse,
   UpdateRoleRequest,
 } from '../models/response';
 
@@ -22,24 +21,24 @@ export class RoleService {
    * GET /api/roles
    * Get all roles
    */
-  getAll(): Observable<SuccessResponse<RoleResponse[]>> {
-    return this.http.get<SuccessResponse<RoleResponse[]>>(this.apiUrl);
+  getAll(): Observable<ApiResponse<RoleResponse[]>> {
+    return this.http.get<ApiResponse<RoleResponse[]>>(this.apiUrl);
   }
 
   /**
    * GET /api/roles/{id}
    * Get role by id
    */
-  getById(id: number): Observable<SuccessResponse<RoleResponse>> {
-    return this.http.get<SuccessResponse<RoleResponse>>(`${this.apiUrl}/${id}`);
+  getById(id: number): Observable<ApiResponse<RoleResponse>> {
+    return this.http.get<ApiResponse<RoleResponse>>(`${this.apiUrl}/${id}`);
   }
 
   /**
    * GET /api/roles/name/{name}
    * Get role by name
    */
-  getByName(name: string): Observable<SuccessResponse<RoleResponse>> {
-    return this.http.get<SuccessResponse<RoleResponse>>(
+  getByName(name: string): Observable<ApiResponse<RoleResponse>> {
+    return this.http.get<ApiResponse<RoleResponse>>(
       `${this.apiUrl}/name/${name}`
     );
   }
@@ -53,7 +52,7 @@ export class RoleService {
     page: number = 0,
     size: number = 10,
     sort: string = 'name,asc'
-  ): Observable<SuccessResponse<PageResponse<RoleResponse>>> {
+  ): Observable<ApiResponse<RoleResponse[]>> {
     let params = new HttpParams()
       .set('page', page.toString())
       .set('size', size.toString())
@@ -63,7 +62,7 @@ export class RoleService {
       params = params.set('search', search);
     }
 
-    return this.http.get<SuccessResponse<PageResponse<RoleResponse>>>(
+    return this.http.get<ApiResponse<RoleResponse[]>>(
       `${this.apiUrl}/search`,
       { params }
     );
@@ -73,8 +72,8 @@ export class RoleService {
    * POST /api/roles
    * Create a new role
    */
-  create(request: CreateRoleRequest): Observable<SuccessResponse<RoleResponse>> {
-    return this.http.post<SuccessResponse<RoleResponse>>(this.apiUrl, request);
+  create(request: CreateRoleRequest): Observable<ApiResponse<RoleResponse>> {
+    return this.http.post<ApiResponse<RoleResponse>>(this.apiUrl, request);
   }
 
   /**
@@ -84,8 +83,8 @@ export class RoleService {
   update(
     id: number,
     request: UpdateRoleRequest
-  ): Observable<SuccessResponse<RoleResponse>> {
-    return this.http.put<SuccessResponse<RoleResponse>>(
+  ): Observable<ApiResponse<RoleResponse>> {
+    return this.http.put<ApiResponse<RoleResponse>>(
       `${this.apiUrl}/${id}`,
       request
     );
@@ -95,8 +94,8 @@ export class RoleService {
    * DELETE /api/roles/{id}
    * Delete a role
    */
-  delete(id: number): Observable<SuccessResponse<void>> {
-    return this.http.delete<SuccessResponse<void>>(`${this.apiUrl}/${id}`);
+  delete(id: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
   }
 
   /**

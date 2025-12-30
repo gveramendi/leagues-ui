@@ -36,14 +36,14 @@ export class AuthService {
     }).pipe(
       map((response) => {
         return {
-          success: true,
-          message: response.message || 'Registration successful',
-          data: response.data
+          success: response.header?.success ?? true,
+          message: response.header?.message || 'Registration successful',
+          data: response.body?.data
         };
       }),
       catchError((error) => {
         console.error('Registration error:', error);
-        const errorMessage = error.error?.message || 'Registration failed. Please try again.';
+        const errorMessage = error || 'Registration failed. Please try again.';
         return throwError(() => new Error(errorMessage));
       })
     );
@@ -52,7 +52,7 @@ export class AuthService {
   login(email: string, password: string): Observable<any> {
     return this.httpClient.post<AuthResponse>(`${this.apiUrl}/login`, { email, password }).pipe(
       map((response) => {
-        const data = response.data;
+        const data = response.body.data;
         const user: User = {
           id: 0, // Backend doesn't return id in login response, will need to fetch if needed
           email: data.email,
@@ -79,7 +79,7 @@ export class AuthService {
       }),
       catchError((error) => {
         console.error('Login error:', error);
-        const errorMessage = error.error?.message || 'Username or password is incorrect';
+        const errorMessage = error || 'Username or password is incorrect';
         return this.error(errorMessage);
       })
     );

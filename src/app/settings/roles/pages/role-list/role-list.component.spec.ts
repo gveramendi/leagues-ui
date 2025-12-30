@@ -7,7 +7,7 @@ import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { RoleListComponent } from './role-list.component';
-import { RoleService, PageResponse, RoleResponse, SuccessResponse, CreateRoleRequest } from '@core';
+import { RoleService, ApiResponse, RoleResponse, CreateRoleRequest } from '@core';
 
 describe('RoleListComponent', () => {
   let component: RoleListComponent;
@@ -16,32 +16,52 @@ describe('RoleListComponent', () => {
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let toastrSpy: jasmine.SpyObj<ToastrService>;
 
-  const mockRolesResponse: SuccessResponse<PageResponse<RoleResponse>> = {
-    message: 'Success',
-    data: {
-      content: [
-        { id: 1, name: 'Admin', description: 'Administrator role' },
-        { id: 2, name: 'User', description: 'User role' },
-        { id: 3, name: 'Manager', description: 'Manager role' },
-      ],
-      totalElements: 3,
-      totalPages: 1,
-      size: 10,
-      number: 0,
-      first: true,
-      last: true,
-      empty: false,
+  const mockRoles: RoleResponse[] = [
+    { id: 1, name: 'Admin', description: 'Administrator role' },
+    { id: 2, name: 'User', description: 'User role' },
+    { id: 3, name: 'Manager', description: 'Manager role' },
+  ];
+
+  const mockRolesResponse: ApiResponse<RoleResponse[]> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Success',
+    },
+    body: {
+      pagination: {
+        totalElements: 3,
+        totalPages: 1,
+        size: 10,
+        number: 0,
+        first: true,
+        last: true,
+        empty: false,
+      },
+      data: mockRoles,
     },
   };
 
-  const mockCreateResponse: SuccessResponse<RoleResponse> = {
-    message: 'Role created successfully',
-    data: { id: 4, name: 'NewRole', description: 'New role description' },
+  const mockCreateResponse: ApiResponse<RoleResponse> = {
+    header: {
+      success: true,
+      statusCode: 201,
+      message: 'Role created successfully',
+    },
+    body: {
+      data: { id: 4, name: 'NewRole', description: 'New role description' },
+    },
   };
 
-  const mockDeleteResponse: SuccessResponse<void> = {
-    message: 'Role deleted successfully',
-    data: undefined as unknown as void,
+  const mockDeleteResponse: ApiResponse<void> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Role deleted successfully',
+    },
+    body: {
+      data: undefined as unknown as void,
+    },
   };
 
   beforeEach(waitForAsync(() => {
@@ -128,15 +148,15 @@ describe('RoleListComponent', () => {
       component.loadRoles();
       tick();
 
-      expect(component.rows).toEqual(mockRolesResponse.data.content);
-      expect(component.filteredRows).toEqual(mockRolesResponse.data.content);
+      expect(component.rows).toEqual(mockRoles);
+      expect(component.filteredRows).toEqual(mockRoles);
       expect(component.totalElements).toBe(3);
     }));
   });
 
   describe('filterDatatable', () => {
     beforeEach(() => {
-      component.rows = mockRolesResponse.data.content;
+      component.rows = mockRoles;
       component.filteredRows = [...component.rows];
     });
 

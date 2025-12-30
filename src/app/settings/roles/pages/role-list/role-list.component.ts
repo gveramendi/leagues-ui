@@ -15,7 +15,6 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import {
   CreateRoleRequest,
-  PageResponse,
   RoleResponse,
   RoleService,
 } from '@core';
@@ -74,10 +73,9 @@ export class RoleListComponent implements OnInit {
     this.loading = true;
     this.roleService.searchRoles(this.search, this.page, this.size, this.sort).subscribe({
       next: (response) => {
-        const pageData: PageResponse<RoleResponse> = response.data;
-        this.rows = pageData.content;
+        this.rows = response.body.data;
         this.filteredRows = [...this.rows];
-        this.totalElements = pageData.totalElements;
+        this.totalElements = response.body.pagination?.totalElements || 0;
         this.loading = false;
       },
       error: (error) => {
@@ -138,7 +136,7 @@ export class RoleListComponent implements OnInit {
 
     this.roleService.create(request).subscribe({
       next: (response) => {
-        this.toastr.success(response.message);
+        this.toastr.success(response.header.message);
         this.modalService.dismissAll();
         this.roleForm.reset();
         this.loadRoles();
@@ -168,7 +166,7 @@ export class RoleListComponent implements OnInit {
       if (result.isConfirmed) {
         this.roleService.delete(row.id).subscribe({
           next: (response) => {
-            this.toastr.success(response.message);
+            this.toastr.success(response.header.message);
             this.loadRoles();
           },
           error: (error) => {

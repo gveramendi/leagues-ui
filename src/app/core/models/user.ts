@@ -26,19 +26,28 @@ export class User {
   expiresAt?: string;
 }
 
-// Auth response DTO matching backend response
+// Auth data from login response
+export interface AuthData {
+  token: string;
+  tokenType: string;
+  expiresIn: number;
+  email: string;
+  firstName: string;
+  lastName: string;
+  roles: string[];
+  menus: RouteInfo[];
+  issuedAt: string;
+  expiresAt: string;
+}
+
+// Auth response DTO matching backend response with header/body structure
 export interface AuthResponse {
-  message: string;
-  data: {
-    token: string;
-    tokenType: string;
-    expiresIn: number;
-    email: string;
-    firstName: string;
-    lastName: string;
-    roles: string[];
-    menus: RouteInfo[];
-    issuedAt: string;
-    expiresAt: string;
+  header: {
+    success: boolean;
+    statusCode: number;
+    message: string;
+  };
+  body: {
+    data: AuthData;
   };
 }

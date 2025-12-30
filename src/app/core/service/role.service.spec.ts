@@ -6,10 +6,9 @@ import {
 import { RoleService } from './role.service';
 import { environment } from '../../../environments/environment';
 import {
+  ApiResponse,
   CreateRoleRequest,
-  PageResponse,
   RoleResponse,
-  SuccessResponse,
   UpdateRoleRequest,
 } from '../models/response';
 
@@ -44,15 +43,21 @@ describe('RoleService', () => {
   });
 
   describe('getAll', () => {
-    it('should return all roles wrapped in SuccessResponse', () => {
-      const mockResponse: SuccessResponse<RoleResponse[]> = {
-        message: 'Roles retrieved successfully',
-        data: [mockRole, { ...mockRole, id: 2, name: 'User' }],
+    it('should return all roles wrapped in ApiResponse', () => {
+      const mockResponse: ApiResponse<RoleResponse[]> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Roles retrieved successfully',
+        },
+        body: {
+          data: [mockRole, { ...mockRole, id: 2, name: 'User' }],
+        },
       };
 
       service.getAll().subscribe((response) => {
-        expect(response.data.length).toBe(2);
-        expect(response.message).toBe('Roles retrieved successfully');
+        expect(response.body.data.length).toBe(2);
+        expect(response.header.message).toBe('Roles retrieved successfully');
       });
 
       const req = httpMock.expectOne(apiUrl);
@@ -62,15 +67,21 @@ describe('RoleService', () => {
   });
 
   describe('getById', () => {
-    it('should return a role by id wrapped in SuccessResponse', () => {
-      const mockResponse: SuccessResponse<RoleResponse> = {
-        message: 'Role retrieved successfully',
-        data: mockRole,
+    it('should return a role by id wrapped in ApiResponse', () => {
+      const mockResponse: ApiResponse<RoleResponse> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Role retrieved successfully',
+        },
+        body: {
+          data: mockRole,
+        },
       };
 
       service.getById(1).subscribe((response) => {
-        expect(response.data).toEqual(mockRole);
-        expect(response.message).toBe('Role retrieved successfully');
+        expect(response.body.data).toEqual(mockRole);
+        expect(response.header.message).toBe('Role retrieved successfully');
       });
 
       const req = httpMock.expectOne(`${apiUrl}/1`);
@@ -80,15 +91,21 @@ describe('RoleService', () => {
   });
 
   describe('getByName', () => {
-    it('should return a role by name wrapped in SuccessResponse', () => {
-      const mockResponse: SuccessResponse<RoleResponse> = {
-        message: 'Role retrieved successfully',
-        data: mockRole,
+    it('should return a role by name wrapped in ApiResponse', () => {
+      const mockResponse: ApiResponse<RoleResponse> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Role retrieved successfully',
+        },
+        body: {
+          data: mockRole,
+        },
       };
 
       service.getByName('Admin').subscribe((response) => {
-        expect(response.data).toEqual(mockRole);
-        expect(response.data.name).toBe('Admin');
+        expect(response.body.data).toEqual(mockRole);
+        expect(response.body.data.name).toBe('Admin');
       });
 
       const req = httpMock.expectOne(`${apiUrl}/name/Admin`);
@@ -98,24 +115,30 @@ describe('RoleService', () => {
   });
 
   describe('searchRoles', () => {
-    const mockPageResponse: SuccessResponse<PageResponse<RoleResponse>> = {
-      message: 'Success',
-      data: {
-        content: [mockRole, { ...mockRole, id: 2, name: 'User' }],
-        totalElements: 2,
-        totalPages: 1,
-        size: 10,
-        number: 0,
-        first: true,
-        last: true,
-        empty: false,
+    const mockSearchResponse: ApiResponse<RoleResponse[]> = {
+      header: {
+        success: true,
+        statusCode: 200,
+        message: 'Success',
+      },
+      body: {
+        pagination: {
+          totalElements: 2,
+          totalPages: 1,
+          size: 10,
+          number: 0,
+          first: true,
+          last: true,
+          empty: false,
+        },
+        data: [mockRole, { ...mockRole, id: 2, name: 'User' }],
       },
     };
 
     it('should search roles with default parameters', () => {
       service.searchRoles().subscribe((response) => {
-        expect(response.data.content.length).toBe(2);
-        expect(response.data.totalElements).toBe(2);
+        expect(response.body.data.length).toBe(2);
+        expect(response.body.pagination?.totalElements).toBe(2);
       });
 
       const req = httpMock.expectOne((request) =>
@@ -125,12 +148,12 @@ describe('RoleService', () => {
         request.params.get('sort') === 'name,asc'
       );
       expect(req.request.method).toBe('GET');
-      req.flush(mockPageResponse);
+      req.flush(mockSearchResponse);
     });
 
     it('should search roles with custom parameters', () => {
       service.searchRoles('admin', 1, 20, 'name,desc').subscribe((response) => {
-        expect(response.data.content.length).toBe(2);
+        expect(response.body.data.length).toBe(2);
       });
 
       const req = httpMock.expectOne((request) =>
@@ -141,7 +164,7 @@ describe('RoleService', () => {
         request.params.get('sort') === 'name,desc'
       );
       expect(req.request.method).toBe('GET');
-      req.flush(mockPageResponse);
+      req.flush(mockSearchResponse);
     });
 
     it('should not include search param when search is empty', () => {
@@ -151,7 +174,7 @@ describe('RoleService', () => {
         request.url === `${apiUrl}/search` && !request.params.has('search')
       );
       expect(req.request.method).toBe('GET');
-      req.flush(mockPageResponse);
+      req.flush(mockSearchResponse);
     });
   });
 
@@ -161,14 +184,20 @@ describe('RoleService', () => {
         name: 'NewRole',
         description: 'New role description',
       };
-      const mockResponse: SuccessResponse<RoleResponse> = {
-        message: 'Role created successfully',
-        data: { ...mockRole, id: 3, name: 'NewRole', description: 'New role description' },
+      const mockResponse: ApiResponse<RoleResponse> = {
+        header: {
+          success: true,
+          statusCode: 201,
+          message: 'Role created successfully',
+        },
+        body: {
+          data: { ...mockRole, id: 3, name: 'NewRole', description: 'New role description' },
+        },
       };
 
       service.create(createRequest).subscribe((response) => {
-        expect(response.data.name).toBe('NewRole');
-        expect(response.message).toBe('Role created successfully');
+        expect(response.body.data.name).toBe('NewRole');
+        expect(response.header.message).toBe('Role created successfully');
       });
 
       const req = httpMock.expectOne(apiUrl);
@@ -183,14 +212,20 @@ describe('RoleService', () => {
       const updateRequest: UpdateRoleRequest = {
         description: 'Updated description',
       };
-      const mockResponse: SuccessResponse<RoleResponse> = {
-        message: 'Role updated successfully',
-        data: { ...mockRole, description: 'Updated description' },
+      const mockResponse: ApiResponse<RoleResponse> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Role updated successfully',
+        },
+        body: {
+          data: { ...mockRole, description: 'Updated description' },
+        },
       };
 
       service.update(1, updateRequest).subscribe((response) => {
-        expect(response.data.description).toBe('Updated description');
-        expect(response.message).toBe('Role updated successfully');
+        expect(response.body.data.description).toBe('Updated description');
+        expect(response.header.message).toBe('Role updated successfully');
       });
 
       const req = httpMock.expectOne(`${apiUrl}/1`);
@@ -202,13 +237,19 @@ describe('RoleService', () => {
 
   describe('delete', () => {
     it('should delete a role', () => {
-      const mockResponse: SuccessResponse<void> = {
-        message: 'Role deleted successfully',
-        data: undefined as unknown as void,
+      const mockResponse: ApiResponse<void> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Role deleted successfully',
+        },
+        body: {
+          data: undefined as unknown as void,
+        },
       };
 
       service.delete(1).subscribe((response) => {
-        expect(response.message).toBe('Role deleted successfully');
+        expect(response.header.message).toBe('Role deleted successfully');
       });
 
       const req = httpMock.expectOne(`${apiUrl}/1`);
