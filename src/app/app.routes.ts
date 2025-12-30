@@ -16,6 +16,11 @@ export const APP_ROUTE: Route[] = [
                 loadChildren: () =>
                     import('./dashboard/dashboard.routes').then((m) => m.DASHBOARD_ROUTE),
             },
+            {
+                path: 'settings/roles',
+                loadChildren: () =>
+                    import('./settings/roles/roles.module').then((m) => m.RolesModule),
+            },
         ],
     },
     {

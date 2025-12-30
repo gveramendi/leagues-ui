@@ -1,0 +1,210 @@
+import { ComponentFixture, TestBed, fakeAsync, tick, waitForAsync } from '@angular/core/testing';
+import { HttpClientTestingModule } from '@angular/common/http/testing';
+import { RouterTestingModule } from '@angular/router/testing';
+import { TranslateModule } from '@ngx-translate/core';
+import { of, throwError } from 'rxjs';
+import { RoleListComponent } from './role-list.component';
+import { RoleService, PageResponse, RoleResponse, SuccessResponse } from '@core';
+
+describe('RoleListComponent', () => {
+  let component: RoleListComponent;
+  let fixture: ComponentFixture<RoleListComponent>;
+  let roleServiceSpy: jasmine.SpyObj<RoleService>;
+
+  const mockRolesResponse: SuccessResponse<PageResponse<RoleResponse>> = {
+    message: 'Success',
+    data: {
+      content: [
+        { id: 1, name: 'Admin', description: 'Administrator role' },
+        { id: 2, name: 'User', description: 'User role' },
+        { id: 3, name: 'Manager', description: 'Manager role' },
+      ],
+      totalElements: 3,
+      totalPages: 1,
+      size: 10,
+      number: 0,
+      first: true,
+      last: true,
+      empty: false,
+    },
+  };
+
+  beforeEach(waitForAsync(() => {
+    const spy = jasmine.createSpyObj('RoleService', ['searchRoles']);
+    spy.searchRoles.and.returnValue(of(mockRolesResponse));
+
+    TestBed.configureTestingModule({
+      imports: [
+        RoleListComponent,
+        HttpClientTestingModule,
+        RouterTestingModule,
+        TranslateModule.forRoot(),
+      ],
+      providers: [{ provide: RoleService, useValue: spy }],
+    }).compileComponents();
+
+    roleServiceSpy = TestBed.inject(RoleService) as jasmine.SpyObj<RoleService>;
+  }));
+
+  beforeEach(() => {
+    fixture = TestBed.createComponent(RoleListComponent);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  });
+
+  it('should create', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should have default values', () => {
+    expect(component.page).toBe(0);
+    expect(component.size).toBe(10);
+    expect(component.sort).toBe('name,asc');
+    expect(component.search).toBe('');
+  });
+
+  describe('ngOnInit', () => {
+    it('should load roles on init', () => {
+      expect(roleServiceSpy.searchRoles).toHaveBeenCalledWith('', 0, 10, 'name,asc');
+      expect(component.rows.length).toBe(3);
+      expect(component.filteredRows.length).toBe(3);
+      expect(component.totalElements).toBe(3);
+      expect(component.loading).toBeFalse();
+    });
+  });
+
+  describe('loadRoles', () => {
+    it('should set loading to true while fetching', fakeAsync(() => {
+      roleServiceSpy.searchRoles.and.returnValue(of(mockRolesResponse));
+
+      component.loading = false;
+      component.loadRoles();
+
+      expect(component.loading).toBeFalse(); // After async completes
+      tick();
+    }));
+
+    it('should handle error when loading roles fails', fakeAsync(() => {
+      const consoleSpy = spyOn(console, 'error');
+      roleServiceSpy.searchRoles.and.returnValue(throwError(() => new Error('Network error')));
+
+      component.loadRoles();
+      tick();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      expect(component.loading).toBeFalse();
+    }));
+
+    it('should update rows and filteredRows on successful load', fakeAsync(() => {
+      roleServiceSpy.searchRoles.and.returnValue(of(mockRolesResponse));
+
+      component.loadRoles();
+      tick();
+
+      expect(component.rows).toEqual(mockRolesResponse.data.content);
+      expect(component.filteredRows).toEqual(mockRolesResponse.data.content);
+      expect(component.totalElements).toBe(3);
+    }));
+  });
+
+  describe('filterDatatable', () => {
+    beforeEach(() => {
+      component.rows = mockRolesResponse.data.content;
+      component.filteredRows = [...component.rows];
+    });
+
+    it('should filter rows by name', () => {
+      const event = { target: { value: 'admin' } } as unknown as Event;
+
+      component.filterDatatable(event);
+
+      expect(component.filteredRows.length).toBe(1);
+      expect(component.filteredRows[0].name).toBe('Admin');
+    });
+
+    it('should filter rows by description', () => {
+      const event = { target: { value: 'manager' } } as unknown as Event;
+
+      component.filterDatatable(event);
+
+      expect(component.filteredRows.length).toBe(1);
+      expect(component.filteredRows[0].name).toBe('Manager');
+    });
+
+    it('should filter rows by id', () => {
+      const event = { target: { value: '2' } } as unknown as Event;
+
+      component.filterDatatable(event);
+
+      expect(component.filteredRows.length).toBe(1);
+      expect(component.filteredRows[0].id).toBe(2);
+    });
+
+    it('should return all rows when filter is empty', () => {
+      const event = { target: { value: '' } } as unknown as Event;
+
+      component.filterDatatable(event);
+
+      expect(component.filteredRows.length).toBe(3);
+    });
+
+    it('should be case insensitive', () => {
+      const event = { target: { value: 'ADMIN' } } as unknown as Event;
+
+      component.filterDatatable(event);
+
+      expect(component.filteredRows.length).toBe(1);
+      expect(component.filteredRows[0].name).toBe('Admin');
+    });
+  });
+
+  describe('onPageChange', () => {
+    it('should update page and reload roles', fakeAsync(() => {
+      roleServiceSpy.searchRoles.calls.reset();
+      roleServiceSpy.searchRoles.and.returnValue(of(mockRolesResponse));
+
+      component.onPageChange({ offset: 2 });
+      tick();
+
+      expect(component.page).toBe(2);
+      expect(roleServiceSpy.searchRoles).toHaveBeenCalledWith('', 2, 10, 'name,asc');
+    }));
+  });
+
+  describe('onSort', () => {
+    it('should update sort and reload roles with ascending order', fakeAsync(() => {
+      roleServiceSpy.searchRoles.calls.reset();
+      roleServiceSpy.searchRoles.and.returnValue(of(mockRolesResponse));
+
+      component.onSort({ sorts: [{ prop: 'name', dir: 'asc' }] });
+      tick();
+
+      expect(component.sort).toBe('name,asc');
+      expect(component.page).toBe(0);
+      expect(roleServiceSpy.searchRoles).toHaveBeenCalledWith('', 0, 10, 'name,asc');
+    }));
+
+    it('should update sort and reload roles with descending order', fakeAsync(() => {
+      roleServiceSpy.searchRoles.calls.reset();
+      roleServiceSpy.searchRoles.and.returnValue(of(mockRolesResponse));
+
+      component.onSort({ sorts: [{ prop: 'description', dir: 'desc' }] });
+      tick();
+
+      expect(component.sort).toBe('description,desc');
+      expect(component.page).toBe(0);
+      expect(roleServiceSpy.searchRoles).toHaveBeenCalledWith('', 0, 10, 'description,desc');
+    }));
+
+    it('should reset page to 0 when sorting', fakeAsync(() => {
+      component.page = 5;
+      roleServiceSpy.searchRoles.calls.reset();
+      roleServiceSpy.searchRoles.and.returnValue(of(mockRolesResponse));
+
+      component.onSort({ sorts: [{ prop: 'id', dir: 'asc' }] });
+      tick();
+
+      expect(component.page).toBe(0);
+    }));
+  });
+});

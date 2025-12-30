@@ -4,6 +4,21 @@
       "TEXT": "Buscar.."
     }
   },
+  "COMMON": {
+    "SEARCH": "Buscar",
+    "SEARCH_PLACEHOLDER": "Buscar...",
+    "ID": "ID",
+    "NAME": "Nombre",
+    "DESCRIPTION": "Descripción",
+    "ACTIONS": "Acciones"
+  },
+  "SETTINGS": {
+    "TEXT": "Configuración"
+  },
+  "ROLES": {
+    "TITLE": "Roles",
+    "SEARCH_PLACEHOLDER": "Buscar roles..."
+  },
   "MENUITEMS": {
     "USER":{
       "POST": "Gerente"

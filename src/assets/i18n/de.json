@@ -4,6 +4,21 @@
       "TEXT": "Suche.."
     }
   },
+  "COMMON": {
+    "SEARCH": "Suchen",
+    "SEARCH_PLACEHOLDER": "Suchen...",
+    "ID": "ID",
+    "NAME": "Name",
+    "DESCRIPTION": "Beschreibung",
+    "ACTIONS": "Aktionen"
+  },
+  "SETTINGS": {
+    "TEXT": "Einstellungen"
+  },
+  "ROLES": {
+    "TITLE": "Rollen",
+    "SEARCH_PLACEHOLDER": "Rollen suchen..."
+  },
   "MENUITEMS": {
     "USER":{
       "POST": "Manager"
