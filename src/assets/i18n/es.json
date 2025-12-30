@@ -22,7 +22,8 @@
   "VALIDATION": {
     "REQUIRED": "Este campo es obligatorio",
     "MIN_LENGTH": "La longitud mínima es de {{min}} caracteres",
-    "MAX_LENGTH": "La longitud máxima es de {{max}} caracteres"
+    "MAX_LENGTH": "La longitud máxima es de {{max}} caracteres",
+    "EMAIL": "Por favor ingrese un correo electrónico válido"
   },
   "SETTINGS": {
     "TEXT": "Configuración"
@@ -37,6 +38,24 @@
     "NAME_NOT_EDITABLE": "El nombre del rol no se puede cambiar",
     "DELETE_CONFIRM_TITLE": "¿Está seguro?",
     "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el rol '{{name}}'. Esta acción no se puede deshacer."
+  },
+  "USERS": {
+    "TITLE": "Usuarios",
+    "SEARCH_PLACEHOLDER": "Buscar usuarios...",
+    "ADD_NEW": "Agregar Nuevo Usuario",
+    "EDIT": "Editar Usuario",
+    "FIRST_NAME": "Nombre",
+    "LAST_NAME": "Apellido",
+    "EMAIL": "Correo Electrónico",
+    "PASSWORD": "Contraseña",
+    "ROLES": "Roles",
+    "FIRST_NAME_PLACEHOLDER": "Ingrese el nombre",
+    "LAST_NAME_PLACEHOLDER": "Ingrese el apellido",
+    "EMAIL_PLACEHOLDER": "Ingrese el correo electrónico",
+    "PASSWORD_PLACEHOLDER": "Ingrese la contraseña",
+    "EMAIL_NOT_EDITABLE": "El correo electrónico no se puede cambiar",
+    "DELETE_CONFIRM_TITLE": "¿Está seguro?",
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el usuario '{{name}}'. Esta acción no se puede deshacer."
   },
   "MENUITEMS": {
     "USER":{

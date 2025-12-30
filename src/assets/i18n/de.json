@@ -22,7 +22,8 @@
   "VALIDATION": {
     "REQUIRED": "Dieses Feld ist erforderlich",
     "MIN_LENGTH": "Die Mindestlänge beträgt {{min}} Zeichen",
-    "MAX_LENGTH": "Die maximale Länge beträgt {{max}} Zeichen"
+    "MAX_LENGTH": "Die maximale Länge beträgt {{max}} Zeichen",
+    "EMAIL": "Bitte geben Sie eine gültige E-Mail-Adresse ein"
   },
   "SETTINGS": {
     "TEXT": "Einstellungen"
@@ -37,6 +38,24 @@
     "NAME_NOT_EDITABLE": "Der Rollenname kann nicht geändert werden",
     "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
     "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, die Rolle '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
+  },
+  "USERS": {
+    "TITLE": "Benutzer",
+    "SEARCH_PLACEHOLDER": "Benutzer suchen...",
+    "ADD_NEW": "Neuen Benutzer hinzufügen",
+    "EDIT": "Benutzer bearbeiten",
+    "FIRST_NAME": "Vorname",
+    "LAST_NAME": "Nachname",
+    "EMAIL": "E-Mail",
+    "PASSWORD": "Passwort",
+    "ROLES": "Rollen",
+    "FIRST_NAME_PLACEHOLDER": "Vorname eingeben",
+    "LAST_NAME_PLACEHOLDER": "Nachname eingeben",
+    "EMAIL_PLACEHOLDER": "E-Mail-Adresse eingeben",
+    "PASSWORD_PLACEHOLDER": "Passwort eingeben",
+    "EMAIL_NOT_EDITABLE": "Die E-Mail-Adresse kann nicht geändert werden",
+    "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
+    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, den Benutzer '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "MENUITEMS": {
     "USER":{

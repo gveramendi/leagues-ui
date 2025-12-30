@@ -22,7 +22,8 @@
   "VALIDATION": {
     "REQUIRED": "This field is required",
     "MIN_LENGTH": "Minimum length is {{min}} characters",
-    "MAX_LENGTH": "Maximum length is {{max}} characters"
+    "MAX_LENGTH": "Maximum length is {{max}} characters",
+    "EMAIL": "Please enter a valid email address"
   },
   "SETTINGS": {
     "TEXT": "Settings"
@@ -37,6 +38,24 @@
     "NAME_NOT_EDITABLE": "Role name cannot be changed",
     "DELETE_CONFIRM_TITLE": "Are you sure?",
     "DELETE_CONFIRM_MESSAGE": "You are about to delete the role '{{name}}'. This action cannot be undone."
+  },
+  "USERS": {
+    "TITLE": "Users",
+    "SEARCH_PLACEHOLDER": "Search users...",
+    "ADD_NEW": "Add New User",
+    "EDIT": "Edit User",
+    "FIRST_NAME": "First Name",
+    "LAST_NAME": "Last Name",
+    "EMAIL": "Email",
+    "PASSWORD": "Password",
+    "ROLES": "Roles",
+    "FIRST_NAME_PLACEHOLDER": "Enter first name",
+    "LAST_NAME_PLACEHOLDER": "Enter last name",
+    "EMAIL_PLACEHOLDER": "Enter email address",
+    "PASSWORD_PLACEHOLDER": "Enter password",
+    "EMAIL_NOT_EDITABLE": "Email address cannot be changed",
+    "DELETE_CONFIRM_TITLE": "Are you sure?",
+    "DELETE_CONFIRM_MESSAGE": "You are about to delete the user '{{name}}'. This action cannot be undone."
   },
   "MENUITEMS": {
     "USER":{

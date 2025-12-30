@@ -1,0 +1,350 @@
+<section class="main-content">
+  <ul class="breadcrumb breadcrumb-style">
+    <li class="breadcrumb-item">
+      <h5 class="page-title m-b-0">{{ 'SETTINGS.TEXT' | translate }}</h5>
+    </li>
+    <li class="breadcrumb-item bcrumb-1">
+      <a routerLink="/dashboard">
+        <i class="fas fa-home font-17"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item">{{ 'SETTINGS.TEXT' | translate }}</li>
+    <li class="breadcrumb-item active">{{ 'USERS.TITLE' | translate }}</li>
+  </ul>
+  <div class="section-body">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="p-10">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="row m-0">
+                  <div class="col-auto p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-title">
+                        <h2><strong>{{ 'USERS.TITLE' | translate }}</strong></h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-8 p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-search-area">
+                        <div>
+                          <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                          <input
+                            [placeholder]="'USERS.SEARCH_PLACEHOLDER' | translate"
+                            type="text"
+                            class="browser-default search-field"
+                            (keyup)="filterDatatable($event)"
+                            [attr.aria-label]="'COMMON.SEARCH' | translate"
+                          />
+                        </div>
+                      </div>
+                      <div class="header-buttons-left">
+                        <div class="tbl-btn-style">
+                          <button
+                            class="btn btn-icon icon-left btn-primary rounded-button"
+                            (click)="openAddModal(addUserModal)"
+                          >
+                            <i class="material-icons">add</i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ngx-datatable
+              #table
+              class="material"
+              [rows]="filteredRows"
+              [loadingIndicator]="loading"
+              columnMode="force"
+              [headerHeight]="60"
+              [footerHeight]="80"
+              rowHeight="auto"
+              [limit]="size"
+              [externalPaging]="true"
+              [externalSorting]="true"
+              [count]="totalElements"
+              [offset]="page"
+              (page)="onPageChange($event)"
+              (sort)="onSort($event)"
+            >
+              <ngx-datatable-column prop="id" [width]="80">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ID' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.id }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="firstName" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'USERS.FIRST_NAME' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.firstName }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="lastName" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'USERS.LAST_NAME' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.lastName }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="email">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'USERS.EMAIL' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.email }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="roles" [sortable]="false" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'USERS.ROLES' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  @for (role of row.roles; track role) {
+                    <span class="badge bg-primary me-1">{{ role }}</span>
+                  } @empty {
+                    <span class="text-muted">-</span>
+                  }
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="140">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ACTIONS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editUserModal, row)" [title]="'COMMON.EDIT' | translate">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteUser(row)" [title]="'COMMON.DELETE' | translate">
+                      <i class="far fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add User Modal -->
+<ng-template #addUserModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ 'USERS.ADD_NEW' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="userForm" (ngSubmit)="onAddUserSave()">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'USERS.FIRST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'USERS.FIRST_NAME_PLACEHOLDER' | translate"
+            formControlName="firstName"
+          />
+          @if (userForm.get('firstName')?.invalid && userForm.get('firstName')?.touched) {
+            <small class="form-text text-danger">
+              @if (userForm.get('firstName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (userForm.get('firstName')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (userForm.get('firstName')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 50 } }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'USERS.LAST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'USERS.LAST_NAME_PLACEHOLDER' | translate"
+            formControlName="lastName"
+          />
+          @if (userForm.get('lastName')?.invalid && userForm.get('lastName')?.touched) {
+            <small class="form-text text-danger">
+              @if (userForm.get('lastName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (userForm.get('lastName')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (userForm.get('lastName')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 50 } }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">
+            {{ 'USERS.EMAIL' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="email"
+            class="form-control"
+            [placeholder]="'USERS.EMAIL_PLACEHOLDER' | translate"
+            formControlName="email"
+          />
+          @if (userForm.get('email')?.invalid && userForm.get('email')?.touched) {
+            <small class="form-text text-danger">
+              @if (userForm.get('email')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (userForm.get('email')?.errors?.['email']) {
+                {{ 'VALIDATION.EMAIL' | translate }}
+              }
+              @if (userForm.get('email')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 100 } }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">
+            {{ 'USERS.PASSWORD' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="password"
+            class="form-control"
+            [placeholder]="'USERS.PASSWORD_PLACEHOLDER' | translate"
+            formControlName="password"
+          />
+          @if (userForm.get('password')?.invalid && userForm.get('password')?.touched) {
+            <small class="form-text text-danger">
+              @if (userForm.get('password')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (userForm.get('password')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 6 } }}
+              }
+              @if (userForm.get('password')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 100 } }}
+              }
+            </small>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="userForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit User Modal -->
+<ng-template #editUserModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-title">
+      {{ 'USERS.EDIT' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editUserForm" (ngSubmit)="onEditUserSave()">
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'USERS.EMAIL' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="editingUser?.email"
+            disabled
+          />
+          <small class="form-text text-muted">
+            {{ 'USERS.EMAIL_NOT_EDITABLE' | translate }}
+          </small>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'USERS.FIRST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'USERS.FIRST_NAME_PLACEHOLDER' | translate"
+            formControlName="firstName"
+          />
+          @if (editUserForm.get('firstName')?.invalid && editUserForm.get('firstName')?.touched) {
+            <small class="form-text text-danger">
+              @if (editUserForm.get('firstName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (editUserForm.get('firstName')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (editUserForm.get('firstName')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 50 } }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'USERS.LAST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'USERS.LAST_NAME_PLACEHOLDER' | translate"
+            formControlName="lastName"
+          />
+          @if (editUserForm.get('lastName')?.invalid && editUserForm.get('lastName')?.touched) {
+            <small class="form-text text-danger">
+              @if (editUserForm.get('lastName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (editUserForm.get('lastName')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (editUserForm.get('lastName')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 50 } }}
+              }
+            </small>
+          }
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="editUserForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

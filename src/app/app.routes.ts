@@ -21,6 +21,11 @@ export const APP_ROUTE: Route[] = [
                 loadChildren: () =>
                     import('./settings/roles/roles.module').then((m) => m.RolesModule),
             },
+            {
+                path: 'settings/users',
+                loadChildren: () =>
+                    import('./settings/users/users.module').then((m) => m.UsersModule),
+            },
         ],
     },
     {
