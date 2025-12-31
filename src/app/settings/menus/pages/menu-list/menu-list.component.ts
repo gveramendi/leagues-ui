@@ -105,6 +105,7 @@ export class MenuListComponent implements OnInit {
   private initEditForm(): void {
     this.editMenuForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      resourceId: [null, [Validators.required]],
       path: ['', [Validators.maxLength(255)]],
       iconType: ['', [Validators.maxLength(50)]],
       icon: ['', [Validators.maxLength(100)]],
@@ -217,6 +218,7 @@ export class MenuListComponent implements OnInit {
     this.editingMenu = row;
     this.editMenuForm.patchValue({
       title: row.title || '',
+      resourceId: row.resourceId,
       path: row.path || '',
       iconType: row.iconType || '',
       icon: row.icon || '',
@@ -240,6 +242,7 @@ export class MenuListComponent implements OnInit {
 
     const request: UpdateMenuRequest = {
       title: this.editMenuForm.value.title,
+      resourceId: this.editMenuForm.value.resourceId,
       path: this.editMenuForm.value.path || undefined,
       iconType: this.editMenuForm.value.iconType || undefined,
       icon: this.editMenuForm.value.icon || undefined,

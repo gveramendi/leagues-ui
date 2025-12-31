@@ -231,6 +231,7 @@ describe('MenuService', () => {
     it('should update an existing menu wrapped in ApiResponse', () => {
       const updateRequest: UpdateMenuRequest = {
         title: 'Updated Title',
+        resourceId: 2,
         path: '/updated-path',
       };
 
@@ -244,6 +245,7 @@ describe('MenuService', () => {
           data: {
             ...mockMenu,
             title: 'Updated Title',
+            resourceId: 2,
             path: '/updated-path',
           },
         },
@@ -252,6 +254,7 @@ describe('MenuService', () => {
       service.update(1, updateRequest).subscribe((response) => {
         expect(response.header.success).toBeTrue();
         expect(response.body.data.title).toBe('Updated Title');
+        expect(response.body.data.resourceId).toBe(2);
         expect(response.body.data.path).toBe('/updated-path');
       });
 

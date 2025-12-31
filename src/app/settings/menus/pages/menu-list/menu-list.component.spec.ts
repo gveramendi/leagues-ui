@@ -347,6 +347,17 @@ describe('MenuListComponent', () => {
   describe('onEditMenuSave', () => {
     it('should not save if form is invalid', () => {
       component.editMenuForm.controls['title'].setValue('');
+      component.editMenuForm.controls['resourceId'].setValue(null);
+      component.editingMenu = mockMenu;
+
+      component.onEditMenuSave();
+
+      expect(menuServiceSpy.update).not.toHaveBeenCalled();
+    });
+
+    it('should not save if resourceId is not selected', () => {
+      component.editMenuForm.controls['title'].setValue('Updated Title');
+      component.editMenuForm.controls['resourceId'].setValue(null);
       component.editingMenu = mockMenu;
 
       component.onEditMenuSave();
@@ -356,6 +367,7 @@ describe('MenuListComponent', () => {
 
     it('should not save if no menu is being edited', () => {
       component.editMenuForm.controls['title'].setValue('Updated Title');
+      component.editMenuForm.controls['resourceId'].setValue(1);
       component.editingMenu = null;
 
       component.onEditMenuSave();
@@ -366,6 +378,7 @@ describe('MenuListComponent', () => {
     it('should update menu successfully', () => {
       component.editingMenu = mockMenu;
       component.editMenuForm.controls['title'].setValue('Updated Dashboard');
+      component.editMenuForm.controls['resourceId'].setValue(1);
 
       component.onEditMenuSave();
 
@@ -375,12 +388,24 @@ describe('MenuListComponent', () => {
       expect(component.editingMenu).toBeNull();
     });
 
+    it('should include resourceId in update request', () => {
+      component.editingMenu = mockMenu;
+      component.editMenuForm.controls['title'].setValue('Updated Dashboard');
+      component.editMenuForm.controls['resourceId'].setValue(2);
+
+      component.onEditMenuSave();
+
+      const callArgs = menuServiceSpy.update.calls.mostRecent().args[1];
+      expect(callArgs.resourceId).toBe(2);
+    });
+
     it('should handle error when updating menu', () => {
       menuServiceSpy.update.and.returnValue(
         throwError(() => ({ message: 'Update failed' }))
       );
       component.editingMenu = mockMenu;
       component.editMenuForm.controls['title'].setValue('Updated Dashboard');
+      component.editMenuForm.controls['resourceId'].setValue(1);
 
       component.onEditMenuSave();
 
@@ -471,9 +496,16 @@ describe('MenuListComponent', () => {
       expect(component.menuForm.valid).toBeTrue();
     });
 
-    it('should have valid edit form when title is filled', () => {
+    it('should have valid edit form when title and resourceId are filled', () => {
       component.editMenuForm.controls['title'].setValue('Valid Title');
+      component.editMenuForm.controls['resourceId'].setValue(1);
       expect(component.editMenuForm.valid).toBeTrue();
+    });
+
+    it('should have invalid edit form when resourceId is null', () => {
+      component.editMenuForm.controls['title'].setValue('Valid Title');
+      component.editMenuForm.controls['resourceId'].setValue(null);
+      expect(component.editMenuForm.valid).toBeFalse();
     });
 
     it('should have invalid form when code exceeds max length', () => {
@@ -548,6 +580,7 @@ describe('MenuListComponent', () => {
       component.openEditModal(content, fullMenu);
 
       expect(component.editMenuForm.value.title).toBe('Test Menu');
+      expect(component.editMenuForm.value.resourceId).toBe(1);
       expect(component.editMenuForm.value.path).toBe('/test');
       expect(component.editMenuForm.value.iconType).toBe('fontawesome');
       expect(component.editMenuForm.value.icon).toBe('fas fa-test');
@@ -611,6 +644,7 @@ describe('MenuListComponent', () => {
       );
       component.editingMenu = mockMenu;
       component.editMenuForm.controls['title'].setValue('Updated Dashboard');
+      component.editMenuForm.controls['resourceId'].setValue(1);
 
       component.onEditMenuSave();
 

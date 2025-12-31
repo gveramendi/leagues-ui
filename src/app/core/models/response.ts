@@ -153,6 +153,7 @@ export interface CreateMenuRequest {
 
 export interface UpdateMenuRequest {
   title: string;
+  resourceId: number;
   path?: string;
   iconType?: string;
   icon?: string;
