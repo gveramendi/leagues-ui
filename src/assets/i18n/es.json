@@ -98,6 +98,7 @@
     "EDIT": "Editar Recurso",
     "CODE": "Código",
     "TYPE": "Tipo",
+    "ROLES": "Roles",
     "CODE_PLACEHOLDER": "Ingrese el código del recurso",
     "NAME_PLACEHOLDER": "Ingrese el nombre del recurso",
     "CODE_NOT_EDITABLE": "El código del recurso no se puede cambiar",

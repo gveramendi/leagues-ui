@@ -7,12 +7,13 @@ import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { ResourceListComponent } from './resource-list.component';
-import { ResourceService, ApiResponse, ResourceResponse, CreateResourceRequest, UpdateResourceRequest } from '@core';
+import { ResourceService, PermissionService, ApiResponse, ResourceResponse, PermissionResponse } from '@core';
 
 describe('ResourceListComponent', () => {
   let component: ResourceListComponent;
   let fixture: ComponentFixture<ResourceListComponent>;
   let resourceServiceSpy: jasmine.SpyObj<ResourceService>;
+  let permissionServiceSpy: jasmine.SpyObj<PermissionService>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let toastrSpy: jasmine.SpyObj<ToastrService>;
 
@@ -20,6 +21,12 @@ describe('ResourceListComponent', () => {
     { id: 1, code: 'USERS_VIEW', name: 'Users View', type: 'VIEW' },
     { id: 2, code: 'USERS_API', name: 'Users API', type: 'API' },
     { id: 3, code: 'ROLES_VIEW', name: 'Roles View', type: 'VIEW' },
+  ];
+
+  const mockPermissions: PermissionResponse[] = [
+    { id: 1, roleId: 1, roleName: 'ADMIN', resourceId: 1, resourceCode: 'USERS_VIEW', resourceName: 'Users View', canCreate: true, canRead: true, canWrite: true, canDelete: true, canExecute: true },
+    { id: 2, roleId: 1, roleName: 'ADMIN', resourceId: 2, resourceCode: 'USERS_API', resourceName: 'Users API', canCreate: true, canRead: true, canWrite: true, canDelete: true, canExecute: true },
+    { id: 3, roleId: 2, roleName: 'USER', resourceId: 1, resourceCode: 'USERS_VIEW', resourceName: 'Users View', canCreate: false, canRead: true, canWrite: false, canDelete: false, canExecute: false },
   ];
 
   const mockResourcesResponse: ApiResponse<ResourceResponse[]> = {
@@ -30,6 +37,17 @@ describe('ResourceListComponent', () => {
     },
     body: {
       data: mockResources,
+    },
+  };
+
+  const mockPermissionsResponse: ApiResponse<PermissionResponse[]> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Success',
+    },
+    body: {
+      data: mockPermissions,
     },
   };
 
@@ -73,6 +91,9 @@ describe('ResourceListComponent', () => {
     resourceServiceMock.update.and.returnValue(of(mockUpdateResponse));
     resourceServiceMock.delete.and.returnValue(of(mockDeleteResponse));
 
+    const permissionServiceMock = jasmine.createSpyObj('PermissionService', ['getAll']);
+    permissionServiceMock.getAll.and.returnValue(of(mockPermissionsResponse));
+
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
     const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
 
@@ -85,6 +106,7 @@ describe('ResourceListComponent', () => {
       ],
       providers: [
         { provide: ResourceService, useValue: resourceServiceMock },
+        { provide: PermissionService, useValue: permissionServiceMock },
         { provide: NgbModal, useValue: modalMock },
         { provide: ToastrService, useValue: toastrMock },
         provideToastr(),
@@ -92,6 +114,7 @@ describe('ResourceListComponent', () => {
     }).compileComponents();
 
     resourceServiceSpy = TestBed.inject(ResourceService) as jasmine.SpyObj<ResourceService>;
+    permissionServiceSpy = TestBed.inject(PermissionService) as jasmine.SpyObj<PermissionService>;
     modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     toastrSpy = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
   }));
@@ -122,6 +145,7 @@ describe('ResourceListComponent', () => {
   describe('loadResources', () => {
     it('should set loading to false after fetching', fakeAsync(() => {
       resourceServiceSpy.getAll.and.returnValue(of(mockResourcesResponse));
+      permissionServiceSpy.getAll.and.returnValue(of(mockPermissionsResponse));
 
       component.loading = true;
       component.loadResources();
@@ -133,6 +157,7 @@ describe('ResourceListComponent', () => {
     it('should handle error when loading resources fails', fakeAsync(() => {
       const consoleSpy = spyOn(console, 'error');
       resourceServiceSpy.getAll.and.returnValue(throwError(() => new Error('Network error')));
+      permissionServiceSpy.getAll.and.returnValue(of(mockPermissionsResponse));
 
       component.loadResources();
       tick();
@@ -143,12 +168,17 @@ describe('ResourceListComponent', () => {
 
     it('should update rows and filteredRows on successful load', fakeAsync(() => {
       resourceServiceSpy.getAll.and.returnValue(of(mockResourcesResponse));
+      permissionServiceSpy.getAll.and.returnValue(of(mockPermissionsResponse));
 
       component.loadResources();
       tick();
 
-      expect(component.rows).toEqual(mockResources);
-      expect(component.filteredRows).toEqual(mockResources);
+      // Resources should be enriched with roles
+      expect(component.rows.length).toBe(3);
+      expect(component.rows[0].roles).toEqual([{ id: 1, name: 'ADMIN' }, { id: 2, name: 'USER' }]);
+      expect(component.rows[1].roles).toEqual([{ id: 1, name: 'ADMIN' }]);
+      expect(component.rows[2].roles).toEqual([]);
+      expect(component.filteredRows.length).toBe(3);
     }));
   });
 

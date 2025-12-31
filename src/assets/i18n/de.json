@@ -91,6 +91,7 @@
     "EDIT": "Ressource bearbeiten",
     "CODE": "Code",
     "TYPE": "Typ",
+    "ROLES": "Rollen",
     "CODE_PLACEHOLDER": "Ressourcencode eingeben",
     "NAME_PLACEHOLDER": "Ressourcenname eingeben",
     "CODE_NOT_EDITABLE": "Der Ressourcencode kann nicht geändert werden",

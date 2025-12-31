@@ -17,6 +17,14 @@ export class PermissionService {
   constructor(private http: HttpClient) {}
 
   /**
+   * GET /api/permissions
+   * Get all permissions
+   */
+  getAll(): Observable<ApiResponse<PermissionResponse[]>> {
+    return this.http.get<ApiResponse<PermissionResponse[]>>(this.apiUrl);
+  }
+
+  /**
    * GET /api/permissions/role/{roleId}
    * Get all permissions for a role
    */

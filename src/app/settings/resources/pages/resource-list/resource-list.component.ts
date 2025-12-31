@@ -13,8 +13,11 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
+import { forkJoin } from 'rxjs';
 import {
   CreateResourceRequest,
+  PermissionResponse,
+  PermissionService,
   ResourceResponse,
   ResourceService,
   ResourceType,
@@ -54,6 +57,7 @@ export class ResourceListComponent implements OnInit {
 
   constructor(
     private resourceService: ResourceService,
+    private permissionService: PermissionService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -84,9 +88,21 @@ export class ResourceListComponent implements OnInit {
 
   loadResources(): void {
     this.loading = true;
-    this.resourceService.getAll().subscribe({
-      next: (response) => {
-        this.rows = response.body.data;
+
+    // Load resources and permissions in parallel
+    forkJoin({
+      resources: this.resourceService.getAll(),
+      permissions: this.permissionService.getAll(),
+    }).subscribe({
+      next: ({ resources, permissions }) => {
+        // Create a map of resourceId -> roles
+        const resourceRolesMap = this.buildResourceRolesMap(permissions.body.data);
+
+        // Enrich resources with their roles
+        this.rows = resources.body.data.map((resource) => ({
+          ...resource,
+          roles: resourceRolesMap.get(resource.id) || [],
+        }));
         this.filteredRows = [...this.rows];
         this.loading = false;
       },
@@ -97,15 +113,34 @@ export class ResourceListComponent implements OnInit {
     });
   }
 
+  private buildResourceRolesMap(permissions: PermissionResponse[]): Map<number, { id: number; name: string }[]> {
+    const map = new Map<number, { id: number; name: string }[]>();
+
+    permissions.forEach((permission) => {
+      const existingRoles = map.get(permission.resourceId) || [];
+      // Avoid duplicates
+      if (!existingRoles.some((r) => r.id === permission.roleId)) {
+        existingRoles.push({ id: permission.roleId, name: permission.roleName });
+      }
+      map.set(permission.resourceId, existingRoles);
+    });
+
+    return map;
+  }
+
   filterDatatable(event: Event): void {
     const val = (event.target as HTMLInputElement).value.toLowerCase();
 
     this.filteredRows = this.rows.filter((row) => {
+      const rolesMatch = row.roles?.some((role) =>
+        role.name?.toLowerCase().includes(val)
+      );
       return (
         row.code?.toLowerCase().includes(val) ||
         row.name?.toLowerCase().includes(val) ||
         row.type?.toLowerCase().includes(val) ||
-        row.id?.toString().includes(val)
+        row.id?.toString().includes(val) ||
+        rolesMatch
       );
     });
 

@@ -105,6 +105,21 @@
                 </ng-template>
               </ngx-datatable-column>
 
+              <ngx-datatable-column prop="roles" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'RESOURCES.ROLES' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  @if (row.roles && row.roles.length > 0) {
+                    @for (role of row.roles; track role.id) {
+                      <span class="badge bg-primary me-1">{{ role.name }}</span>
+                    }
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </ng-template>
+              </ngx-datatable-column>
+
               <ngx-datatable-column name="Actions" [sortable]="false" [width]="140">
                 <ng-template ngx-datatable-header-template>
                   {{ 'COMMON.ACTIONS' | translate }}

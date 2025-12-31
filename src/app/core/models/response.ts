@@ -76,11 +76,17 @@ export interface UpdateUserRequest {
 // Resource interfaces
 export type ResourceType = 'API' | 'VIEW';
 
+export interface ResourceRoleResponse {
+  id: number;
+  name: string;
+}
+
 export interface ResourceResponse {
   id: number;
   code: string;
   name: string;
   type: ResourceType;
+  roles?: ResourceRoleResponse[];
   createdAt?: string;
   updatedAt?: string;
 }

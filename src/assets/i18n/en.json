@@ -98,6 +98,7 @@
     "EDIT": "Edit Resource",
     "CODE": "Code",
     "TYPE": "Type",
+    "ROLES": "Roles",
     "CODE_PLACEHOLDER": "Enter resource code",
     "NAME_PLACEHOLDER": "Enter resource name",
     "CODE_NOT_EDITABLE": "Resource code cannot be changed",
