@@ -159,3 +159,54 @@ export interface UpdateMenuRequest {
   badge?: string;
   badgeClass?: string;
 }
+
+// MenuItem interfaces
+export interface MenuItemResponse {
+  id: number;
+  menuId: number;
+  menuCode?: string;
+  parentId?: number;
+  resourceId?: number;
+  resourceCode?: string;
+  title: string;
+  icon?: string;
+  path?: string;
+  iconType?: string;
+  className?: string;
+  groupTitle?: boolean;
+  badge?: string;
+  badgeClass?: string;
+  displayOrder: number;
+  children?: MenuItemResponse[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateMenuItemRequest {
+  menuId: number;
+  parentId?: number;
+  resourceId?: number;
+  title: string;
+  icon?: string;
+  path?: string;
+  iconType?: string;
+  className?: string;
+  groupTitle?: boolean;
+  badge?: string;
+  badgeClass?: string;
+  displayOrder: number;
+}
+
+export interface UpdateMenuItemRequest {
+  parentId?: number;
+  resourceId?: number;
+  title?: string;
+  icon?: string;
+  path?: string;
+  iconType?: string;
+  className?: string;
+  groupTitle?: boolean;
+  badge?: string;
+  badgeClass?: string;
+  displayOrder?: number;
+}
