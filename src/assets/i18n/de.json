@@ -37,7 +37,17 @@
     "DESCRIPTION_PLACEHOLDER": "Rollenbeschreibung eingeben",
     "NAME_NOT_EDITABLE": "Der Rollenname kann nicht geändert werden",
     "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
-    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, die Rolle '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
+    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, die Rolle '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden.",
+    "RESOURCES": "Ressourcen",
+    "VIEW_RESOURCES": "Ressourcen anzeigen",
+    "RESOURCES_FOR": "Ressourcen für {{name}}",
+    "NO_RESOURCES": "Dieser Rolle sind keine Ressourcen zugewiesen",
+    "PERMISSIONS": "Berechtigungen",
+    "CAN_CREATE": "Erstellen",
+    "CAN_READ": "Lesen",
+    "CAN_WRITE": "Schreiben",
+    "CAN_DELETE": "Löschen",
+    "CAN_EXECUTE": "Ausführen"
   },
   "USERS": {
     "TITLE": "Benutzer",
@@ -66,6 +76,19 @@
     "NO_ROLES_AVAILABLE": "Keine Rollen zum Hinzufügen verfügbar",
     "REMOVE_ROLE_CONFIRM_TITLE": "Rolle entfernen?",
     "REMOVE_ROLE_CONFIRM_MESSAGE": "Sind Sie sicher, dass Sie die Rolle '{{role}}' von diesem Benutzer entfernen möchten?"
+  },
+  "RESOURCES": {
+    "TITLE": "Ressourcen",
+    "SEARCH_PLACEHOLDER": "Ressourcen suchen...",
+    "ADD_NEW": "Neue Ressource hinzufügen",
+    "EDIT": "Ressource bearbeiten",
+    "CODE": "Code",
+    "TYPE": "Typ",
+    "CODE_PLACEHOLDER": "Ressourcencode eingeben",
+    "NAME_PLACEHOLDER": "Ressourcenname eingeben",
+    "CODE_NOT_EDITABLE": "Der Ressourcencode kann nicht geändert werden",
+    "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
+    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, die Ressource '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
   },
   "MENUITEMS": {
     "USER":{

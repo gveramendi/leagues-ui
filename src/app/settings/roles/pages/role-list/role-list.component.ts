@@ -15,6 +15,8 @@ import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import {
   CreateRoleRequest,
+  PermissionResponse,
+  PermissionService,
   RoleResponse,
   RoleService,
   UpdateRoleRequest,
@@ -53,8 +55,14 @@ export class RoleListComponent implements OnInit {
   editRoleForm!: UntypedFormGroup;
   editingRole: RoleResponse | null = null;
 
+  // Resources modal
+  viewingRole: RoleResponse | null = null;
+  rolePermissions: PermissionResponse[] = [];
+  loadingPermissions = false;
+
   constructor(
     private roleService: RoleService,
+    private permissionService: PermissionService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -230,6 +238,37 @@ export class RoleListComponent implements OnInit {
           },
         });
       }
+    });
+  }
+
+  // Open modal to view role resources
+  openResourcesModal(content: any, row: RoleResponse): void {
+    this.viewingRole = row;
+    this.rolePermissions = [];
+    this.loadingPermissions = true;
+    this.modalService.open(content, {
+      ariaLabelledBy: 'modal-resources-title',
+      size: 'lg',
+    });
+    this.loadRolePermissions(row.id);
+  }
+
+  // Load permissions for a role
+  private loadRolePermissions(roleId: number): void {
+    this.permissionService.getByRoleId(roleId).subscribe({
+      next: (response) => {
+        this.rolePermissions = response.body.data;
+        this.loadingPermissions = false;
+      },
+      error: (error) => {
+        console.error('Error loading role permissions:', error);
+        this.loadingPermissions = false;
+        let errorMessage = 'Error loading resources';
+        if (error) {
+          errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+        }
+        this.toastr.error(errorMessage);
+      },
     });
   }
 }

@@ -37,7 +37,17 @@
     "DESCRIPTION_PLACEHOLDER": "Ingrese la descripción del rol",
     "NAME_NOT_EDITABLE": "El nombre del rol no se puede cambiar",
     "DELETE_CONFIRM_TITLE": "¿Está seguro?",
-    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el rol '{{name}}'. Esta acción no se puede deshacer."
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el rol '{{name}}'. Esta acción no se puede deshacer.",
+    "RESOURCES": "Recursos",
+    "VIEW_RESOURCES": "Ver Recursos",
+    "RESOURCES_FOR": "Recursos de {{name}}",
+    "NO_RESOURCES": "No hay recursos asignados a este rol",
+    "PERMISSIONS": "Permisos",
+    "CAN_CREATE": "Crear",
+    "CAN_READ": "Leer",
+    "CAN_WRITE": "Escribir",
+    "CAN_DELETE": "Eliminar",
+    "CAN_EXECUTE": "Ejecutar"
   },
   "USERS": {
     "TITLE": "Usuarios",
@@ -66,6 +76,19 @@
     "NO_ROLES_AVAILABLE": "No hay roles disponibles para agregar",
     "REMOVE_ROLE_CONFIRM_TITLE": "¿Remover Rol?",
     "REMOVE_ROLE_CONFIRM_MESSAGE": "¿Está seguro que desea remover el rol '{{role}}' de este usuario?"
+  },
+  "RESOURCES": {
+    "TITLE": "Recursos",
+    "SEARCH_PLACEHOLDER": "Buscar recursos...",
+    "ADD_NEW": "Agregar Nuevo Recurso",
+    "EDIT": "Editar Recurso",
+    "CODE": "Código",
+    "TYPE": "Tipo",
+    "CODE_PLACEHOLDER": "Ingrese el código del recurso",
+    "NAME_PLACEHOLDER": "Ingrese el nombre del recurso",
+    "CODE_NOT_EDITABLE": "El código del recurso no se puede cambiar",
+    "DELETE_CONFIRM_TITLE": "¿Está seguro?",
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el recurso '{{name}}'. Esta acción no se puede deshacer."
   },
   "MENUITEMS": {
     "USER":{

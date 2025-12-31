@@ -26,6 +26,11 @@ export const APP_ROUTE: Route[] = [
                 loadChildren: () =>
                     import('./settings/users/users.module').then((m) => m.UsersModule),
             },
+            {
+                path: 'settings/resources',
+                loadChildren: () =>
+                    import('./settings/resources/resources.module').then((m) => m.ResourcesModule),
+            },
         ],
     },
     {

@@ -7,12 +7,13 @@ import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { RoleListComponent } from './role-list.component';
-import { RoleService, ApiResponse, RoleResponse, CreateRoleRequest, UpdateRoleRequest } from '@core';
+import { RoleService, PermissionService, ApiResponse, RoleResponse, PermissionResponse, CreateRoleRequest, UpdateRoleRequest } from '@core';
 
 describe('RoleListComponent', () => {
   let component: RoleListComponent;
   let fixture: ComponentFixture<RoleListComponent>;
   let roleServiceSpy: jasmine.SpyObj<RoleService>;
+  let permissionServiceSpy: jasmine.SpyObj<PermissionService>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let toastrSpy: jasmine.SpyObj<ToastrService>;
 
@@ -75,12 +76,55 @@ describe('RoleListComponent', () => {
     },
   };
 
+  const mockPermissions: PermissionResponse[] = [
+    {
+      id: 1,
+      roleId: 1,
+      roleName: 'Admin',
+      resourceId: 1,
+      resourceCode: 'USER_MANAGEMENT',
+      resourceName: 'User Management',
+      canCreate: true,
+      canRead: true,
+      canWrite: false,
+      canDelete: false,
+      canExecute: false,
+    },
+    {
+      id: 2,
+      roleId: 1,
+      roleName: 'Admin',
+      resourceId: 2,
+      resourceCode: 'ROLE_MANAGEMENT',
+      resourceName: 'Role Management',
+      canCreate: true,
+      canRead: true,
+      canWrite: true,
+      canDelete: true,
+      canExecute: false,
+    },
+  ];
+
+  const mockPermissionsResponse: ApiResponse<PermissionResponse[]> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Permissions retrieved successfully',
+    },
+    body: {
+      data: mockPermissions,
+    },
+  };
+
   beforeEach(waitForAsync(() => {
     const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create', 'update', 'delete']);
     roleServiceMock.searchRoles.and.returnValue(of(mockRolesResponse));
     roleServiceMock.create.and.returnValue(of(mockCreateResponse));
     roleServiceMock.update.and.returnValue(of(mockUpdateResponse));
     roleServiceMock.delete.and.returnValue(of(mockDeleteResponse));
+
+    const permissionServiceMock = jasmine.createSpyObj('PermissionService', ['getByRoleId']);
+    permissionServiceMock.getByRoleId.and.returnValue(of(mockPermissionsResponse));
 
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
     const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
@@ -94,6 +138,7 @@ describe('RoleListComponent', () => {
       ],
       providers: [
         { provide: RoleService, useValue: roleServiceMock },
+        { provide: PermissionService, useValue: permissionServiceMock },
         { provide: NgbModal, useValue: modalMock },
         { provide: ToastrService, useValue: toastrMock },
         provideToastr(),
@@ -101,6 +146,7 @@ describe('RoleListComponent', () => {
     }).compileComponents();
 
     roleServiceSpy = TestBed.inject(RoleService) as jasmine.SpyObj<RoleService>;
+    permissionServiceSpy = TestBed.inject(PermissionService) as jasmine.SpyObj<PermissionService>;
     modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     toastrSpy = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
   }));
@@ -584,6 +630,97 @@ describe('RoleListComponent', () => {
       tick();
 
       expect(toastrSpy.error).toHaveBeenCalledWith('Error updating role');
+    }));
+  });
+
+  describe('openResourcesModal', () => {
+    const mockRole: RoleResponse = { id: 1, name: 'Admin', description: 'Administrator role' };
+
+    it('should set viewingRole and open modal', fakeAsync(() => {
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+      tick();
+
+      expect(component.viewingRole).toEqual(mockRole);
+      expect(modalServiceSpy.open).toHaveBeenCalledWith(mockContent, {
+        ariaLabelledBy: 'modal-resources-title',
+        size: 'lg',
+      });
+    }));
+
+    it('should set loadingPermissions to true initially', () => {
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+
+      expect(component.loadingPermissions).toBeFalse(); // After async completes
+    });
+
+    it('should call permissionService.getByRoleId with correct roleId', fakeAsync(() => {
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+      tick();
+
+      expect(permissionServiceSpy.getByRoleId).toHaveBeenCalledWith(1);
+    }));
+
+    it('should populate rolePermissions on successful load', fakeAsync(() => {
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+      tick();
+
+      expect(component.rolePermissions.length).toBe(2);
+      expect(component.rolePermissions[0].resourceCode).toBe('USER_MANAGEMENT');
+      expect(component.loadingPermissions).toBeFalse();
+    }));
+
+    it('should handle error when loading permissions fails', fakeAsync(() => {
+      const consoleSpy = spyOn(console, 'error');
+      permissionServiceSpy.getByRoleId.and.returnValue(throwError(() => new Error('Network error')));
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+      tick();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      expect(component.loadingPermissions).toBeFalse();
+      expect(toastrSpy.error).toHaveBeenCalledWith('Network error');
+    }));
+
+    it('should show error toast with string error message', fakeAsync(() => {
+      spyOn(console, 'error');
+      permissionServiceSpy.getByRoleId.and.returnValue(throwError(() => 'Custom error'));
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Custom error');
+    }));
+
+    it('should show error toast with object error message', fakeAsync(() => {
+      spyOn(console, 'error');
+      permissionServiceSpy.getByRoleId.and.returnValue(throwError(() => ({ message: 'Object error' })));
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Object error');
+    }));
+
+    it('should show default error toast when error is undefined', fakeAsync(() => {
+      spyOn(console, 'error');
+      permissionServiceSpy.getByRoleId.and.returnValue(throwError(() => undefined));
+      const mockContent = {};
+
+      component.openResourcesModal(mockContent, mockRole);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Error loading resources');
     }));
   });
 });

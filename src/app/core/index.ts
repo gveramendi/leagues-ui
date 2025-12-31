@@ -2,6 +2,8 @@
 export { AuthService } from './service/auth.service';
 export { DirectionService } from './service/direction.service';
 export { LanguageService } from './service/language.service';
+export { PermissionService } from './service/permission.service';
+export { ResourceService } from './service/resource.service';
 export { RightSidebarService } from './service/rightsidebar.service';
 export { RoleService } from './service/role.service';
 export { UserService } from './service/user.service';
@@ -23,4 +25,9 @@ export {
   UserResponse,
   CreateUserRequest,
   UpdateUserRequest,
+  ResourceType,
+  ResourceResponse,
+  CreateResourceRequest,
+  UpdateResourceRequest,
+  PermissionResponse,
 } from './models/response';

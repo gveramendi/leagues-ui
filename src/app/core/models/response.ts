@@ -65,3 +65,43 @@ export interface UpdateUserRequest {
   firstName?: string;
   lastName?: string;
 }
+
+// Resource interfaces
+export type ResourceType = 'API' | 'VIEW';
+
+export interface ResourceResponse {
+  id: number;
+  code: string;
+  name: string;
+  type: ResourceType;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateResourceRequest {
+  code: string;
+  name: string;
+  type: ResourceType;
+}
+
+export interface UpdateResourceRequest {
+  name?: string;
+  type?: ResourceType;
+}
+
+// Permission interfaces
+export interface PermissionResponse {
+  id: number;
+  roleId: number;
+  roleName: string;
+  resourceId: number;
+  resourceCode: string;
+  resourceName: string;
+  canCreate: boolean;
+  canRead: boolean;
+  canWrite: boolean;
+  canDelete: boolean;
+  canExecute: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
