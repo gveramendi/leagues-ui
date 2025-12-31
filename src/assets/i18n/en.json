@@ -97,6 +97,34 @@
     "DELETE_CONFIRM_TITLE": "Are you sure?",
     "DELETE_CONFIRM_MESSAGE": "You are about to delete the resource '{{name}}'. This action cannot be undone."
   },
+  "MENUS": {
+    "TITLE": "Menus",
+    "SEARCH_PLACEHOLDER": "Search menus...",
+    "ADD_NEW": "Add New Menu",
+    "EDIT": "Edit Menu",
+    "CODE": "Code",
+    "TITLE_FIELD": "Title",
+    "PATH": "Path",
+    "ICON": "Icon",
+    "ICON_TYPE": "Icon Type",
+    "CLASS_NAME": "Class Name",
+    "GROUP_TITLE": "Is Group Title",
+    "GROUP_NAME": "Group Name",
+    "BADGE": "Badge",
+    "BADGE_CLASS": "Badge Class",
+    "CODE_PLACEHOLDER": "Enter menu code",
+    "TITLE_PLACEHOLDER": "Enter menu title",
+    "PATH_PLACEHOLDER": "Enter menu path (e.g., /dashboard)",
+    "ICON_PLACEHOLDER": "Enter icon class (e.g., fas fa-home)",
+    "ICON_TYPE_PLACEHOLDER": "Enter icon type (e.g., fontawesome)",
+    "CLASS_NAME_PLACEHOLDER": "Enter CSS class name",
+    "GROUP_NAME_PLACEHOLDER": "Enter group name",
+    "BADGE_PLACEHOLDER": "Enter badge text",
+    "BADGE_CLASS_PLACEHOLDER": "Enter badge CSS class",
+    "CODE_NOT_EDITABLE": "Menu code cannot be changed",
+    "DELETE_CONFIRM_TITLE": "Are you sure?",
+    "DELETE_CONFIRM_MESSAGE": "You are about to delete the menu '{{title}}'. This action cannot be undone."
+  },
   "MENUITEMS": {
     "USER":{
       "POST": "Manager"

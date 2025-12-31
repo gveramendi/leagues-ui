@@ -1,0 +1,466 @@
+<section class="main-content">
+  <ul class="breadcrumb breadcrumb-style">
+    <li class="breadcrumb-item">
+      <h5 class="page-title m-b-0">{{ 'SETTINGS.TEXT' | translate }}</h5>
+    </li>
+    <li class="breadcrumb-item bcrumb-1">
+      <a routerLink="/dashboard">
+        <i class="fas fa-home font-17"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item">{{ 'SETTINGS.TEXT' | translate }}</li>
+    <li class="breadcrumb-item active">{{ 'MENUS.TITLE' | translate }}</li>
+  </ul>
+  <div class="section-body">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="p-10">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="row m-0">
+                  <div class="col-auto p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-title">
+                        <h2><strong>{{ 'MENUS.TITLE' | translate }}</strong></h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-8 p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-search-area">
+                        <div>
+                          <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                          <input
+                            [placeholder]="'MENUS.SEARCH_PLACEHOLDER' | translate"
+                            type="text"
+                            class="browser-default search-field"
+                            (keyup)="filterDatatable($event)"
+                            [attr.aria-label]="'COMMON.SEARCH' | translate"
+                          />
+                        </div>
+                      </div>
+                      <div class="header-buttons-left">
+                        <div class="tbl-btn-style">
+                          <button
+                            class="btn btn-icon icon-left btn-primary rounded-button"
+                            (click)="openAddModal(addMenuModal)"
+                          >
+                            <i class="material-icons">add</i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ngx-datatable
+              #table
+              class="material"
+              [rows]="filteredRows"
+              [loadingIndicator]="loading"
+              columnMode="force"
+              [headerHeight]="60"
+              [footerHeight]="80"
+              rowHeight="auto"
+              [limit]="size"
+              [externalPaging]="true"
+              [externalSorting]="true"
+              [count]="totalElements"
+              [offset]="page"
+              (page)="onPageChange($event)"
+              (sort)="onSort($event)"
+            >
+              <ngx-datatable-column prop="id" [width]="80">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ID' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.id }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="code" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENUS.CODE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <code>{{ row.code }}</code>
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="title" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENUS.TITLE_FIELD' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.title }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="path">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENUS.PATH' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.path || '-' }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="icon" [width]="120">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENUS.ICON' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  @if (row.icon) {
+                    <i [class]="row.icon"></i>
+                    <span class="ms-1">{{ row.icon }}</span>
+                  } @else {
+                    -
+                  }
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="groupName" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENUS.GROUP_NAME' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.groupName || '-' }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="140">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ACTIONS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editMenuModal, row)" [title]="'COMMON.EDIT' | translate">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteMenu(row)" [title]="'COMMON.DELETE' | translate">
+                      <i class="far fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Menu Modal -->
+<ng-template #addMenuModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ 'MENUS.ADD_NEW' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="menuForm" (ngSubmit)="onAddMenuSave()">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'MENUS.CODE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.CODE_PLACEHOLDER' | translate"
+            formControlName="code"
+          />
+          @if (menuForm.get('code')?.invalid && menuForm.get('code')?.touched) {
+            <small class="form-text text-danger">
+              @if (menuForm.get('code')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (menuForm.get('code')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (menuForm.get('code')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 50 } }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'MENUS.TITLE_FIELD' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.TITLE_PLACEHOLDER' | translate"
+            formControlName="title"
+          />
+          @if (menuForm.get('title')?.invalid && menuForm.get('title')?.touched) {
+            <small class="form-text text-danger">
+              @if (menuForm.get('title')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (menuForm.get('title')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (menuForm.get('title')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 100 } }}
+              }
+            </small>
+          }
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'MENUS.PATH' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.PATH_PLACEHOLDER' | translate"
+            formControlName="path"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.ICON_TYPE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.ICON_TYPE_PLACEHOLDER' | translate"
+            formControlName="iconType"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.ICON' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.ICON_PLACEHOLDER' | translate"
+            formControlName="icon"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.CLASS_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.CLASS_NAME_PLACEHOLDER' | translate"
+            formControlName="className"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.GROUP_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.GROUP_NAME_PLACEHOLDER' | translate"
+            formControlName="groupName"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.BADGE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.BADGE_PLACEHOLDER' | translate"
+            formControlName="badge"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.BADGE_CLASS' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.BADGE_CLASS_PLACEHOLDER' | translate"
+            formControlName="badgeClass"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="groupTitle"
+              formControlName="groupTitle"
+            />
+            <span class="form-check-sign">
+              <span class="check"></span>
+            </span>
+            <label class="form-check-label" for="groupTitle">
+              {{ 'MENUS.GROUP_TITLE' | translate }}
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="menuForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit Menu Modal -->
+<ng-template #editMenuModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-title">
+      {{ 'MENUS.EDIT' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editMenuForm" (ngSubmit)="onEditMenuSave()">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.CODE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="editingMenu?.code"
+            disabled
+          />
+          <small class="form-text text-muted">
+            {{ 'MENUS.CODE_NOT_EDITABLE' | translate }}
+          </small>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'MENUS.TITLE_FIELD' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.TITLE_PLACEHOLDER' | translate"
+            formControlName="title"
+          />
+          @if (editMenuForm.get('title')?.invalid && editMenuForm.get('title')?.touched) {
+            <small class="form-text text-danger">
+              @if (editMenuForm.get('title')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+              @if (editMenuForm.get('title')?.errors?.['minlength']) {
+                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
+              }
+              @if (editMenuForm.get('title')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 100 } }}
+              }
+            </small>
+          }
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'MENUS.PATH' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.PATH_PLACEHOLDER' | translate"
+            formControlName="path"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.ICON_TYPE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.ICON_TYPE_PLACEHOLDER' | translate"
+            formControlName="iconType"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.ICON' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.ICON_PLACEHOLDER' | translate"
+            formControlName="icon"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.CLASS_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.CLASS_NAME_PLACEHOLDER' | translate"
+            formControlName="className"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.GROUP_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.GROUP_NAME_PLACEHOLDER' | translate"
+            formControlName="groupName"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.BADGE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.BADGE_PLACEHOLDER' | translate"
+            formControlName="badge"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENUS.BADGE_CLASS' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'MENUS.BADGE_CLASS_PLACEHOLDER' | translate"
+            formControlName="badgeClass"
+          />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-12 mb-3">
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="editGroupTitle"
+              formControlName="groupTitle"
+            />
+            <span class="form-check-sign">
+              <span class="check"></span>
+            </span>
+            <label class="form-check-label" for="editGroupTitle">
+              {{ 'MENUS.GROUP_TITLE' | translate }}
+            </label>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="editMenuForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

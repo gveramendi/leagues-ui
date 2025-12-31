@@ -2,6 +2,7 @@
 export { AuthService } from './service/auth.service';
 export { DirectionService } from './service/direction.service';
 export { LanguageService } from './service/language.service';
+export { MenuService } from './service/menu.service';
 export { PermissionService } from './service/permission.service';
 export { ResourceService } from './service/resource.service';
 export { RightSidebarService } from './service/rightsidebar.service';
@@ -31,4 +32,7 @@ export {
   UpdateResourceRequest,
   PermissionResponse,
   CreatePermissionRequest,
+  MenuResponse,
+  CreateMenuRequest,
+  UpdateMenuRequest,
 } from './models/response';

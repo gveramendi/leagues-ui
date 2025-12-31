@@ -97,6 +97,34 @@
     "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
     "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, die Ressource '{{name}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
   },
+  "MENUS": {
+    "TITLE": "Menüs",
+    "SEARCH_PLACEHOLDER": "Menüs suchen...",
+    "ADD_NEW": "Neues Menü hinzufügen",
+    "EDIT": "Menü bearbeiten",
+    "CODE": "Code",
+    "TITLE_FIELD": "Titel",
+    "PATH": "Pfad",
+    "ICON": "Symbol",
+    "ICON_TYPE": "Symboltyp",
+    "CLASS_NAME": "Klassenname",
+    "GROUP_TITLE": "Ist Gruppentitel",
+    "GROUP_NAME": "Gruppenname",
+    "BADGE": "Abzeichen",
+    "BADGE_CLASS": "Abzeichen-Klasse",
+    "CODE_PLACEHOLDER": "Menücode eingeben",
+    "TITLE_PLACEHOLDER": "Menütitel eingeben",
+    "PATH_PLACEHOLDER": "Menüpfad eingeben (z.B., /dashboard)",
+    "ICON_PLACEHOLDER": "Symbolklasse eingeben (z.B., fas fa-home)",
+    "ICON_TYPE_PLACEHOLDER": "Symboltyp eingeben (z.B., fontawesome)",
+    "CLASS_NAME_PLACEHOLDER": "CSS-Klassenname eingeben",
+    "GROUP_NAME_PLACEHOLDER": "Gruppenname eingeben",
+    "BADGE_PLACEHOLDER": "Abzeichen-Text eingeben",
+    "BADGE_CLASS_PLACEHOLDER": "Abzeichen-CSS-Klasse eingeben",
+    "CODE_NOT_EDITABLE": "Der Menücode kann nicht geändert werden",
+    "DELETE_CONFIRM_TITLE": "Sind Sie sicher?",
+    "DELETE_CONFIRM_MESSAGE": "Sie sind dabei, das Menü '{{title}}' zu löschen. Diese Aktion kann nicht rückgängig gemacht werden."
+  },
   "MENUITEMS": {
     "USER":{
       "POST": "Manager"

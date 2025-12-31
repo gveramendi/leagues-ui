@@ -97,6 +97,34 @@
     "DELETE_CONFIRM_TITLE": "¿Está seguro?",
     "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el recurso '{{name}}'. Esta acción no se puede deshacer."
   },
+  "MENUS": {
+    "TITLE": "Menús",
+    "SEARCH_PLACEHOLDER": "Buscar menús...",
+    "ADD_NEW": "Agregar Nuevo Menú",
+    "EDIT": "Editar Menú",
+    "CODE": "Código",
+    "TITLE_FIELD": "Título",
+    "PATH": "Ruta",
+    "ICON": "Icono",
+    "ICON_TYPE": "Tipo de Icono",
+    "CLASS_NAME": "Nombre de Clase",
+    "GROUP_TITLE": "Es Título de Grupo",
+    "GROUP_NAME": "Nombre de Grupo",
+    "BADGE": "Insignia",
+    "BADGE_CLASS": "Clase de Insignia",
+    "CODE_PLACEHOLDER": "Ingrese el código del menú",
+    "TITLE_PLACEHOLDER": "Ingrese el título del menú",
+    "PATH_PLACEHOLDER": "Ingrese la ruta del menú (ej., /dashboard)",
+    "ICON_PLACEHOLDER": "Ingrese la clase del icono (ej., fas fa-home)",
+    "ICON_TYPE_PLACEHOLDER": "Ingrese el tipo de icono (ej., fontawesome)",
+    "CLASS_NAME_PLACEHOLDER": "Ingrese el nombre de clase CSS",
+    "GROUP_NAME_PLACEHOLDER": "Ingrese el nombre del grupo",
+    "BADGE_PLACEHOLDER": "Ingrese el texto de la insignia",
+    "BADGE_CLASS_PLACEHOLDER": "Ingrese la clase CSS de la insignia",
+    "CODE_NOT_EDITABLE": "El código del menú no se puede cambiar",
+    "DELETE_CONFIRM_TITLE": "¿Está seguro?",
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el menú '{{title}}'. Esta acción no se puede deshacer."
+  },
   "MENUITEMS": {
     "USER":{
       "POST": "Gerente"

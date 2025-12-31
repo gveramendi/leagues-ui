@@ -31,6 +31,11 @@ export const APP_ROUTE: Route[] = [
                 loadChildren: () =>
                     import('./settings/resources/resources.module').then((m) => m.ResourcesModule),
             },
+            {
+                path: 'settings/menus',
+                loadChildren: () =>
+                    import('./settings/menus/menus.module').then((m) => m.MenusModule),
+            },
         ],
     },
     {

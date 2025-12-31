@@ -115,3 +115,47 @@ export interface CreatePermissionRequest {
   canDelete: boolean;
   canExecute: boolean;
 }
+
+// Menu interfaces
+export interface MenuResponse {
+  id: number;
+  code: string;
+  title: string;
+  path?: string;
+  iconType?: string;
+  icon?: string;
+  className?: string;
+  groupTitle?: boolean;
+  groupName?: string;
+  badge?: string;
+  badgeClass?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateMenuRequest {
+  code: string;
+  title: string;
+  path?: string;
+  iconType?: string;
+  icon?: string;
+  className?: string;
+  groupTitle?: boolean;
+  groupName?: string;
+  badge?: string;
+  badgeClass?: string;
+  displayOrder?: number;
+  resourceId?: number;
+}
+
+export interface UpdateMenuRequest {
+  title: string;
+  path?: string;
+  iconType?: string;
+  icon?: string;
+  className?: string;
+  groupTitle?: boolean;
+  groupName?: string;
+  badge?: string;
+  badgeClass?: string;
+}
