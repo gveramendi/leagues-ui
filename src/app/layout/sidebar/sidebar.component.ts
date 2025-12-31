@@ -13,6 +13,7 @@ import {
   Renderer2,
   HostListener,
   OnDestroy,
+  AfterViewInit,
 } from '@angular/core';
 import { RouteInfo } from './sidebar.metadata';
 import { TranslateModule } from '@ngx-translate/core';
@@ -21,6 +22,7 @@ import { NgScrollbar } from 'ngx-scrollbar';
 import { AuthService, User } from '@core';
 import { SidebarService } from './sidebar.service';
 import { Role } from '@core/models/role';
+import { filter } from 'rxjs/operators';
 @Component({
   selector: 'app-sidebar',
   templateUrl: './sidebar.component.html',
@@ -34,7 +36,7 @@ import { Role } from '@core/models/role';
     TranslateModule,
   ],
 })
-export class SidebarComponent implements OnInit, OnDestroy {
+export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
 
   public sidebarItems!: RouteInfo[];
 
@@ -68,13 +70,15 @@ export class SidebarComponent implements OnInit, OnDestroy {
     private router: Router,
     private sidebarService: SidebarService
   ) {
-    this.routerObj = this.router.events.subscribe((event) => {
-      if (event instanceof NavigationEnd) {
+    this.routerObj = this.router.events
+      .pipe(filter((event) => event instanceof NavigationEnd))
+      .subscribe(() => {
         // close sidebar on mobile screen after menu select
         this.renderer.removeClass(this.document.body, 'overlay-open');
         this.sidebbarClose();
-      }
-    });
+        // Expand parent menu for the new route
+        setTimeout(() => this.expandActiveMenu(), 100);
+      });
   }
 
   @HostListener('window:resize', ['$event'])
@@ -131,6 +135,38 @@ export class SidebarComponent implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     this.routerObj.unsubscribe();
+  }
+
+  ngAfterViewInit() {
+    // Expand parent menu for current route after view is initialized
+    setTimeout(() => this.expandActiveMenu(), 100);
+  }
+
+  private expandActiveMenu() {
+    const currentUrl = this.router.url;
+    if (!this.sidebarItems) return;
+
+    // Find and expand parent menu if current route is a submenu item
+    this.sidebarItems.forEach((item) => {
+      if (item.submenu && item.submenu.length > 0) {
+        const hasActiveChild = item.submenu.some((subItem) =>
+          currentUrl.startsWith(subItem.path)
+        );
+        if (hasActiveChild) {
+          // Find the parent li element and add active class
+          const menuItems = this.elementRef.nativeElement.querySelectorAll('.list > li');
+          menuItems.forEach((menuItem: HTMLElement) => {
+            const link = menuItem.querySelector('a.menu-toggle');
+            if (link) {
+              const titleSpan = link.querySelector('.hide-menu');
+              if (titleSpan && titleSpan.textContent?.trim() === item.title) {
+                this.renderer.addClass(menuItem, 'active');
+              }
+            }
+          });
+        }
+      }
+    });
   }
 
   initLeftSidebar() {
