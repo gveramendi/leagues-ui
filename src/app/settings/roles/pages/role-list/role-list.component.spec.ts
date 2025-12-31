@@ -158,6 +158,17 @@ describe('RoleListComponent', () => {
     },
   };
 
+  const mockDeletePermissionResponse: ApiResponse<void> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Permission deleted successfully',
+    },
+    body: {
+      data: undefined as unknown as void,
+    },
+  };
+
   beforeEach(waitForAsync(() => {
     const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create', 'update', 'delete']);
     roleServiceMock.searchRoles.and.returnValue(of(mockRolesResponse));
@@ -165,9 +176,10 @@ describe('RoleListComponent', () => {
     roleServiceMock.update.and.returnValue(of(mockUpdateResponse));
     roleServiceMock.delete.and.returnValue(of(mockDeleteResponse));
 
-    const permissionServiceMock = jasmine.createSpyObj('PermissionService', ['getByRoleId', 'create']);
+    const permissionServiceMock = jasmine.createSpyObj('PermissionService', ['getByRoleId', 'create', 'delete']);
     permissionServiceMock.getByRoleId.and.returnValue(of(mockPermissionsResponse));
     permissionServiceMock.create.and.returnValue(of(mockCreatePermissionResponse));
+    permissionServiceMock.delete.and.returnValue(of(mockDeletePermissionResponse));
 
     const resourceServiceMock = jasmine.createSpyObj('ResourceService', ['getAll']);
     resourceServiceMock.getAll.and.returnValue(of(mockResourcesResponse));
@@ -986,6 +998,111 @@ describe('RoleListComponent', () => {
       tick();
 
       expect(toastrSpy.error).toHaveBeenCalledWith('Error adding resource');
+    }));
+  });
+
+  describe('removeResource', () => {
+    const mockRole: RoleResponse = { id: 1, name: 'Admin', description: 'Administrator role' };
+    const mockPermission: PermissionResponse = {
+      id: 1,
+      roleId: 1,
+      roleName: 'Admin',
+      resourceId: 1,
+      resourceCode: 'USER_MANAGEMENT',
+      resourceName: 'User Management',
+      canCreate: true,
+      canRead: true,
+      canWrite: false,
+      canDelete: false,
+      canExecute: false,
+    };
+
+    beforeEach(() => {
+      component.viewingRole = mockRole;
+      component.rolePermissions = [mockPermission];
+    });
+
+    it('should not call service if viewingRole is null', fakeAsync(() => {
+      component.viewingRole = null;
+      permissionServiceSpy.delete.calls.reset();
+
+      component.removeResource(mockPermission);
+      tick();
+
+      expect(permissionServiceSpy.delete).not.toHaveBeenCalled();
+    }));
+
+    it('should show confirmation dialog when removing', fakeAsync(() => {
+      const swalSpy = spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true } as SweetAlertResult)
+      );
+
+      component.removeResource(mockPermission);
+      tick();
+
+      expect(swalSpy).toHaveBeenCalled();
+    }));
+
+    it('should call delete service when confirmed', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      permissionServiceSpy.getByRoleId.calls.reset();
+
+      component.removeResource(mockPermission);
+      tick();
+
+      expect(permissionServiceSpy.delete).toHaveBeenCalledWith(1, 1);
+      expect(toastrSpy.success).toHaveBeenCalledWith('Permission deleted successfully');
+      expect(permissionServiceSpy.getByRoleId).toHaveBeenCalledWith(1);
+    }));
+
+    it('should not call delete service when cancelled', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true } as SweetAlertResult)
+      );
+      permissionServiceSpy.delete.calls.reset();
+
+      component.removeResource(mockPermission);
+      tick();
+
+      expect(permissionServiceSpy.delete).not.toHaveBeenCalled();
+    }));
+
+    it('should show error toast on delete failure with string error', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      permissionServiceSpy.delete.and.returnValue(throwError(() => 'Delete failed'));
+
+      component.removeResource(mockPermission);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Delete failed');
+    }));
+
+    it('should show error toast on delete failure with object error', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      permissionServiceSpy.delete.and.returnValue(throwError(() => ({ message: 'Delete failed' })));
+
+      component.removeResource(mockPermission);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Delete failed');
+    }));
+
+    it('should show default error toast on delete failure with undefined error', fakeAsync(() => {
+      spyOn(Swal, 'fire').and.returnValue(
+        Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+      );
+      permissionServiceSpy.delete.and.returnValue(throwError(() => undefined));
+
+      component.removeResource(mockPermission);
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Error removing resource');
     }));
   });
 });

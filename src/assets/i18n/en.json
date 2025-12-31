@@ -51,7 +51,10 @@
     "ADD_RESOURCE": "Add Resource",
     "ADD_RESOURCE_TITLE": "Add Resource to {{name}}",
     "NO_AVAILABLE_RESOURCES": "No resources available to add",
-    "SELECT_RESOURCE": "Select a resource"
+    "SELECT_RESOURCE": "Select a resource",
+    "REMOVE_RESOURCE": "Remove Resource",
+    "REMOVE_RESOURCE_CONFIRM_TITLE": "Remove Resource?",
+    "REMOVE_RESOURCE_CONFIRM_MESSAGE": "Are you sure you want to remove '{{resource}}' from role '{{role}}'?"
   },
   "USERS": {
     "TITLE": "Users",

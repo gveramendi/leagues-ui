@@ -281,6 +281,7 @@
               <th>{{ 'RESOURCES.CODE' | translate }}</th>
               <th>{{ 'COMMON.NAME' | translate }}</th>
               <th class="text-center">{{ 'ROLES.PERMISSIONS' | translate }}</th>
+              <th class="text-center" style="width: 80px;">{{ 'COMMON.ACTIONS' | translate }}</th>
             </tr>
           </thead>
           <tbody>
@@ -308,6 +309,15 @@
                       <span class="badge bg-secondary" [title]="'ROLES.CAN_EXECUTE' | translate">E</span>
                     }
                   </div>
+                </td>
+                <td class="text-center">
+                  <button
+                    class="btn btn-tbl-delete btn-sm"
+                    (click)="removeResource(permission)"
+                    [title]="'ROLES.REMOVE_RESOURCE' | translate"
+                  >
+                    <i class="far fa-trash-alt"></i>
+                  </button>
                 </td>
               </tr>
             }

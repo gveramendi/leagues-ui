@@ -363,4 +363,44 @@ export class RoleListComponent implements OnInit {
       },
     });
   }
+
+  // Remove resource from role with confirmation
+  removeResource(permission: PermissionResponse): void {
+    if (!this.viewingRole) {
+      return;
+    }
+
+    Swal.fire({
+      title: this.translate.instant('ROLES.REMOVE_RESOURCE_CONFIRM_TITLE'),
+      text: this.translate.instant('ROLES.REMOVE_RESOURCE_CONFIRM_MESSAGE', {
+        resource: permission.resourceName,
+        role: this.viewingRole.name,
+      }),
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#8963ff',
+      cancelButtonColor: '#fb7823',
+      confirmButtonText: this.translate.instant('COMMON.YES'),
+      cancelButtonText: this.translate.instant('COMMON.NO'),
+    }).then((result) => {
+      if (result.isConfirmed && this.viewingRole) {
+        this.permissionService.delete(this.viewingRole.id, permission.resourceId).subscribe({
+          next: (response) => {
+            this.toastr.success(response.header.message);
+            // Reload permissions for the current role
+            if (this.viewingRole) {
+              this.loadRolePermissions(this.viewingRole.id);
+            }
+          },
+          error: (error) => {
+            let errorMessage = 'Error removing resource';
+            if (error) {
+              errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+            }
+            this.toastr.error(errorMessage);
+          },
+        });
+      }
+    });
+  }
 }

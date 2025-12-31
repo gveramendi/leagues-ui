@@ -51,7 +51,10 @@
     "ADD_RESOURCE": "Ressource hinzufügen",
     "ADD_RESOURCE_TITLE": "Ressource zu {{name}} hinzufügen",
     "NO_AVAILABLE_RESOURCES": "Keine Ressourcen zum Hinzufügen verfügbar",
-    "SELECT_RESOURCE": "Ressource auswählen"
+    "SELECT_RESOURCE": "Ressource auswählen",
+    "REMOVE_RESOURCE": "Ressource entfernen",
+    "REMOVE_RESOURCE_CONFIRM_TITLE": "Ressource entfernen?",
+    "REMOVE_RESOURCE_CONFIRM_MESSAGE": "Sind Sie sicher, dass Sie '{{resource}}' von der Rolle '{{role}}' entfernen möchten?"
   },
   "USERS": {
     "TITLE": "Benutzer",

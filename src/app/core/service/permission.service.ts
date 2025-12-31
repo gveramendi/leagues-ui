@@ -33,4 +33,14 @@ export class PermissionService {
   create(request: CreatePermissionRequest): Observable<ApiResponse<PermissionResponse>> {
     return this.http.post<ApiResponse<PermissionResponse>>(this.apiUrl, request);
   }
+
+  /**
+   * DELETE /api/roles/{roleId}/resources/{resourceId}
+   * Delete a permission (remove resource from role)
+   */
+  delete(roleId: number, resourceId: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      `${environment.apiUrl}/api/roles/${roleId}/resources/${resourceId}`
+    );
+  }
 }

@@ -51,7 +51,10 @@
     "ADD_RESOURCE": "Agregar Recurso",
     "ADD_RESOURCE_TITLE": "Agregar Recurso a {{name}}",
     "NO_AVAILABLE_RESOURCES": "No hay recursos disponibles para agregar",
-    "SELECT_RESOURCE": "Seleccione un recurso"
+    "SELECT_RESOURCE": "Seleccione un recurso",
+    "REMOVE_RESOURCE": "Remover Recurso",
+    "REMOVE_RESOURCE_CONFIRM_TITLE": "¿Remover Recurso?",
+    "REMOVE_RESOURCE_CONFIRM_MESSAGE": "¿Está seguro que desea remover '{{resource}}' del rol '{{role}}'?"
   },
   "USERS": {
     "TITLE": "Usuarios",

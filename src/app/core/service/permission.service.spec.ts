@@ -197,4 +197,47 @@ describe('PermissionService', () => {
       req.flush(mockResponse);
     });
   });
+
+  describe('delete', () => {
+    it('should delete a permission and return ApiResponse', () => {
+      const mockResponse: ApiResponse<void> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Permission deleted successfully',
+        },
+        body: {
+          data: undefined as unknown as void,
+        },
+      };
+
+      service.delete(1, 3).subscribe((response) => {
+        expect(response.header.success).toBeTrue();
+        expect(response.header.message).toBe('Permission deleted successfully');
+      });
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/roles/1/resources/3`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(mockResponse);
+    });
+
+    it('should call correct URL with roleId and resourceId', () => {
+      const mockResponse: ApiResponse<void> = {
+        header: {
+          success: true,
+          statusCode: 200,
+          message: 'Permission deleted successfully',
+        },
+        body: {
+          data: undefined as unknown as void,
+        },
+      };
+
+      service.delete(5, 10).subscribe();
+
+      const req = httpMock.expectOne(`${environment.apiUrl}/api/roles/5/resources/10`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(mockResponse);
+    });
+  });
 });
