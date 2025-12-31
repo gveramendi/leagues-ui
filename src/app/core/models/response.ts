@@ -121,6 +121,9 @@ export interface MenuResponse {
   id: number;
   code: string;
   title: string;
+  resourceId: number;
+  resourceCode?: string;
+  resourceName?: string;
   path?: string;
   iconType?: string;
   icon?: string;
@@ -136,6 +139,7 @@ export interface MenuResponse {
 export interface CreateMenuRequest {
   code: string;
   title: string;
+  resourceId: number;
   path?: string;
   iconType?: string;
   icon?: string;
@@ -145,7 +149,6 @@ export interface CreateMenuRequest {
   badge?: string;
   badgeClass?: string;
   displayOrder?: number;
-  resourceId?: number;
 }
 
 export interface UpdateMenuRequest {

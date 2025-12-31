@@ -9,19 +9,38 @@ import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 
 import { MenuListComponent } from './menu-list.component';
-import { MenuService, ApiResponse, MenuResponse } from '@core';
+import { MenuService, ResourceService, ApiResponse, MenuResponse, ResourceResponse } from '@core';
 
 describe('MenuListComponent', () => {
   let component: MenuListComponent;
   let fixture: ComponentFixture<MenuListComponent>;
   let menuServiceSpy: jasmine.SpyObj<MenuService>;
+  let resourceServiceSpy: jasmine.SpyObj<ResourceService>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let toastrSpy: jasmine.SpyObj<ToastrService>;
+
+  const mockResources: ResourceResponse[] = [
+    { id: 1, code: 'DASHBOARD_VIEW', name: 'Dashboard View', type: 'VIEW' },
+    { id: 2, code: 'SETTINGS_VIEW', name: 'Settings View', type: 'VIEW' },
+  ];
+
+  const mockResourcesResponse: ApiResponse<ResourceResponse[]> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Resources retrieved successfully',
+    },
+    body: {
+      data: mockResources,
+    },
+  };
 
   const mockMenu: MenuResponse = {
     id: 1,
     code: 'DASHBOARD',
     title: 'Dashboard',
+    resourceId: 1,
+    resourceCode: 'DASHBOARD_VIEW',
     path: '/dashboard',
     iconType: 'fontawesome',
     icon: 'fas fa-home',
@@ -31,7 +50,7 @@ describe('MenuListComponent', () => {
 
   const mockMenus: MenuResponse[] = [
     mockMenu,
-    { id: 2, code: 'SETTINGS', title: 'Settings', path: '/settings' },
+    { id: 2, code: 'SETTINGS', title: 'Settings', resourceId: 2, path: '/settings' },
   ];
 
   const mockSearchResponse: ApiResponse<MenuResponse[]> = {
@@ -99,6 +118,9 @@ describe('MenuListComponent', () => {
     menuServiceMock.update.and.returnValue(of(mockUpdateResponse));
     menuServiceMock.delete.and.returnValue(of(mockDeleteResponse));
 
+    const resourceServiceMock = jasmine.createSpyObj('ResourceService', ['getAll']);
+    resourceServiceMock.getAll.and.returnValue(of(mockResourcesResponse));
+
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
     const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
 
@@ -113,12 +135,14 @@ describe('MenuListComponent', () => {
       ],
       providers: [
         { provide: MenuService, useValue: menuServiceMock },
+        { provide: ResourceService, useValue: resourceServiceMock },
         { provide: NgbModal, useValue: modalMock },
         { provide: ToastrService, useValue: toastrMock },
       ],
     }).compileComponents();
 
     menuServiceSpy = TestBed.inject(MenuService) as jasmine.SpyObj<MenuService>;
+    resourceServiceSpy = TestBed.inject(ResourceService) as jasmine.SpyObj<ResourceService>;
     modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     toastrSpy = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
   }));
@@ -138,6 +162,11 @@ describe('MenuListComponent', () => {
       expect(menuServiceSpy.searchMenus).toHaveBeenCalledWith('', 0, 10, 'title,asc');
       expect(component.rows.length).toBe(2);
       expect(component.filteredRows.length).toBe(2);
+    });
+
+    it('should load resources on init', () => {
+      expect(resourceServiceSpy.getAll).toHaveBeenCalled();
+      expect(component.resources.length).toBe(2);
     });
   });
 
@@ -245,6 +274,17 @@ describe('MenuListComponent', () => {
     it('should not save if form is invalid', () => {
       component.menuForm.controls['code'].setValue('');
       component.menuForm.controls['title'].setValue('');
+      component.menuForm.controls['resourceId'].setValue(null);
+
+      component.onAddMenuSave();
+
+      expect(menuServiceSpy.create).not.toHaveBeenCalled();
+    });
+
+    it('should not save if resourceId is not selected', () => {
+      component.menuForm.controls['code'].setValue('NEW_MENU');
+      component.menuForm.controls['title'].setValue('New Menu');
+      component.menuForm.controls['resourceId'].setValue(null);
 
       component.onAddMenuSave();
 
@@ -254,6 +294,7 @@ describe('MenuListComponent', () => {
     it('should create menu successfully', () => {
       component.menuForm.controls['code'].setValue('NEW_MENU');
       component.menuForm.controls['title'].setValue('New Menu');
+      component.menuForm.controls['resourceId'].setValue(1);
 
       component.onAddMenuSave();
 
@@ -262,12 +303,24 @@ describe('MenuListComponent', () => {
       expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
     });
 
+    it('should include resourceId in create request', () => {
+      component.menuForm.controls['code'].setValue('NEW_MENU');
+      component.menuForm.controls['title'].setValue('New Menu');
+      component.menuForm.controls['resourceId'].setValue(1);
+
+      component.onAddMenuSave();
+
+      const callArgs = menuServiceSpy.create.calls.mostRecent().args[0];
+      expect(callArgs.resourceId).toBe(1);
+    });
+
     it('should handle error when creating menu', () => {
       menuServiceSpy.create.and.returnValue(
         throwError(() => ({ message: 'Creation failed' }))
       );
       component.menuForm.controls['code'].setValue('NEW_MENU');
       component.menuForm.controls['title'].setValue('New Menu');
+      component.menuForm.controls['resourceId'].setValue(1);
 
       component.onAddMenuSave();
 
@@ -396,6 +449,11 @@ describe('MenuListComponent', () => {
       expect(component.menuForm.controls['title'].valid).toBeFalse();
     });
 
+    it('should have invalid form when resourceId is null', () => {
+      component.menuForm.controls['resourceId'].setValue(null);
+      expect(component.menuForm.controls['resourceId'].valid).toBeFalse();
+    });
+
     it('should have invalid form when code is too short', () => {
       component.menuForm.controls['code'].setValue('A');
       expect(component.menuForm.controls['code'].valid).toBeFalse();
@@ -409,6 +467,7 @@ describe('MenuListComponent', () => {
     it('should have valid form when required fields are filled correctly', () => {
       component.menuForm.controls['code'].setValue('VALID_CODE');
       component.menuForm.controls['title'].setValue('Valid Title');
+      component.menuForm.controls['resourceId'].setValue(1);
       expect(component.menuForm.valid).toBeTrue();
     });
 
@@ -474,6 +533,8 @@ describe('MenuListComponent', () => {
         id: 1,
         code: 'TEST',
         title: 'Test Menu',
+        resourceId: 1,
+        resourceCode: 'TEST_VIEW',
         path: '/test',
         iconType: 'fontawesome',
         icon: 'fas fa-test',
@@ -502,6 +563,7 @@ describe('MenuListComponent', () => {
     it('should create menu with all optional fields', () => {
       component.menuForm.controls['code'].setValue('NEW_MENU');
       component.menuForm.controls['title'].setValue('New Menu');
+      component.menuForm.controls['resourceId'].setValue(1);
       component.menuForm.controls['path'].setValue('/new-path');
       component.menuForm.controls['iconType'].setValue('fontawesome');
       component.menuForm.controls['icon'].setValue('fas fa-star');
@@ -517,6 +579,7 @@ describe('MenuListComponent', () => {
       const callArgs = menuServiceSpy.create.calls.mostRecent().args[0];
       expect(callArgs.code).toBe('NEW_MENU');
       expect(callArgs.title).toBe('New Menu');
+      expect(callArgs.resourceId).toBe(1);
       expect(callArgs.path).toBe('/new-path');
       expect(callArgs.iconType).toBe('fontawesome');
       expect(callArgs.icon).toBe('fas fa-star');
@@ -535,6 +598,7 @@ describe('MenuListComponent', () => {
       );
       component.menuForm.controls['code'].setValue('NEW_MENU');
       component.menuForm.controls['title'].setValue('New Menu');
+      component.menuForm.controls['resourceId'].setValue(1);
 
       component.onAddMenuSave();
 
@@ -573,6 +637,7 @@ describe('MenuListComponent', () => {
       );
       component.menuForm.controls['code'].setValue('NEW_MENU');
       component.menuForm.controls['title'].setValue('New Menu');
+      component.menuForm.controls['resourceId'].setValue(1);
 
       component.onAddMenuSave();
 

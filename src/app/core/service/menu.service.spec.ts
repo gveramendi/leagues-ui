@@ -21,6 +21,8 @@ describe('MenuService', () => {
     id: 1,
     code: 'DASHBOARD',
     title: 'Dashboard',
+    resourceId: 1,
+    resourceCode: 'DASHBOARD_VIEW',
     path: '/dashboard',
     iconType: 'fontawesome',
     icon: 'fas fa-home',
@@ -185,6 +187,7 @@ describe('MenuService', () => {
       const createRequest: CreateMenuRequest = {
         code: 'NEW_MENU',
         title: 'New Menu',
+        resourceId: 1,
         path: '/new-menu',
         iconType: 'fontawesome',
         icon: 'fas fa-star',
@@ -201,6 +204,8 @@ describe('MenuService', () => {
             id: 3,
             code: 'NEW_MENU',
             title: 'New Menu',
+            resourceId: 1,
+            resourceCode: 'DASHBOARD_VIEW',
             path: '/new-menu',
             iconType: 'fontawesome',
             icon: 'fas fa-star',
@@ -212,6 +217,7 @@ describe('MenuService', () => {
         expect(response.header.success).toBeTrue();
         expect(response.header.statusCode).toBe(201);
         expect(response.body.data.code).toBe('NEW_MENU');
+        expect(response.body.data.resourceId).toBe(1);
       });
 
       const req = httpMock.expectOne(apiUrl);

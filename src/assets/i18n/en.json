@@ -104,6 +104,8 @@
     "EDIT": "Edit Menu",
     "CODE": "Code",
     "TITLE_FIELD": "Title",
+    "RESOURCE": "Resource",
+    "SELECT_RESOURCE": "Select a resource",
     "PATH": "Path",
     "ICON": "Icon",
     "ICON_TYPE": "Icon Type",

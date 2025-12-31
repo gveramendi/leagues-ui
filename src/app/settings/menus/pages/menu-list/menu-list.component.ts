@@ -17,6 +17,8 @@ import {
   CreateMenuRequest,
   MenuResponse,
   MenuService,
+  ResourceResponse,
+  ResourceService,
   UpdateMenuRequest,
 } from '@core';
 
@@ -53,8 +55,12 @@ export class MenuListComponent implements OnInit {
   editMenuForm!: UntypedFormGroup;
   editingMenu: MenuResponse | null = null;
 
+  // Resources for dropdown
+  resources: ResourceResponse[] = [];
+
   constructor(
     private menuService: MenuService,
+    private resourceService: ResourceService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -66,12 +72,25 @@ export class MenuListComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadMenus();
+    this.loadResources();
+  }
+
+  private loadResources(): void {
+    this.resourceService.getAll().subscribe({
+      next: (response) => {
+        this.resources = response.body.data;
+      },
+      error: (error) => {
+        console.error('Error loading resources:', error);
+      },
+    });
   }
 
   private initForm(): void {
     this.menuForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
+      resourceId: [null, [Validators.required]],
       path: ['', [Validators.maxLength(255)]],
       iconType: ['', [Validators.maxLength(50)]],
       icon: ['', [Validators.maxLength(100)]],
@@ -147,6 +166,7 @@ export class MenuListComponent implements OnInit {
   // Open modal to add new menu
   openAddModal(content: any): void {
     this.menuForm.reset({
+      resourceId: null,
       groupTitle: false,
     });
     this.modalService.open(content, {
@@ -164,6 +184,7 @@ export class MenuListComponent implements OnInit {
     const request: CreateMenuRequest = {
       code: this.menuForm.value.code,
       title: this.menuForm.value.title,
+      resourceId: this.menuForm.value.resourceId,
       path: this.menuForm.value.path || undefined,
       iconType: this.menuForm.value.iconType || undefined,
       icon: this.menuForm.value.icon || undefined,
