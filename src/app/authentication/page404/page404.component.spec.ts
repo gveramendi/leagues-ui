@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { RouterTestingModule } from '@angular/router/testing';
 
 import { Page404Component } from './page404.component';
 
@@ -8,9 +9,8 @@ describe('Page404Component', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-    imports: [Page404Component]
-})
-    .compileComponents();
+      imports: [Page404Component, RouterTestingModule],
+    }).compileComponents();
   });
 
   beforeEach(() => {
