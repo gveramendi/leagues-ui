@@ -17,7 +17,8 @@
     "EDIT": "Edit",
     "DELETE": "Delete",
     "YES": "Yes",
-    "NO": "No"
+    "NO": "No",
+    "BACK": "Back"
   },
   "VALIDATION": {
     "REQUIRED": "This field is required",
@@ -125,7 +126,36 @@
     "BADGE_CLASS_PLACEHOLDER": "Enter badge CSS class",
     "CODE_NOT_EDITABLE": "Menu code cannot be changed",
     "DELETE_CONFIRM_TITLE": "Are you sure?",
-    "DELETE_CONFIRM_MESSAGE": "You are about to delete the menu '{{title}}'. This action cannot be undone."
+    "DELETE_CONFIRM_MESSAGE": "You are about to delete the menu '{{title}}'. This action cannot be undone.",
+    "VIEW_ITEMS": "View Items"
+  },
+  "MENU_ITEMS": {
+    "TITLE": "Menu Items for {{menu}}",
+    "SEARCH_PLACEHOLDER": "Search menu items...",
+    "ADD_NEW": "Add New Menu Item",
+    "EDIT": "Edit Menu Item",
+    "TITLE_FIELD": "Title",
+    "TITLE_PLACEHOLDER": "Enter menu item title",
+    "PATH": "Path",
+    "PATH_PLACEHOLDER": "Enter path (e.g., /dashboard)",
+    "PARENT": "Parent",
+    "NO_PARENT": "No Parent (Root Item)",
+    "RESOURCE": "Resource",
+    "NO_RESOURCE": "No resource",
+    "ORDER": "Order",
+    "ICON": "Icon",
+    "ICON_PLACEHOLDER": "Enter icon class (e.g., fas fa-home)",
+    "ICON_TYPE": "Icon Type",
+    "ICON_TYPE_PLACEHOLDER": "Enter icon type (e.g., fontawesome)",
+    "CLASS_NAME": "Class Name",
+    "CLASS_NAME_PLACEHOLDER": "Enter CSS class name",
+    "BADGE": "Badge",
+    "BADGE_PLACEHOLDER": "Enter badge text",
+    "BADGE_CLASS": "Badge Class",
+    "BADGE_CLASS_PLACEHOLDER": "Enter badge CSS class",
+    "GROUP_TITLE": "Is Group Title",
+    "DELETE_CONFIRM_TITLE": "Are you sure?",
+    "DELETE_CONFIRM_MESSAGE": "You are about to delete the menu item '{{title}}'. This action cannot be undone."
   },
   "MENUITEMS": {
     "USER":{

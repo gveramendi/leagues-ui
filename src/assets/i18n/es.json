@@ -17,7 +17,8 @@
     "EDIT": "Editar",
     "DELETE": "Eliminar",
     "YES": "Sí",
-    "NO": "No"
+    "NO": "No",
+    "BACK": "Volver"
   },
   "VALIDATION": {
     "REQUIRED": "Este campo es obligatorio",
@@ -125,7 +126,36 @@
     "BADGE_CLASS_PLACEHOLDER": "Ingrese la clase CSS de la insignia",
     "CODE_NOT_EDITABLE": "El código del menú no se puede cambiar",
     "DELETE_CONFIRM_TITLE": "¿Está seguro?",
-    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el menú '{{title}}'. Esta acción no se puede deshacer."
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el menú '{{title}}'. Esta acción no se puede deshacer.",
+    "VIEW_ITEMS": "Ver Items"
+  },
+  "MENU_ITEMS": {
+    "TITLE": "Items del Menú {{menu}}",
+    "SEARCH_PLACEHOLDER": "Buscar items de menú...",
+    "ADD_NEW": "Agregar Nuevo Item",
+    "EDIT": "Editar Item de Menú",
+    "TITLE_FIELD": "Título",
+    "TITLE_PLACEHOLDER": "Ingrese el título del item",
+    "PATH": "Ruta",
+    "PATH_PLACEHOLDER": "Ingrese la ruta (ej., /dashboard)",
+    "PARENT": "Padre",
+    "NO_PARENT": "Sin Padre (Item Raíz)",
+    "RESOURCE": "Recurso",
+    "NO_RESOURCE": "Sin recurso",
+    "ORDER": "Orden",
+    "ICON": "Icono",
+    "ICON_PLACEHOLDER": "Ingrese la clase del icono (ej., fas fa-home)",
+    "ICON_TYPE": "Tipo de Icono",
+    "ICON_TYPE_PLACEHOLDER": "Ingrese el tipo de icono (ej., fontawesome)",
+    "CLASS_NAME": "Nombre de Clase",
+    "CLASS_NAME_PLACEHOLDER": "Ingrese el nombre de clase CSS",
+    "BADGE": "Insignia",
+    "BADGE_PLACEHOLDER": "Ingrese el texto de la insignia",
+    "BADGE_CLASS": "Clase de Insignia",
+    "BADGE_CLASS_PLACEHOLDER": "Ingrese la clase CSS de la insignia",
+    "GROUP_TITLE": "Es Título de Grupo",
+    "DELETE_CONFIRM_TITLE": "¿Está seguro?",
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el item de menú '{{title}}'. Esta acción no se puede deshacer."
   },
   "MENUITEMS": {
     "USER":{

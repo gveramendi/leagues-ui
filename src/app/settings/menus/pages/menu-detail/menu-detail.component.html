@@ -9,9 +9,32 @@
       </a>
     </li>
     <li class="breadcrumb-item">{{ 'SETTINGS.TEXT' | translate }}</li>
-    <li class="breadcrumb-item active">{{ 'MENUS.TITLE' | translate }}</li>
+    <li class="breadcrumb-item">
+      <a routerLink="/settings/menus/list">{{ 'MENUS.TITLE' | translate }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ 'MENU_ITEMS.TITLE' | translate: { menu: menu?.title } }}</li>
   </ul>
   <div class="section-body">
+    <!-- Menu Info Card -->
+    @if (menu) {
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ menu.title }}</h4>
+                <button class="btn btn-outline-secondary" (click)="goBack()">
+                  <i class="fas fa-arrow-left me-1"></i>
+                  {{ 'COMMON.BACK' | translate }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Menu Items Table -->
     <div class="row clearfix">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
@@ -22,7 +45,7 @@
                   <div class="col-auto p-0">
                     <div class="ngxTableHeader">
                       <div class="table-title">
-                        <h2><strong>{{ 'MENUS.TITLE' | translate }}</strong></h2>
+                        <h2><strong>{{ 'MENU_ITEMS.TITLE' | translate: { menu: menu?.title } }}</strong></h2>
                       </div>
                     </div>
                   </div>
@@ -32,7 +55,7 @@
                         <div>
                           <label for="search-input"><i class="material-icons search-icon">search</i></label>
                           <input
-                            [placeholder]="'MENUS.SEARCH_PLACEHOLDER' | translate"
+                            [placeholder]="'MENU_ITEMS.SEARCH_PLACEHOLDER' | translate"
                             type="text"
                             class="browser-default search-field"
                             (keyup)="filterDatatable($event)"
@@ -44,7 +67,7 @@
                         <div class="tbl-btn-style">
                           <button
                             class="btn btn-icon icon-left btn-primary rounded-button"
-                            (click)="openAddModal(addMenuModal)"
+                            (click)="openAddModal(addMenuItemModal)"
                           >
                             <i class="material-icons">add</i>
                           </button>
@@ -59,19 +82,13 @@
             <ngx-datatable
               #table
               class="material"
-              [rows]="filteredRows"
+              [rows]="filteredMenuItems"
               [loadingIndicator]="loading"
               columnMode="force"
               [headerHeight]="60"
               [footerHeight]="80"
               rowHeight="auto"
-              [limit]="size"
-              [externalPaging]="true"
-              [externalSorting]="true"
-              [count]="totalElements"
-              [offset]="page"
-              (page)="onPageChange($event)"
-              (sort)="onSort($event)"
+              [limit]="10"
             >
               <ngx-datatable-column prop="id" [width]="80">
                 <ng-template ngx-datatable-header-template>
@@ -82,18 +99,9 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="code" [width]="150">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'MENUS.CODE' | translate }}
-                </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  <code>{{ row.code }}</code>
-                </ng-template>
-              </ngx-datatable-column>
-
               <ngx-datatable-column prop="title" [width]="200">
                 <ng-template ngx-datatable-header-template>
-                  {{ 'MENUS.TITLE_FIELD' | translate }}
+                  {{ 'MENU_ITEMS.TITLE_FIELD' | translate }}
                 </ng-template>
                 <ng-template let-row="row" ngx-datatable-cell-template>
                   {{ row.title }}
@@ -102,16 +110,47 @@
 
               <ngx-datatable-column prop="path">
                 <ng-template ngx-datatable-header-template>
-                  {{ 'MENUS.PATH' | translate }}
+                  {{ 'MENU_ITEMS.PATH' | translate }}
                 </ng-template>
                 <ng-template let-row="row" ngx-datatable-cell-template>
                   {{ row.path || '-' }}
                 </ng-template>
               </ngx-datatable-column>
 
+              <ngx-datatable-column prop="parentId" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENU_ITEMS.PARENT' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ getParentTitle(row.parentId) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="resourceCode" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENU_ITEMS.RESOURCE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  @if (row.resourceCode) {
+                    <code>{{ row.resourceCode }}</code>
+                  } @else {
+                    -
+                  }
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="displayOrder" [width]="100">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'MENU_ITEMS.ORDER' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.displayOrder }}
+                </ng-template>
+              </ngx-datatable-column>
+
               <ngx-datatable-column prop="icon" [width]="120">
                 <ng-template ngx-datatable-header-template>
-                  {{ 'MENUS.ICON' | translate }}
+                  {{ 'MENU_ITEMS.ICON' | translate }}
                 </ng-template>
                 <ng-template let-row="row" ngx-datatable-cell-template>
                   @if (row.icon) {
@@ -123,28 +162,16 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="groupName" [width]="150">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'MENUS.GROUP_NAME' | translate }}
-                </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  {{ row.groupName || '-' }}
-                </ng-template>
-              </ngx-datatable-column>
-
-              <ngx-datatable-column name="Actions" [sortable]="false" [width]="180">
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="140">
                 <ng-template ngx-datatable-header-template>
                   {{ 'COMMON.ACTIONS' | translate }}
                 </ng-template>
                 <ng-template let-row="row" ngx-datatable-cell-template>
                   <div class="d-flex gap-2">
-                    <button class="btn btn-tbl-view btn-sm" [routerLink]="['/settings/menus', row.id, 'items']" [title]="'MENUS.VIEW_ITEMS' | translate">
-                      <i class="fas fa-list"></i>
-                    </button>
-                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editMenuModal, row)" [title]="'COMMON.EDIT' | translate">
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editMenuItemModal, row)" [title]="'COMMON.EDIT' | translate">
                       <i class="fas fa-pencil-alt"></i>
                     </button>
-                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteMenu(row)" [title]="'COMMON.DELETE' | translate">
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteMenuItem(row)" [title]="'COMMON.DELETE' | translate">
                       <i class="far fa-trash-alt"></i>
                     </button>
                   </div>
@@ -158,159 +185,147 @@
   </div>
 </section>
 
-<!-- Add Menu Modal -->
-<ng-template #addMenuModal let-modal>
+<!-- Add Menu Item Modal -->
+<ng-template #addMenuItemModal let-modal>
   <div class="modal-header">
     <h4 class="modal-title" id="modal-basic-title">
-      {{ 'MENUS.ADD_NEW' | translate }}
+      {{ 'MENU_ITEMS.ADD_NEW' | translate }}
     </h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="menuForm" (ngSubmit)="onAddMenuSave()">
+    <form [formGroup]="menuItemForm" (ngSubmit)="onAddMenuItemSave()">
       <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">
-            {{ 'MENUS.CODE' | translate }} <span class="text-danger">*</span>
+            {{ 'MENU_ITEMS.TITLE_FIELD' | translate }} <span class="text-danger">*</span>
           </label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.CODE_PLACEHOLDER' | translate"
-            formControlName="code"
+            [placeholder]="'MENU_ITEMS.TITLE_PLACEHOLDER' | translate"
+            formControlName="title"
           />
-          @if (menuForm.get('code')?.invalid && menuForm.get('code')?.touched) {
+          @if (menuItemForm.get('title')?.invalid && menuItemForm.get('title')?.touched) {
             <small class="form-text text-danger">
-              @if (menuForm.get('code')?.errors?.['required']) {
+              @if (menuItemForm.get('title')?.errors?.['required']) {
                 {{ 'VALIDATION.REQUIRED' | translate }}
               }
-              @if (menuForm.get('code')?.errors?.['minlength']) {
+              @if (menuItemForm.get('title')?.errors?.['minlength']) {
                 {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
               }
-              @if (menuForm.get('code')?.errors?.['maxlength']) {
-                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 50 } }}
+              @if (menuItemForm.get('title')?.errors?.['maxlength']) {
+                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 100 } }}
               }
             </small>
           }
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">
-            {{ 'MENUS.TITLE_FIELD' | translate }} <span class="text-danger">*</span>
+            {{ 'MENU_ITEMS.ORDER' | translate }} <span class="text-danger">*</span>
           </label>
           <input
-            type="text"
+            type="number"
             class="form-control"
-            [placeholder]="'MENUS.TITLE_PLACEHOLDER' | translate"
-            formControlName="title"
+            formControlName="displayOrder"
+            min="0"
           />
-          @if (menuForm.get('title')?.invalid && menuForm.get('title')?.touched) {
+          @if (menuItemForm.get('displayOrder')?.invalid && menuItemForm.get('displayOrder')?.touched) {
             <small class="form-text text-danger">
-              @if (menuForm.get('title')?.errors?.['required']) {
-                {{ 'VALIDATION.REQUIRED' | translate }}
-              }
-              @if (menuForm.get('title')?.errors?.['minlength']) {
-                {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
-              }
-              @if (menuForm.get('title')?.errors?.['maxlength']) {
-                {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 100 } }}
-              }
+              {{ 'VALIDATION.REQUIRED' | translate }}
             </small>
           }
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">
-            {{ 'MENUS.RESOURCE' | translate }} <span class="text-danger">*</span>
-          </label>
+          <label class="form-label">{{ 'MENU_ITEMS.PARENT' | translate }}</label>
+          <select
+            class="form-control form-select"
+            formControlName="parentId"
+          >
+            <option [ngValue]="null">{{ 'MENU_ITEMS.NO_PARENT' | translate }}</option>
+            @for (item of getRootMenuItems(); track item.id) {
+              <option [ngValue]="item.id">{{ item.title }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENU_ITEMS.RESOURCE' | translate }}</label>
           <select
             class="form-control form-select"
             formControlName="resourceId"
           >
-            <option [ngValue]="null" disabled>{{ 'MENUS.SELECT_RESOURCE' | translate }}</option>
+            <option [ngValue]="null">{{ 'MENU_ITEMS.NO_RESOURCE' | translate }}</option>
             @for (resource of resources; track resource.id) {
               <option [ngValue]="resource.id">{{ resource.name }} ({{ resource.code }})</option>
             }
           </select>
-          @if (menuForm.get('resourceId')?.invalid && menuForm.get('resourceId')?.touched) {
-            <small class="form-text text-danger">
-              {{ 'VALIDATION.REQUIRED' | translate }}
-            </small>
-          }
         </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.PATH' | translate }}</label>
+      </div>
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'MENU_ITEMS.PATH' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.PATH_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.PATH_PLACEHOLDER' | translate"
             formControlName="path"
           />
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.ICON_TYPE' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.ICON_TYPE' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.ICON_TYPE_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.ICON_TYPE_PLACEHOLDER' | translate"
             formControlName="iconType"
           />
         </div>
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.ICON' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.ICON' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.ICON_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.ICON_PLACEHOLDER' | translate"
             formControlName="icon"
           />
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.CLASS_NAME' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.CLASS_NAME' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.CLASS_NAME_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.CLASS_NAME_PLACEHOLDER' | translate"
             formControlName="className"
           />
         </div>
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.GROUP_NAME' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.BADGE' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.GROUP_NAME_PLACEHOLDER' | translate"
-            formControlName="groupName"
-          />
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.BADGE' | translate }}</label>
-          <input
-            type="text"
-            class="form-control"
-            [placeholder]="'MENUS.BADGE_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.BADGE_PLACEHOLDER' | translate"
             formControlName="badge"
           />
         </div>
+      </div>
+      <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.BADGE_CLASS' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.BADGE_CLASS' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.BADGE_CLASS_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.BADGE_CLASS_PLACEHOLDER' | translate"
             formControlName="badgeClass"
           />
         </div>
-      </div>
-      <div class="row">
-        <div class="col-12 mb-3">
-          <div class="form-check">
+        <div class="col-md-6 mb-3">
+          <div class="form-check mt-4">
             <input
               class="form-check-input"
               type="checkbox"
@@ -321,13 +336,13 @@
               <span class="check"></span>
             </span>
             <label class="form-check-label" for="groupTitle">
-              {{ 'MENUS.GROUP_TITLE' | translate }}
+              {{ 'MENU_ITEMS.GROUP_TITLE' | translate }}
             </label>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" [disabled]="menuForm.invalid">
+        <button type="submit" class="btn btn-primary" [disabled]="menuItemForm.invalid">
           {{ 'COMMON.SAVE' | translate }}
         </button>
         <button type="button" class="btn btn-light" (click)="modal.close()">
@@ -338,147 +353,149 @@
   </div>
 </ng-template>
 
-<!-- Edit Menu Modal -->
-<ng-template #editMenuModal let-modal>
+<!-- Edit Menu Item Modal -->
+<ng-template #editMenuItemModal let-modal>
   <div class="modal-header">
     <h4 class="modal-title" id="modal-edit-title">
-      {{ 'MENUS.EDIT' | translate }}
+      {{ 'MENU_ITEMS.EDIT' | translate }}
     </h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
-    <form [formGroup]="editMenuForm" (ngSubmit)="onEditMenuSave()">
+    <form [formGroup]="editMenuItemForm" (ngSubmit)="onEditMenuItemSave()">
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.CODE' | translate }}</label>
-          <input
-            type="text"
-            class="form-control"
-            [value]="editingMenu?.code"
-            disabled
-          />
-          <small class="form-text text-muted">
-            {{ 'MENUS.CODE_NOT_EDITABLE' | translate }}
-          </small>
-        </div>
-        <div class="col-md-6 mb-3">
           <label class="form-label">
-            {{ 'MENUS.TITLE_FIELD' | translate }} <span class="text-danger">*</span>
+            {{ 'MENU_ITEMS.TITLE_FIELD' | translate }} <span class="text-danger">*</span>
           </label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.TITLE_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.TITLE_PLACEHOLDER' | translate"
             formControlName="title"
           />
-          @if (editMenuForm.get('title')?.invalid && editMenuForm.get('title')?.touched) {
+          @if (editMenuItemForm.get('title')?.invalid && editMenuItemForm.get('title')?.touched) {
             <small class="form-text text-danger">
-              @if (editMenuForm.get('title')?.errors?.['required']) {
+              @if (editMenuItemForm.get('title')?.errors?.['required']) {
                 {{ 'VALIDATION.REQUIRED' | translate }}
               }
-              @if (editMenuForm.get('title')?.errors?.['minlength']) {
+              @if (editMenuItemForm.get('title')?.errors?.['minlength']) {
                 {{ 'VALIDATION.MIN_LENGTH' | translate: { min: 2 } }}
               }
-              @if (editMenuForm.get('title')?.errors?.['maxlength']) {
+              @if (editMenuItemForm.get('title')?.errors?.['maxlength']) {
                 {{ 'VALIDATION.MAX_LENGTH' | translate: { max: 100 } }}
               }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'MENU_ITEMS.ORDER' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="displayOrder"
+            min="0"
+          />
+          @if (editMenuItemForm.get('displayOrder')?.invalid && editMenuItemForm.get('displayOrder')?.touched) {
+            <small class="form-text text-danger">
+              {{ 'VALIDATION.REQUIRED' | translate }}
             </small>
           }
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">
-            {{ 'MENUS.RESOURCE' | translate }} <span class="text-danger">*</span>
-          </label>
+          <label class="form-label">{{ 'MENU_ITEMS.PARENT' | translate }}</label>
+          <select
+            class="form-control form-select"
+            formControlName="parentId"
+          >
+            <option [ngValue]="null">{{ 'MENU_ITEMS.NO_PARENT' | translate }}</option>
+            @for (item of getRootMenuItems(); track item.id) {
+              @if (item.id !== editingMenuItem?.id) {
+                <option [ngValue]="item.id">{{ item.title }}</option>
+              }
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MENU_ITEMS.RESOURCE' | translate }}</label>
           <select
             class="form-control form-select"
             formControlName="resourceId"
           >
-            <option [ngValue]="null" disabled>{{ 'MENUS.SELECT_RESOURCE' | translate }}</option>
+            <option [ngValue]="null">{{ 'MENU_ITEMS.NO_RESOURCE' | translate }}</option>
             @for (resource of resources; track resource.id) {
               <option [ngValue]="resource.id">{{ resource.name }} ({{ resource.code }})</option>
             }
           </select>
-          @if (editMenuForm.get('resourceId')?.invalid && editMenuForm.get('resourceId')?.touched) {
-            <small class="form-text text-danger">
-              {{ 'VALIDATION.REQUIRED' | translate }}
-            </small>
-          }
         </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.PATH' | translate }}</label>
+      </div>
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'MENU_ITEMS.PATH' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.PATH_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.PATH_PLACEHOLDER' | translate"
             formControlName="path"
           />
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.ICON_TYPE' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.ICON_TYPE' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.ICON_TYPE_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.ICON_TYPE_PLACEHOLDER' | translate"
             formControlName="iconType"
           />
         </div>
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.ICON' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.ICON' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.ICON_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.ICON_PLACEHOLDER' | translate"
             formControlName="icon"
           />
         </div>
       </div>
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.CLASS_NAME' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.CLASS_NAME' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.CLASS_NAME_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.CLASS_NAME_PLACEHOLDER' | translate"
             formControlName="className"
           />
         </div>
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.GROUP_NAME' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.BADGE' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.GROUP_NAME_PLACEHOLDER' | translate"
-            formControlName="groupName"
-          />
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.BADGE' | translate }}</label>
-          <input
-            type="text"
-            class="form-control"
-            [placeholder]="'MENUS.BADGE_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.BADGE_PLACEHOLDER' | translate"
             formControlName="badge"
           />
         </div>
+      </div>
+      <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'MENUS.BADGE_CLASS' | translate }}</label>
+          <label class="form-label">{{ 'MENU_ITEMS.BADGE_CLASS' | translate }}</label>
           <input
             type="text"
             class="form-control"
-            [placeholder]="'MENUS.BADGE_CLASS_PLACEHOLDER' | translate"
+            [placeholder]="'MENU_ITEMS.BADGE_CLASS_PLACEHOLDER' | translate"
             formControlName="badgeClass"
           />
         </div>
-      </div>
-      <div class="row">
-        <div class="col-12 mb-3">
-          <div class="form-check">
+        <div class="col-md-6 mb-3">
+          <div class="form-check mt-4">
             <input
               class="form-check-input"
               type="checkbox"
@@ -489,13 +506,13 @@
               <span class="check"></span>
             </span>
             <label class="form-check-label" for="editGroupTitle">
-              {{ 'MENUS.GROUP_TITLE' | translate }}
+              {{ 'MENU_ITEMS.GROUP_TITLE' | translate }}
             </label>
           </div>
         </div>
       </div>
       <div class="modal-footer">
-        <button type="submit" class="btn btn-primary" [disabled]="editMenuForm.invalid">
+        <button type="submit" class="btn btn-primary" [disabled]="editMenuItemForm.invalid">
           {{ 'COMMON.SAVE' | translate }}
         </button>
         <button type="button" class="btn btn-light" (click)="modal.close()">
