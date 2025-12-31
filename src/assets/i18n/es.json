@@ -57,6 +57,12 @@
     "REMOVE_RESOURCE_CONFIRM_TITLE": "¿Remover Recurso?",
     "REMOVE_RESOURCE_CONFIRM_MESSAGE": "¿Está seguro que desea remover '{{resource}}' del rol '{{role}}'?"
   },
+  "ROLE_RESOURCES": {
+    "TITLE": "Recursos de {{role}}",
+    "SEARCH_PLACEHOLDER": "Buscar recursos...",
+    "ADD_NEW": "Agregar Recurso",
+    "EDIT": "Editar Permisos"
+  },
   "USERS": {
     "TITLE": "Usuarios",
     "SEARCH_PLACEHOLDER": "Buscar usuarios...",

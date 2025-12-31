@@ -35,6 +35,21 @@ export class PermissionService {
   }
 
   /**
+   * PUT /api/roles/{roleId}/resources/{resourceId}
+   * Update a permission (modify resource permissions for role)
+   */
+  update(
+    roleId: number,
+    resourceId: number,
+    request: CreatePermissionRequest
+  ): Observable<ApiResponse<PermissionResponse>> {
+    return this.http.put<ApiResponse<PermissionResponse>>(
+      `${environment.apiUrl}/api/roles/${roleId}/resources/${resourceId}`,
+      request
+    );
+  }
+
+  /**
    * DELETE /api/roles/{roleId}/resources/{resourceId}
    * Delete a permission (remove resource from role)
    */

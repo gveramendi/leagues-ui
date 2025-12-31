@@ -57,6 +57,12 @@
     "REMOVE_RESOURCE_CONFIRM_TITLE": "Remove Resource?",
     "REMOVE_RESOURCE_CONFIRM_MESSAGE": "Are you sure you want to remove '{{resource}}' from role '{{role}}'?"
   },
+  "ROLE_RESOURCES": {
+    "TITLE": "Resources for {{role}}",
+    "SEARCH_PLACEHOLDER": "Search resources...",
+    "ADD_NEW": "Add Resource",
+    "EDIT": "Edit Permissions"
+  },
   "USERS": {
     "TITLE": "Users",
     "SEARCH_PLACEHOLDER": "Search users...",

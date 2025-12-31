@@ -1,0 +1,53 @@
+.form-check {
+  display: flex !important;
+  align-items: center !important;
+
+  .form-check-input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .form-check-sign {
+    top: 0 !important;
+    padding-right: 5px !important;
+    display: flex;
+    align-items: center;
+  }
+
+  .form-check-label {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.35rem;
+    padding-left: 0 !important;
+    padding-top: 0 !important;
+    margin: 0 !important;
+
+    .badge {
+      position: relative !important;
+      display: inline-flex !important;
+      justify-content: center !important;
+      align-items: center !important;
+      width: 24px;
+      height: 24px;
+      padding: 0 !important;
+      font-size: 11px;
+      line-height: 1;
+      top: auto !important;
+      left: auto !important;
+    }
+  }
+}
+
+.d-flex.gap-1 {
+  .badge {
+    display: inline-flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+    width: 22px;
+    height: 22px;
+    padding: 0 !important;
+    font-size: 11px;
+    line-height: 1;
+  }
+}

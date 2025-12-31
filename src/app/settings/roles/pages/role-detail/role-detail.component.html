@@ -1,0 +1,393 @@
+<section class="main-content">
+  <ul class="breadcrumb breadcrumb-style">
+    <li class="breadcrumb-item">
+      <h5 class="page-title m-b-0">{{ 'SETTINGS.TEXT' | translate }}</h5>
+    </li>
+    <li class="breadcrumb-item bcrumb-1">
+      <a routerLink="/dashboard">
+        <i class="fas fa-home font-17"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item">{{ 'SETTINGS.TEXT' | translate }}</li>
+    <li class="breadcrumb-item">
+      <a routerLink="/settings/roles/list">{{ 'ROLES.TITLE' | translate }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ 'ROLE_RESOURCES.TITLE' | translate: { role: role?.name } }}</li>
+  </ul>
+  <div class="section-body">
+    <!-- Role Info Card -->
+    @if (role) {
+      <div class="row mb-3">
+        <div class="col-12">
+          <div class="card">
+            <div class="card-body">
+              <div class="d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">{{ role.name }}</h4>
+                <button class="btn btn-outline-secondary" (click)="goBack()">
+                  <i class="fas fa-arrow-left me-1"></i>
+                  {{ 'COMMON.BACK' | translate }}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Permissions Table -->
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="p-10">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="row m-0">
+                  <div class="col-auto p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-title">
+                        <h2><strong>{{ 'ROLE_RESOURCES.TITLE' | translate: { role: role?.name } }}</strong></h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-8 p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-search-area">
+                        <div>
+                          <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                          <input
+                            [placeholder]="'ROLE_RESOURCES.SEARCH_PLACEHOLDER' | translate"
+                            type="text"
+                            class="browser-default search-field"
+                            (keyup)="filterDatatable($event)"
+                            [attr.aria-label]="'COMMON.SEARCH' | translate"
+                          />
+                        </div>
+                      </div>
+                      <div class="header-buttons-left">
+                        <div class="tbl-btn-style">
+                          <button
+                            class="btn btn-icon icon-left btn-primary rounded-button"
+                            (click)="openAddModal(addPermissionModal)"
+                            [disabled]="getAvailableResources().length === 0"
+                          >
+                            <i class="material-icons">add</i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ngx-datatable
+              #table
+              class="material"
+              [rows]="filteredPermissions"
+              [loadingIndicator]="loading"
+              columnMode="force"
+              [headerHeight]="60"
+              [footerHeight]="80"
+              rowHeight="auto"
+              [limit]="10"
+            >
+              <ngx-datatable-column prop="resourceCode" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'RESOURCES.CODE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <code>{{ row.resourceCode }}</code>
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="resourceName">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.NAME' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.resourceName }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column name="Permissions" [sortable]="false" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'ROLES.PERMISSIONS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex gap-1 flex-wrap">
+                    @if (row.canCreate) {
+                      <span class="badge bg-primary" [title]="'ROLES.CAN_CREATE' | translate">C</span>
+                    }
+                    @if (row.canRead) {
+                      <span class="badge bg-success" [title]="'ROLES.CAN_READ' | translate">R</span>
+                    }
+                    @if (row.canWrite) {
+                      <span class="badge bg-warning" [title]="'ROLES.CAN_WRITE' | translate">W</span>
+                    }
+                    @if (row.canDelete) {
+                      <span class="badge bg-danger" [title]="'ROLES.CAN_DELETE' | translate">D</span>
+                    }
+                    @if (row.canExecute) {
+                      <span class="badge bg-secondary" [title]="'ROLES.CAN_EXECUTE' | translate">E</span>
+                    }
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="140">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ACTIONS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editPermissionModal, row)" [title]="'COMMON.EDIT' | translate">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deletePermission(row)" [title]="'COMMON.DELETE' | translate">
+                      <i class="far fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Permission Modal -->
+<ng-template #addPermissionModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ 'ROLE_RESOURCES.ADD_NEW' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="permissionForm" (ngSubmit)="onAddPermissionSave()">
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">
+            {{ 'RESOURCES.TITLE' | translate }} <span class="text-danger">*</span>
+          </label>
+          @if (getAvailableResources().length === 0) {
+            <div class="alert alert-warning mb-0">
+              {{ 'ROLES.NO_AVAILABLE_RESOURCES' | translate }}
+            </div>
+          } @else {
+            <select class="form-select" formControlName="resourceId">
+              <option value="">{{ 'ROLES.SELECT_RESOURCE' | translate }}</option>
+              @for (resource of getAvailableResources(); track resource.id) {
+                <option [value]="resource.id">
+                  {{ resource.name }} ({{ resource.code }})
+                </option>
+              }
+            </select>
+            @if (permissionForm.get('resourceId')?.invalid && permissionForm.get('resourceId')?.touched) {
+              <small class="form-text text-danger">
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              </small>
+            }
+          }
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'ROLES.PERMISSIONS' | translate }}</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="canCreate"
+                formControlName="canCreate"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="canCreate">
+                <span class="badge bg-primary">C</span> {{ 'ROLES.CAN_CREATE' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="canRead"
+                formControlName="canRead"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="canRead">
+                <span class="badge bg-success">R</span> {{ 'ROLES.CAN_READ' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="canWrite"
+                formControlName="canWrite"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="canWrite">
+                <span class="badge bg-warning">W</span> {{ 'ROLES.CAN_WRITE' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="canDelete"
+                formControlName="canDelete"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="canDelete">
+                <span class="badge bg-danger">D</span> {{ 'ROLES.CAN_DELETE' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="canExecute"
+                formControlName="canExecute"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="canExecute">
+                <span class="badge bg-secondary">E</span> {{ 'ROLES.CAN_EXECUTE' | translate }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button
+          type="submit"
+          class="btn btn-primary"
+          [disabled]="permissionForm.invalid || getAvailableResources().length === 0"
+        >
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit Permission Modal -->
+<ng-template #editPermissionModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-title">
+      {{ 'ROLE_RESOURCES.EDIT' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editPermissionForm" (ngSubmit)="onEditPermissionSave()">
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'RESOURCES.TITLE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="editingPermission?.resourceName + ' (' + editingPermission?.resourceCode + ')'"
+            disabled
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'ROLES.PERMISSIONS' | translate }}</label>
+          <div class="d-flex flex-wrap gap-3">
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="editCanCreate"
+                formControlName="canCreate"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="editCanCreate">
+                <span class="badge bg-primary">C</span> {{ 'ROLES.CAN_CREATE' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="editCanRead"
+                formControlName="canRead"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="editCanRead">
+                <span class="badge bg-success">R</span> {{ 'ROLES.CAN_READ' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="editCanWrite"
+                formControlName="canWrite"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="editCanWrite">
+                <span class="badge bg-warning">W</span> {{ 'ROLES.CAN_WRITE' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="editCanDelete"
+                formControlName="canDelete"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="editCanDelete">
+                <span class="badge bg-danger">D</span> {{ 'ROLES.CAN_DELETE' | translate }}
+              </label>
+            </div>
+            <div class="form-check">
+              <input
+                class="form-check-input"
+                type="checkbox"
+                id="editCanExecute"
+                formControlName="canExecute"
+              />
+              <span class="form-check-sign">
+                <span class="check"></span>
+              </span>
+              <label class="form-check-label" for="editCanExecute">
+                <span class="badge bg-secondary">E</span> {{ 'ROLES.CAN_EXECUTE' | translate }}
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

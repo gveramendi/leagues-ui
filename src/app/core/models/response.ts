@@ -26,10 +26,17 @@ export interface PaginationInfo {
 }
 
 // Role interfaces
+export interface RoleResourceResponse {
+  id: number;
+  code: string;
+  name: string;
+}
+
 export interface RoleResponse {
   id: number;
   name: string;
   description?: string;
+  resources?: RoleResourceResponse[];
   createdAt?: string;
   updatedAt?: string;
 }

@@ -21,6 +21,7 @@ export {
   ApiHeader,
   ApiBody,
   PaginationInfo,
+  RoleResourceResponse,
   RoleResponse,
   CreateRoleRequest,
   UpdateRoleRequest,
