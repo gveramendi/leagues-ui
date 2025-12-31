@@ -5,7 +5,7 @@ import {
 } from '@angular/common/http/testing';
 import { PermissionService } from './permission.service';
 import { environment } from '../../../environments/environment';
-import { ApiResponse, PermissionResponse } from '../models/response';
+import { ApiResponse, CreatePermissionRequest, PermissionResponse } from '../models/response';
 
 describe('PermissionService', () => {
   let service: PermissionService;
@@ -94,6 +94,106 @@ describe('PermissionService', () => {
 
       const req = httpMock.expectOne(`${apiUrl}/role/999`);
       expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('create', () => {
+    it('should create a new permission wrapped in ApiResponse', () => {
+      const createRequest: CreatePermissionRequest = {
+        roleId: 1,
+        resourceId: 3,
+        canCreate: true,
+        canRead: true,
+        canWrite: false,
+        canDelete: false,
+        canExecute: false,
+      };
+
+      const mockResponse: ApiResponse<PermissionResponse> = {
+        header: {
+          success: true,
+          statusCode: 201,
+          message: 'Permission created successfully',
+        },
+        body: {
+          data: {
+            id: 3,
+            roleId: 1,
+            roleName: 'Admin',
+            resourceId: 3,
+            resourceCode: 'SETTINGS',
+            resourceName: 'Settings',
+            canCreate: true,
+            canRead: true,
+            canWrite: false,
+            canDelete: false,
+            canExecute: false,
+          },
+        },
+      };
+
+      service.create(createRequest).subscribe((response) => {
+        expect(response.header.success).toBeTrue();
+        expect(response.header.message).toBe('Permission created successfully');
+        expect(response.body.data.id).toBe(3);
+        expect(response.body.data.resourceCode).toBe('SETTINGS');
+        expect(response.body.data.canCreate).toBeTrue();
+        expect(response.body.data.canRead).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(apiUrl);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(createRequest);
+      req.flush(mockResponse);
+    });
+
+    it('should send all permission flags correctly', () => {
+      const createRequest: CreatePermissionRequest = {
+        roleId: 2,
+        resourceId: 5,
+        canCreate: false,
+        canRead: true,
+        canWrite: true,
+        canDelete: true,
+        canExecute: true,
+      };
+
+      const mockResponse: ApiResponse<PermissionResponse> = {
+        header: {
+          success: true,
+          statusCode: 201,
+          message: 'Permission created successfully',
+        },
+        body: {
+          data: {
+            id: 4,
+            roleId: 2,
+            roleName: 'Editor',
+            resourceId: 5,
+            resourceCode: 'CONTENT',
+            resourceName: 'Content Management',
+            canCreate: false,
+            canRead: true,
+            canWrite: true,
+            canDelete: true,
+            canExecute: true,
+          },
+        },
+      };
+
+      service.create(createRequest).subscribe((response) => {
+        expect(response.body.data.canCreate).toBeFalse();
+        expect(response.body.data.canRead).toBeTrue();
+        expect(response.body.data.canWrite).toBeTrue();
+        expect(response.body.data.canDelete).toBeTrue();
+        expect(response.body.data.canExecute).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(apiUrl);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body.canCreate).toBeFalse();
+      expect(req.request.body.canWrite).toBeTrue();
       req.flush(mockResponse);
     });
   });

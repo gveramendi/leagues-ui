@@ -47,7 +47,11 @@
     "CAN_READ": "Read",
     "CAN_WRITE": "Write",
     "CAN_DELETE": "Delete",
-    "CAN_EXECUTE": "Execute"
+    "CAN_EXECUTE": "Execute",
+    "ADD_RESOURCE": "Add Resource",
+    "ADD_RESOURCE_TITLE": "Add Resource to {{name}}",
+    "NO_AVAILABLE_RESOURCES": "No resources available to add",
+    "SELECT_RESOURCE": "Select a resource"
   },
   "USERS": {
     "TITLE": "Users",

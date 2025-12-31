@@ -2,7 +2,11 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { ApiResponse, PermissionResponse } from '../models/response';
+import {
+  ApiResponse,
+  CreatePermissionRequest,
+  PermissionResponse,
+} from '../models/response';
 
 @Injectable({
   providedIn: 'root',
@@ -20,5 +24,13 @@ export class PermissionService {
     return this.http.get<ApiResponse<PermissionResponse[]>>(
       `${this.apiUrl}/role/${roleId}`
     );
+  }
+
+  /**
+   * POST /api/permissions
+   * Create a new permission (assign resource to role)
+   */
+  create(request: CreatePermissionRequest): Observable<ApiResponse<PermissionResponse>> {
+    return this.http.post<ApiResponse<PermissionResponse>>(this.apiUrl, request);
   }
 }

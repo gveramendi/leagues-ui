@@ -7,13 +7,14 @@ import { ToastrService, provideToastr } from 'ngx-toastr';
 import { of, throwError } from 'rxjs';
 import Swal, { SweetAlertResult } from 'sweetalert2';
 import { RoleListComponent } from './role-list.component';
-import { RoleService, PermissionService, ApiResponse, RoleResponse, PermissionResponse, CreateRoleRequest, UpdateRoleRequest } from '@core';
+import { RoleService, PermissionService, ResourceService, ApiResponse, RoleResponse, PermissionResponse, ResourceResponse, CreatePermissionRequest } from '@core';
 
 describe('RoleListComponent', () => {
   let component: RoleListComponent;
   let fixture: ComponentFixture<RoleListComponent>;
   let roleServiceSpy: jasmine.SpyObj<RoleService>;
   let permissionServiceSpy: jasmine.SpyObj<PermissionService>;
+  let resourceServiceSpy: jasmine.SpyObj<ResourceService>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let toastrSpy: jasmine.SpyObj<ToastrService>;
 
@@ -116,6 +117,47 @@ describe('RoleListComponent', () => {
     },
   };
 
+  const mockResources: ResourceResponse[] = [
+    { id: 1, code: 'USER_MANAGEMENT', name: 'User Management', type: 'API' },
+    { id: 2, code: 'ROLE_MANAGEMENT', name: 'Role Management', type: 'API' },
+    { id: 3, code: 'SETTINGS', name: 'Settings', type: 'VIEW' },
+    { id: 4, code: 'REPORTS', name: 'Reports', type: 'VIEW' },
+  ];
+
+  const mockResourcesResponse: ApiResponse<ResourceResponse[]> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Resources retrieved successfully',
+    },
+    body: {
+      data: mockResources,
+    },
+  };
+
+  const mockCreatePermissionResponse: ApiResponse<PermissionResponse> = {
+    header: {
+      success: true,
+      statusCode: 201,
+      message: 'Permission created successfully',
+    },
+    body: {
+      data: {
+        id: 3,
+        roleId: 1,
+        roleName: 'Admin',
+        resourceId: 3,
+        resourceCode: 'SETTINGS',
+        resourceName: 'Settings',
+        canCreate: true,
+        canRead: true,
+        canWrite: false,
+        canDelete: false,
+        canExecute: false,
+      },
+    },
+  };
+
   beforeEach(waitForAsync(() => {
     const roleServiceMock = jasmine.createSpyObj('RoleService', ['searchRoles', 'create', 'update', 'delete']);
     roleServiceMock.searchRoles.and.returnValue(of(mockRolesResponse));
@@ -123,8 +165,12 @@ describe('RoleListComponent', () => {
     roleServiceMock.update.and.returnValue(of(mockUpdateResponse));
     roleServiceMock.delete.and.returnValue(of(mockDeleteResponse));
 
-    const permissionServiceMock = jasmine.createSpyObj('PermissionService', ['getByRoleId']);
+    const permissionServiceMock = jasmine.createSpyObj('PermissionService', ['getByRoleId', 'create']);
     permissionServiceMock.getByRoleId.and.returnValue(of(mockPermissionsResponse));
+    permissionServiceMock.create.and.returnValue(of(mockCreatePermissionResponse));
+
+    const resourceServiceMock = jasmine.createSpyObj('ResourceService', ['getAll']);
+    resourceServiceMock.getAll.and.returnValue(of(mockResourcesResponse));
 
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
     const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
@@ -139,6 +185,7 @@ describe('RoleListComponent', () => {
       providers: [
         { provide: RoleService, useValue: roleServiceMock },
         { provide: PermissionService, useValue: permissionServiceMock },
+        { provide: ResourceService, useValue: resourceServiceMock },
         { provide: NgbModal, useValue: modalMock },
         { provide: ToastrService, useValue: toastrMock },
         provideToastr(),
@@ -147,6 +194,7 @@ describe('RoleListComponent', () => {
 
     roleServiceSpy = TestBed.inject(RoleService) as jasmine.SpyObj<RoleService>;
     permissionServiceSpy = TestBed.inject(PermissionService) as jasmine.SpyObj<PermissionService>;
+    resourceServiceSpy = TestBed.inject(ResourceService) as jasmine.SpyObj<ResourceService>;
     modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     toastrSpy = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
   }));
@@ -721,6 +769,223 @@ describe('RoleListComponent', () => {
       tick();
 
       expect(toastrSpy.error).toHaveBeenCalledWith('Error loading resources');
+    }));
+  });
+
+  describe('addResourceForm', () => {
+    it('should initialize with all checkboxes unchecked', () => {
+      expect(component.addResourceForm.get('resourceId')?.value).toBeFalsy();
+      expect(component.addResourceForm.get('canCreate')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canRead')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canWrite')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canDelete')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canExecute')?.value).toBeFalse();
+    });
+
+    it('should be invalid when resourceId is empty', () => {
+      component.addResourceForm.patchValue({ resourceId: '' });
+      expect(component.addResourceForm.invalid).toBeTrue();
+    });
+
+    it('should be valid when resourceId is selected', () => {
+      component.addResourceForm.patchValue({ resourceId: '1' });
+      expect(component.addResourceForm.valid).toBeTrue();
+    });
+  });
+
+  describe('openAddResourceModal', () => {
+    const mockRole: RoleResponse = { id: 1, name: 'Admin', description: 'Administrator role' };
+
+    beforeEach(() => {
+      component.viewingRole = mockRole;
+      component.rolePermissions = mockPermissions;
+    });
+
+    it('should reset form with all checkboxes unchecked', fakeAsync(() => {
+      component.addResourceForm.patchValue({
+        resourceId: '1',
+        canCreate: true,
+        canRead: true,
+        canWrite: true,
+        canDelete: true,
+        canExecute: true,
+      });
+      const mockContent = {};
+
+      component.openAddResourceModal(mockContent);
+      tick();
+
+      expect(component.addResourceForm.get('resourceId')?.value).toBe('');
+      expect(component.addResourceForm.get('canCreate')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canRead')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canWrite')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canDelete')?.value).toBeFalse();
+      expect(component.addResourceForm.get('canExecute')?.value).toBeFalse();
+    }));
+
+    it('should open modal', fakeAsync(() => {
+      const mockContent = {};
+
+      component.openAddResourceModal(mockContent);
+      tick();
+
+      expect(modalServiceSpy.open).toHaveBeenCalledWith(mockContent, {
+        ariaLabelledBy: 'modal-add-resource-title',
+        size: 'lg',
+      });
+    }));
+
+    it('should load available resources', fakeAsync(() => {
+      const mockContent = {};
+
+      component.openAddResourceModal(mockContent);
+      tick();
+
+      expect(resourceServiceSpy.getAll).toHaveBeenCalled();
+    }));
+
+    it('should filter out already assigned resources', fakeAsync(() => {
+      const mockContent = {};
+
+      component.openAddResourceModal(mockContent);
+      tick();
+
+      // mockPermissions has resourceId 1 and 2 assigned
+      // mockResources has 4 resources (ids 1, 2, 3, 4)
+      // So availableResources should only have resources with ids 3 and 4
+      expect(component.availableResources.length).toBe(2);
+      expect(component.availableResources.find(r => r.id === 1)).toBeUndefined();
+      expect(component.availableResources.find(r => r.id === 2)).toBeUndefined();
+      expect(component.availableResources.find(r => r.id === 3)).toBeDefined();
+      expect(component.availableResources.find(r => r.id === 4)).toBeDefined();
+    }));
+
+    it('should handle error when loading resources fails', fakeAsync(() => {
+      const consoleSpy = spyOn(console, 'error');
+      resourceServiceSpy.getAll.and.returnValue(throwError(() => new Error('Network error')));
+      const mockContent = {};
+
+      component.openAddResourceModal(mockContent);
+      tick();
+
+      expect(consoleSpy).toHaveBeenCalled();
+      expect(component.loadingResources).toBeFalse();
+    }));
+  });
+
+  describe('onAddResourceSave', () => {
+    const mockRole: RoleResponse = { id: 1, name: 'Admin', description: 'Administrator role' };
+
+    beforeEach(() => {
+      component.viewingRole = mockRole;
+      component.rolePermissions = mockPermissions;
+    });
+
+    it('should not call service if form is invalid', () => {
+      component.addResourceForm.patchValue({ resourceId: '' });
+      permissionServiceSpy.create.calls.reset();
+
+      component.onAddResourceSave();
+
+      expect(permissionServiceSpy.create).not.toHaveBeenCalled();
+    });
+
+    it('should not call service if viewingRole is null', () => {
+      component.viewingRole = null;
+      component.addResourceForm.patchValue({ resourceId: '3' });
+      permissionServiceSpy.create.calls.reset();
+
+      component.onAddResourceSave();
+
+      expect(permissionServiceSpy.create).not.toHaveBeenCalled();
+    });
+
+    it('should call service with correct data when form is valid', fakeAsync(() => {
+      component.addResourceForm.patchValue({
+        resourceId: '3',
+        canCreate: true,
+        canRead: true,
+        canWrite: false,
+        canDelete: false,
+        canExecute: false,
+      });
+
+      component.onAddResourceSave();
+      tick();
+
+      expect(permissionServiceSpy.create).toHaveBeenCalledWith({
+        roleId: 1,
+        resourceId: 3,
+        canCreate: true,
+        canRead: true,
+        canWrite: false,
+        canDelete: false,
+        canExecute: false,
+      });
+    }));
+
+    it('should show success toast on successful creation', fakeAsync(() => {
+      component.addResourceForm.patchValue({
+        resourceId: '3',
+        canCreate: true,
+        canRead: true,
+        canWrite: false,
+        canDelete: false,
+        canExecute: false,
+      });
+
+      component.onAddResourceSave();
+      tick();
+
+      expect(toastrSpy.success).toHaveBeenCalledWith('Permission created successfully');
+      expect(modalServiceSpy.dismissAll).toHaveBeenCalled();
+    }));
+
+    it('should reload permissions after successful creation', fakeAsync(() => {
+      component.addResourceForm.patchValue({
+        resourceId: '3',
+        canCreate: true,
+        canRead: true,
+        canWrite: false,
+        canDelete: false,
+        canExecute: false,
+      });
+      permissionServiceSpy.getByRoleId.calls.reset();
+
+      component.onAddResourceSave();
+      tick();
+
+      expect(permissionServiceSpy.getByRoleId).toHaveBeenCalledWith(1);
+    }));
+
+    it('should show error toast on creation failure with string error', fakeAsync(() => {
+      component.addResourceForm.patchValue({ resourceId: '3' });
+      permissionServiceSpy.create.and.returnValue(throwError(() => 'Creation failed'));
+
+      component.onAddResourceSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Creation failed');
+    }));
+
+    it('should show error toast on creation failure with object error', fakeAsync(() => {
+      component.addResourceForm.patchValue({ resourceId: '3' });
+      permissionServiceSpy.create.and.returnValue(throwError(() => ({ message: 'Creation failed' })));
+
+      component.onAddResourceSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Creation failed');
+    }));
+
+    it('should show default error toast on creation failure with undefined error', fakeAsync(() => {
+      component.addResourceForm.patchValue({ resourceId: '3' });
+      permissionServiceSpy.create.and.returnValue(throwError(() => undefined));
+
+      component.onAddResourceSave();
+      tick();
+
+      expect(toastrSpy.error).toHaveBeenCalledWith('Error adding resource');
     }));
   });
 });

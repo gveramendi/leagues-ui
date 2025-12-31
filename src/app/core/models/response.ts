@@ -105,3 +105,13 @@ export interface PermissionResponse {
   createdAt?: string;
   updatedAt?: string;
 }
+
+export interface CreatePermissionRequest {
+  roleId: number;
+  resourceId: number;
+  canCreate: boolean;
+  canRead: boolean;
+  canWrite: boolean;
+  canDelete: boolean;
+  canExecute: boolean;
+}

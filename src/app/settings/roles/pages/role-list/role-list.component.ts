@@ -14,9 +14,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import {
+  CreatePermissionRequest,
   CreateRoleRequest,
   PermissionResponse,
   PermissionService,
+  ResourceResponse,
+  ResourceService,
   RoleResponse,
   RoleService,
   UpdateRoleRequest,
@@ -60,9 +63,15 @@ export class RoleListComponent implements OnInit {
   rolePermissions: PermissionResponse[] = [];
   loadingPermissions = false;
 
+  // Add resource modal
+  availableResources: ResourceResponse[] = [];
+  loadingResources = false;
+  addResourceForm!: UntypedFormGroup;
+
   constructor(
     private roleService: RoleService,
     private permissionService: PermissionService,
+    private resourceService: ResourceService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -70,6 +79,7 @@ export class RoleListComponent implements OnInit {
   ) {
     this.initForm();
     this.initEditForm();
+    this.initAddResourceForm();
   }
 
   ngOnInit(): void {
@@ -86,6 +96,17 @@ export class RoleListComponent implements OnInit {
   private initEditForm(): void {
     this.editRoleForm = this.fb.group({
       description: ['', [Validators.maxLength(255)]],
+    });
+  }
+
+  private initAddResourceForm(): void {
+    this.addResourceForm = this.fb.group({
+      resourceId: ['', [Validators.required]],
+      canCreate: [false],
+      canRead: [false],
+      canWrite: [false],
+      canDelete: [false],
+      canExecute: [false],
     });
   }
 
@@ -264,6 +285,77 @@ export class RoleListComponent implements OnInit {
         console.error('Error loading role permissions:', error);
         this.loadingPermissions = false;
         let errorMessage = 'Error loading resources';
+        if (error) {
+          errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
+        }
+        this.toastr.error(errorMessage);
+      },
+    });
+  }
+
+  // Open modal to add resource to role
+  openAddResourceModal(content: any): void {
+    this.addResourceForm.reset({
+      resourceId: '',
+      canCreate: false,
+      canRead: false,
+      canWrite: false,
+      canDelete: false,
+      canExecute: false,
+    });
+    this.loadAvailableResources();
+    this.modalService.open(content, {
+      ariaLabelledBy: 'modal-add-resource-title',
+      size: 'lg',
+    });
+  }
+
+  // Load available resources (excluding already assigned ones)
+  private loadAvailableResources(): void {
+    this.loadingResources = true;
+    this.resourceService.getAll().subscribe({
+      next: (response) => {
+        const assignedResourceIds = this.rolePermissions.map((p) => p.resourceId);
+        this.availableResources = response.body.data.filter(
+          (resource) => !assignedResourceIds.includes(resource.id)
+        );
+        this.loadingResources = false;
+      },
+      error: (error) => {
+        console.error('Error loading resources:', error);
+        this.loadingResources = false;
+      },
+    });
+  }
+
+  // Save new resource permission
+  onAddResourceSave(): void {
+    if (this.addResourceForm.invalid || !this.viewingRole) {
+      return;
+    }
+
+    const request: CreatePermissionRequest = {
+      roleId: this.viewingRole.id,
+      resourceId: Number(this.addResourceForm.value.resourceId),
+      canCreate: this.addResourceForm.value.canCreate || false,
+      canRead: this.addResourceForm.value.canRead || false,
+      canWrite: this.addResourceForm.value.canWrite || false,
+      canDelete: this.addResourceForm.value.canDelete || false,
+      canExecute: this.addResourceForm.value.canExecute || false,
+    };
+
+    this.permissionService.create(request).subscribe({
+      next: (response) => {
+        this.toastr.success(response.header.message);
+        this.modalService.dismissAll();
+        this.addResourceForm.reset();
+        // Reload permissions for the current role
+        if (this.viewingRole) {
+          this.loadRolePermissions(this.viewingRole.id);
+        }
+      },
+      error: (error) => {
+        let errorMessage = 'Error adding resource';
         if (error) {
           errorMessage = typeof error === 'string' ? error : (error.message || errorMessage);
         }

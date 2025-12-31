@@ -30,4 +30,5 @@ export {
   CreateResourceRequest,
   UpdateResourceRequest,
   PermissionResponse,
+  CreatePermissionRequest,
 } from './models/response';

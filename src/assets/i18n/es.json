@@ -47,7 +47,11 @@
     "CAN_READ": "Leer",
     "CAN_WRITE": "Escribir",
     "CAN_DELETE": "Eliminar",
-    "CAN_EXECUTE": "Ejecutar"
+    "CAN_EXECUTE": "Ejecutar",
+    "ADD_RESOURCE": "Agregar Recurso",
+    "ADD_RESOURCE_TITLE": "Agregar Recurso a {{name}}",
+    "NO_AVAILABLE_RESOURCES": "No hay recursos disponibles para agregar",
+    "SELECT_RESOURCE": "Seleccione un recurso"
   },
   "USERS": {
     "TITLE": "Usuarios",
