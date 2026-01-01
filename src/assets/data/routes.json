@@ -45,6 +45,28 @@
           "submenu": []
         },
         {
+          "path": "/settings/resources",
+          "title": "Resources",
+          "iconType": "feather",
+          "icon": "database",
+          "class": "ml-menu",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
+          "path": "/settings/menus",
+          "title": "Menus",
+          "iconType": "feather",
+          "icon": "menu",
+          "class": "ml-menu",
+          "groupTitle": false,
+          "badge": "",
+          "badgeClass": "",
+          "submenu": []
+        },
+        {
           "path": "/settings/permissions",
           "title": "Permissions",
           "iconType": "feather",

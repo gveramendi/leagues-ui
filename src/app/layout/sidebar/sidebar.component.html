@@ -48,6 +48,9 @@
                     [routerLinkActive]="sidebarSubItem1.submenu.length > 0 ? '' : 'active'">
                     <a [routerLink]="sidebarSubItem1.submenu.length > 0 ? null : [sidebarSubItem1.path]"
                       (click)="callToggleMenu($event,sidebarSubItem1.submenu.length)" [ngClass]="[sidebarSubItem1.class]">
+                      @if (sidebarSubItem1.icon) {
+                        <i-feather [name]="sidebarSubItem1.icon" class="sidebarIcon submenu-icon"></i-feather>
+                      }
                       {{sidebarSubItem1.title | translate}}
                     </a>
                     <!-- Second level menu -->
