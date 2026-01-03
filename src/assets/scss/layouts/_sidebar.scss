@@ -201,7 +201,8 @@
         margin-top: 10px;
       }
 
-      .active {
+      .active,
+      .menu-open {
         .menu-toggle {
           background: rgba(146, 144, 144, 0.28);
         }
@@ -248,7 +249,8 @@
           brightness(94%) contrast(88%);
       }
 
-      .active .menu-toggle {
+      .active .menu-toggle,
+      .menu-open .menu-toggle {
         &:before {
           @include mixin.transform(scale(0));
         }

@@ -102,7 +102,8 @@ $color-light: #fff;
     }
   }
 
-  .ml-menu .active {
+  .ml-menu .active,
+  .ml-menu .menu-open {
     .ml-menu {
       color: #6777ef;
       &::before {

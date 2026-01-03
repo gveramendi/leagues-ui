@@ -24,7 +24,7 @@
         <!-- Top Most level menu -->
         @for (sidebarItem of sidebarItems; track sidebarItem) {
           <li
-            [routerLinkActive]="sidebarItem.submenu.length !== 0 ? 'active' : 'active-top'">
+            [routerLinkActive]="sidebarItem.submenu.length !== 0 ? '' : 'active-top'">
             @if (sidebarItem.groupTitle) {
               <div class="header">{{sidebarItem.title | translate}}</div>
             }

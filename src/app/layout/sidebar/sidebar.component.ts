@@ -101,12 +101,12 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
   callToggleMenu(event: Event, length: number) {
     if (length > 0) {
       const parentElement = (event.target as HTMLInputElement).closest('li');
-      const activeClass = parentElement?.classList.contains('active');
+      const isOpen = parentElement?.classList.contains('menu-open');
 
-      if (activeClass) {
-        this.renderer.removeClass(parentElement, 'active');
+      if (isOpen) {
+        this.renderer.removeClass(parentElement, 'menu-open');
       } else {
-        this.renderer.addClass(parentElement, 'active');
+        this.renderer.addClass(parentElement, 'menu-open');
       }
     }
   }
@@ -153,14 +153,14 @@ export class SidebarComponent implements OnInit, OnDestroy, AfterViewInit {
           currentUrl.startsWith(subItem.path)
         );
         if (hasActiveChild) {
-          // Find the parent li element and add active class
+          // Find the parent li element and add menu-open class
           const menuItems = this.elementRef.nativeElement.querySelectorAll('.list > li');
           menuItems.forEach((menuItem: HTMLElement) => {
             const link = menuItem.querySelector('a.menu-toggle');
             if (link) {
               const titleSpan = link.querySelector('.hide-menu');
               if (titleSpan && titleSpan.textContent?.trim() === item.title) {
-                this.renderer.addClass(menuItem, 'active');
+                this.renderer.addClass(menuItem, 'menu-open');
               }
             }
           });

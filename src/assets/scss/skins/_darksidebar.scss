@@ -104,7 +104,8 @@ $color-dark: #16192a;
         color: #ebecf1;
       }
 
-      &.active {
+      &.active,
+      &.menu-open {
         ul.dropdown-menu {
           background-color: #16192a;
         }
@@ -141,7 +142,8 @@ $color-dark: #16192a;
   .btn-primary.disabled {
     box-shadow: none;
   }
-  .ml-menu .active {
+  .ml-menu .active,
+  .ml-menu .menu-open {
     .ml-menu {
       background-color: rgba(0, 0, 0, 0.2);
     }
