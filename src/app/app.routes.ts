@@ -36,6 +36,11 @@ export const APP_ROUTE: Route[] = [
                 loadChildren: () =>
                     import('./settings/menus/menus.module').then((m) => m.MenusModule),
             },
+            {
+                path: 'clubs',
+                loadChildren: () =>
+                    import('./settings/clubs/clubs.module').then((m) => m.ClubsModule),
+            },
         ],
     },
     {
