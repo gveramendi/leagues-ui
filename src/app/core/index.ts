@@ -1,5 +1,6 @@
 // services
 export { AuthService } from './service/auth.service';
+export { ClubService } from './service/club.service';
 export { DirectionService } from './service/direction.service';
 export { LanguageService } from './service/language.service';
 export { MenuService } from './service/menu.service';
@@ -40,4 +41,9 @@ export {
   MenuItemResponse,
   CreateMenuItemRequest,
   UpdateMenuItemRequest,
+  AddressDto,
+  ContactInfoDto,
+  ClubResponse,
+  CreateClubRequest,
+  UpdateClubRequest,
 } from './models/response';

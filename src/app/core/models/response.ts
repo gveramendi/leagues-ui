@@ -227,3 +227,75 @@ export interface UpdateMenuItemRequest {
   badgeClass?: string;
   displayOrder?: number;
 }
+
+// Club interfaces
+export interface AddressDto {
+  street?: string;
+  number?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface ContactInfoDto {
+  email?: string;
+  phone?: string;
+  mobile?: string;
+  contactPerson?: string;
+}
+
+export interface ClubResponse {
+  id: number;
+  name: string;
+  code: string;
+  shortName?: string;
+  foundationDate?: string;
+  logoUrl?: string;
+  address?: AddressDto;
+  contactInfo?: ContactInfoDto;
+  colors?: string;
+  stadiumName?: string;
+  stadiumCapacity?: number;
+  website?: string;
+  description?: string;
+  taxId?: string;
+  legalRepresentative?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateClubRequest {
+  name: string;
+  code: string;
+  shortName?: string;
+  foundationDate?: string;
+  logoUrl?: string;
+  address?: AddressDto;
+  contactInfo?: ContactInfoDto;
+  colors?: string;
+  stadiumName?: string;
+  stadiumCapacity?: number;
+  website?: string;
+  description?: string;
+  taxId?: string;
+  legalRepresentative?: string;
+}
+
+export interface UpdateClubRequest {
+  name?: string;
+  shortName?: string;
+  foundationDate?: string;
+  logoUrl?: string;
+  address?: AddressDto;
+  contactInfo?: ContactInfoDto;
+  colors?: string;
+  stadiumName?: string;
+  stadiumCapacity?: number;
+  website?: string;
+  description?: string;
+  taxId?: string;
+  legalRepresentative?: string;
+}
