@@ -299,3 +299,68 @@ export interface UpdateClubRequest {
   taxId?: string;
   legalRepresentative?: string;
 }
+
+// Team enums
+export type Category = 'SUB_8' | 'SUB_10' | 'SUB_12' | 'SUB_14' | 'SUB_15' | 'SUB_16' | 'SUB_17' | 'SUB_18' | 'SUB_19' | 'SUB_20' | 'SUB_21' | 'SUB_23' | 'PRIMERA' | 'RESERVA' | 'SENIOR' | 'MASTER' | 'SUPER_MASTER' | 'LIBRE';
+export type Gender = 'MALE' | 'FEMALE' | 'MIXED';
+export type FootballType = 'FOOTBALL_11' | 'FOOTBALL_9' | 'FOOTBALL_8' | 'FOOTBALL_7' | 'FOOTBALL_6' | 'FOOTBALL_5' | 'FUTSAL' | 'BEACH_SOCCER';
+export type TeamStatus = 'ACTIVE' | 'INACTIVE' | 'SUSPENDED' | 'DISSOLVED';
+
+// Team interfaces
+export interface TeamResponse {
+  id: number;
+  clubId: number;
+  clubName?: string;
+  clubCode?: string;
+  name: string;
+  code: string;
+  fullName?: string;
+  category: Category;
+  gender: Gender;
+  footballType: FootballType;
+  seasonYear: number;
+  status: TeamStatus;
+  logoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  homeVenue?: string;
+  description?: string;
+  maxPlayers?: number;
+  minPlayers?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateTeamRequest {
+  clubId: number;
+  name: string;
+  code: string;
+  category: Category;
+  gender: Gender;
+  footballType: FootballType;
+  seasonYear: number;
+  status: TeamStatus;
+  logoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  homeVenue?: string;
+  description?: string;
+  maxPlayers?: number;
+  minPlayers?: number;
+}
+
+export interface UpdateTeamRequest {
+  name?: string;
+  category?: Category;
+  gender?: Gender;
+  footballType?: FootballType;
+  seasonYear?: number;
+  status?: TeamStatus;
+  logoUrl?: string;
+  primaryColor?: string;
+  secondaryColor?: string;
+  homeVenue?: string;
+  description?: string;
+  maxPlayers?: number;
+  minPlayers?: number;
+}
