@@ -4,9 +4,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**Oreva** - Angular 19 web application using standalone components architecture. This is a leagues/sports management UI with role-based access control, multi-language support, and dashboard visualizations.
+**Leagues** - Angular 19 web application using standalone components architecture. This is a leagues/sports management UI with role-based access control, multi-language support, and dashboard visualizations.
 
-Project name in package.json: `oreva`
+Project name in package.json: `leagues`
 
 ## Development Commands
 
@@ -20,7 +20,7 @@ npm start
 
 ### Building
 ```bash
-# Production build (outputs to dist/oreva/)
+# Production build (outputs to dist/leagues/)
 ng build
 
 # Development build with source maps
