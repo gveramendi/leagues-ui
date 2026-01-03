@@ -9,6 +9,7 @@ export { PermissionService } from './service/permission.service';
 export { ResourceService } from './service/resource.service';
 export { RightSidebarService } from './service/rightsidebar.service';
 export { RoleService } from './service/role.service';
+export { StaffMemberService } from './service/staff-member.service';
 export { TeamService } from './service/team.service';
 export { UserService } from './service/user.service';
 
@@ -54,4 +55,8 @@ export {
   TeamResponse,
   CreateTeamRequest,
   UpdateTeamRequest,
+  StaffRole,
+  StaffMemberResponse,
+  CreateStaffMemberRequest,
+  UpdateStaffMemberRequest,
 } from './models/response';

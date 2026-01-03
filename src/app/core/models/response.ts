@@ -364,3 +364,64 @@ export interface UpdateTeamRequest {
   maxPlayers?: number;
   minPlayers?: number;
 }
+
+// StaffMember enums
+export type StaffRole = 'HEAD_COACH' | 'ASSISTANT_COACH' | 'GOALKEEPER_COACH' | 'FITNESS_COACH' | 'TEAM_MANAGER' | 'TEAM_DOCTOR' | 'PHYSIOTHERAPIST' | 'ANALYST' | 'EQUIPMENT_MANAGER';
+
+// StaffMember interfaces
+export interface StaffMemberResponse {
+  id: number;
+  teamId: number;
+  teamName?: string;
+  firstName: string;
+  lastName: string;
+  fullName?: string;
+  documentType?: string;
+  documentNumber?: string;
+  birthDate?: string;
+  nationality?: string;
+  role: StaffRole;
+  roleDisplayName?: string;
+  licenseNumber?: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  startDate?: string;
+  endDate?: string;
+  currentlyActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateStaffMemberRequest {
+  teamId: number;
+  firstName: string;
+  lastName: string;
+  documentType?: string;
+  documentNumber?: string;
+  birthDate?: string;
+  nationality?: string;
+  role: StaffRole;
+  licenseNumber?: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  startDate?: string;
+  endDate?: string;
+}
+
+export interface UpdateStaffMemberRequest {
+  firstName?: string;
+  lastName?: string;
+  documentType?: string;
+  documentNumber?: string;
+  birthDate?: string;
+  nationality?: string;
+  role?: StaffRole;
+  licenseNumber?: string;
+  email?: string;
+  phone?: string;
+  photoUrl?: string;
+  startDate?: string;
+  endDate?: string;
+}

@@ -1,0 +1,514 @@
+<section class="main-content">
+  <ul class="breadcrumb breadcrumb-style">
+    <li class="breadcrumb-item">
+      <h5 class="page-title m-b-0">{{ 'CLUBS.TEXT' | translate }}</h5>
+    </li>
+    <li class="breadcrumb-item bcrumb-1">
+      <a routerLink="/dashboard">
+        <i class="fas fa-home font-17"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item">
+      <a routerLink="/clubs/list">{{ 'CLUBS.TEXT' | translate }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ club?.name || '' }}</li>
+  </ul>
+  <div class="section-body">
+    <!-- Club Info Card -->
+    <div class="row clearfix mb-4">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="m-0">{{ 'CLUBS.CLUB_INFO' | translate }}</h5>
+            <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+              <i class="fas fa-arrow-left me-1"></i>
+              {{ 'COMMON.BACK' | translate }}
+            </button>
+          </div>
+          <div class="card-body">
+            @if (club) {
+              <div class="row">
+                <div class="col-md-3">
+                  <p><strong>{{ 'COMMON.CODE' | translate }}:</strong> {{ club.code }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'COMMON.NAME' | translate }}:</strong> {{ club.name }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'CLUBS.SHORT_NAME' | translate }}:</strong> {{ club.shortName || '-' }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'CLUBS.STADIUM' | translate }}:</strong> {{ club.stadiumName || '-' }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teams List -->
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="p-10">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="row m-0">
+                  <div class="col-auto p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-title">
+                        <h2><strong>{{ 'TEAMS.TITLE' | translate }}</strong></h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-8 p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-search-area">
+                        <div>
+                          <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                          <input
+                            [placeholder]="'TEAMS.SEARCH_PLACEHOLDER' | translate"
+                            type="text"
+                            class="browser-default search-field"
+                            (keyup)="filterDatatable($event)"
+                            [attr.aria-label]="'COMMON.SEARCH' | translate"
+                          />
+                        </div>
+                      </div>
+                      <div class="header-buttons-left">
+                        <div class="tbl-btn-style">
+                          <button
+                            class="btn btn-icon icon-left btn-primary rounded-button"
+                            (click)="openAddModal(addTeamModal)"
+                          >
+                            <i class="material-icons">add</i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ngx-datatable
+              #table
+              class="material"
+              [rows]="filteredTeams"
+              [loadingIndicator]="loading"
+              columnMode="force"
+              [headerHeight]="60"
+              [footerHeight]="80"
+              rowHeight="auto"
+              [limit]="10"
+            >
+              <ngx-datatable-column prop="code" [width]="100">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.CODE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.code }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="name" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.NAME' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.name }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="category" [width]="120">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'TEAMS.CATEGORY' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ getCategoryLabel(row.category) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="gender" [width]="100">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'TEAMS.GENDER' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ getGenderLabel(row.gender) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="footballType" [width]="120">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'TEAMS.FOOTBALL_TYPE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ getFootballTypeLabel(row.footballType) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="status" [width]="100">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.STATUS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <span [class]="getStatusClass(row.status)">
+                    {{ getStatusLabel(row.status) }}
+                  </span>
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ACTIONS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-view btn-sm" (click)="viewTeamDetail(row)" [title]="'COMMON.VIEW' | translate">
+                      <i class="fas fa-eye"></i>
+                    </button>
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editTeamModal, row)" [title]="'COMMON.EDIT' | translate">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteTeam(row)" [title]="'COMMON.DELETE' | translate">
+                      <i class="far fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Team Modal -->
+<ng-template #addTeamModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ 'TEAMS.ADD_NEW' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="teamForm" (ngSubmit)="onAddTeamSave()">
+      <!-- Basic Info -->
+      <h6 class="text-muted mb-3">{{ 'TEAMS.BASIC_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'COMMON.CODE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.CODE_PLACEHOLDER' | translate"
+            formControlName="code"
+          />
+          @if (teamForm.get('code')?.invalid && teamForm.get('code')?.touched) {
+            <small class="form-text text-danger">
+              @if (teamForm.get('code')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'COMMON.NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.NAME_PLACEHOLDER' | translate"
+            formControlName="name"
+          />
+          @if (teamForm.get('name')?.invalid && teamForm.get('name')?.touched) {
+            <small class="form-text text-danger">
+              @if (teamForm.get('name')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'TEAMS.CATEGORY' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-control" formControlName="category">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ getCategoryLabel(cat) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'TEAMS.GENDER' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-control" formControlName="gender">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (g of genders; track g) {
+              <option [value]="g">{{ getGenderLabel(g) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'TEAMS.FOOTBALL_TYPE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-control" formControlName="footballType">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (ft of footballTypes; track ft) {
+              <option [value]="ft">{{ getFootballTypeLabel(ft) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'TEAMS.SEASON_YEAR' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="seasonYear"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'COMMON.STATUS' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-control" formControlName="status">
+            @for (s of teamStatuses; track s) {
+              <option [value]="s">{{ getStatusLabel(s) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.HOME_VENUE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.HOME_VENUE_PLACEHOLDER' | translate"
+            formControlName="homeVenue"
+          />
+        </div>
+      </div>
+
+      <!-- Colors -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'TEAMS.COLORS_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.PRIMARY_COLOR' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.PRIMARY_COLOR_PLACEHOLDER' | translate"
+            formControlName="primaryColor"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.SECONDARY_COLOR' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.SECONDARY_COLOR_PLACEHOLDER' | translate"
+            formControlName="secondaryColor"
+          />
+        </div>
+      </div>
+
+      <!-- Additional Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'TEAMS.ADDITIONAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.MIN_PLAYERS' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="minPlayers"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.MAX_PLAYERS' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="maxPlayers"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+          <textarea
+            class="form-control"
+            [placeholder]="'TEAMS.DESCRIPTION_PLACEHOLDER' | translate"
+            formControlName="description"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="teamForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit Team Modal -->
+<ng-template #editTeamModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-title">
+      {{ 'TEAMS.EDIT' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editTeamForm" (ngSubmit)="onEditTeamSave()">
+      <!-- Basic Info -->
+      <h6 class="text-muted mb-3">{{ 'TEAMS.BASIC_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'COMMON.CODE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [value]="editingTeam?.code"
+            disabled
+          />
+          <small class="form-text text-muted">
+            {{ 'TEAMS.CODE_NOT_EDITABLE' | translate }}
+          </small>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'COMMON.NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.NAME_PLACEHOLDER' | translate"
+            formControlName="name"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.CATEGORY' | translate }}</label>
+          <select class="form-control" formControlName="category">
+            @for (cat of categories; track cat) {
+              <option [value]="cat">{{ getCategoryLabel(cat) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.GENDER' | translate }}</label>
+          <select class="form-control" formControlName="gender">
+            @for (g of genders; track g) {
+              <option [value]="g">{{ getGenderLabel(g) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.FOOTBALL_TYPE' | translate }}</label>
+          <select class="form-control" formControlName="footballType">
+            @for (ft of footballTypes; track ft) {
+              <option [value]="ft">{{ getFootballTypeLabel(ft) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.SEASON_YEAR' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="seasonYear"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'COMMON.STATUS' | translate }}</label>
+          <select class="form-control" formControlName="status">
+            @for (s of teamStatuses; track s) {
+              <option [value]="s">{{ getStatusLabel(s) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.HOME_VENUE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.HOME_VENUE_PLACEHOLDER' | translate"
+            formControlName="homeVenue"
+          />
+        </div>
+      </div>
+
+      <!-- Colors -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'TEAMS.COLORS_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.PRIMARY_COLOR' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.PRIMARY_COLOR_PLACEHOLDER' | translate"
+            formControlName="primaryColor"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.SECONDARY_COLOR' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'TEAMS.SECONDARY_COLOR_PLACEHOLDER' | translate"
+            formControlName="secondaryColor"
+          />
+        </div>
+      </div>
+
+      <!-- Additional Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'TEAMS.ADDITIONAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.MIN_PLAYERS' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="minPlayers"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TEAMS.MAX_PLAYERS' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="maxPlayers"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'COMMON.DESCRIPTION' | translate }}</label>
+          <textarea
+            class="form-control"
+            [placeholder]="'TEAMS.DESCRIPTION_PLACEHOLDER' | translate"
+            formControlName="description"
+            rows="3"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="editTeamForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>

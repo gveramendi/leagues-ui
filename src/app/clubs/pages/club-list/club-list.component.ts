@@ -7,7 +7,7 @@ import {
   UntypedFormGroup,
   Validators,
 } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { DatatableComponent, NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
@@ -58,7 +58,8 @@ export class ClubListComponent implements OnInit {
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
-    private translate: TranslateService
+    private translate: TranslateService,
+    private router: Router
   ) {
     this.initForm();
     this.initEditForm();
@@ -358,5 +359,9 @@ export class ClubListComponent implements OnInit {
 
   private hasContactData(formValue: any): boolean {
     return !!(formValue.email || formValue.phone || formValue.mobile || formValue.contactPerson);
+  }
+
+  viewClubDetail(row: ClubResponse): void {
+    this.router.navigate(['/clubs', row.id]);
   }
 }

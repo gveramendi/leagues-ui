@@ -1,0 +1,490 @@
+<section class="main-content">
+  <ul class="breadcrumb breadcrumb-style">
+    <li class="breadcrumb-item">
+      <h5 class="page-title m-b-0">{{ 'TEAMS.TEXT' | translate }}</h5>
+    </li>
+    <li class="breadcrumb-item bcrumb-1">
+      <a routerLink="/dashboard">
+        <i class="fas fa-home font-17"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item">
+      <a routerLink="/clubs/list">{{ 'CLUBS.TEXT' | translate }}</a>
+    </li>
+    <li class="breadcrumb-item">
+      <a [routerLink]="['/clubs', clubId]">{{ team?.clubName || '' }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ team?.name || '' }}</li>
+  </ul>
+  <div class="section-body">
+    <!-- Team Info Card -->
+    <div class="row clearfix mb-4">
+      <div class="col-lg-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between align-items-center">
+            <h5 class="m-0">{{ 'TEAMS.TEAM_INFO' | translate }}</h5>
+            <button class="btn btn-outline-secondary btn-sm" (click)="goBack()">
+              <i class="fas fa-arrow-left me-1"></i>
+              {{ 'COMMON.BACK' | translate }}
+            </button>
+          </div>
+          <div class="card-body">
+            @if (team) {
+              <div class="row">
+                <div class="col-md-3">
+                  <p><strong>{{ 'COMMON.CODE' | translate }}:</strong> {{ team.code }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'COMMON.NAME' | translate }}:</strong> {{ team.name }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TEAMS.CATEGORY' | translate }}:</strong> {{ team.category }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TEAMS.SEASON_YEAR' | translate }}:</strong> {{ team.seasonYear }}</p>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Staff Members List -->
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="p-10">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="row m-0">
+                  <div class="col-auto p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-title">
+                        <h2><strong>{{ 'STAFF.TITLE' | translate }}</strong></h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-8 p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-search-area">
+                        <div>
+                          <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                          <input
+                            [placeholder]="'STAFF.SEARCH_PLACEHOLDER' | translate"
+                            type="text"
+                            class="browser-default search-field"
+                            (keyup)="filterDatatable($event)"
+                            [attr.aria-label]="'COMMON.SEARCH' | translate"
+                          />
+                        </div>
+                      </div>
+                      <div class="header-buttons-left">
+                        <div class="tbl-btn-style">
+                          <button
+                            class="btn btn-icon icon-left btn-primary rounded-button"
+                            (click)="openAddModal(addStaffModal)"
+                          >
+                            <i class="material-icons">add</i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ngx-datatable
+              #table
+              class="material"
+              [rows]="filteredStaffMembers"
+              [loadingIndicator]="loading"
+              columnMode="force"
+              [headerHeight]="60"
+              [footerHeight]="80"
+              rowHeight="auto"
+              [limit]="10"
+            >
+              <ngx-datatable-column prop="fullName" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.NAME' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.fullName || (row.firstName + ' ' + row.lastName) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="role" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'STAFF.ROLE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ getRoleLabel(row.role) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="email" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.EMAIL' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.email || '-' }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="phone" [width]="120">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'STAFF.PHONE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.phone || '-' }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="currentlyActive" [width]="100">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.STATUS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <span [class]="getActiveStatusClass(row.currentlyActive)">
+                    {{ getActiveStatusLabel(row.currentlyActive) }}
+                  </span>
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="120">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ACTIONS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editStaffModal, row)" [title]="'COMMON.EDIT' | translate">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteStaff(row)" [title]="'COMMON.DELETE' | translate">
+                      <i class="far fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Staff Modal -->
+<ng-template #addStaffModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ 'STAFF.ADD_NEW' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="staffForm" (ngSubmit)="onAddStaffSave()">
+      <!-- Personal Info -->
+      <h6 class="text-muted mb-3">{{ 'STAFF.PERSONAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'STAFF.FIRST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.FIRST_NAME_PLACEHOLDER' | translate"
+            formControlName="firstName"
+          />
+          @if (staffForm.get('firstName')?.invalid && staffForm.get('firstName')?.touched) {
+            <small class="form-text text-danger">
+              @if (staffForm.get('firstName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'STAFF.LAST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.LAST_NAME_PLACEHOLDER' | translate"
+            formControlName="lastName"
+          />
+          @if (staffForm.get('lastName')?.invalid && staffForm.get('lastName')?.touched) {
+            <small class="form-text text-danger">
+              @if (staffForm.get('lastName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'STAFF.ROLE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-control" formControlName="role">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (r of staffRoles; track r) {
+              <option [value]="r">{{ getRoleLabel(r) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.NATIONALITY' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.NATIONALITY_PLACEHOLDER' | translate"
+            formControlName="nationality"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.BIRTH_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="birthDate"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.LICENSE_NUMBER' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.LICENSE_NUMBER_PLACEHOLDER' | translate"
+            formControlName="licenseNumber"
+          />
+        </div>
+      </div>
+
+      <!-- Document Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'STAFF.DOCUMENT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.DOCUMENT_TYPE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.DOCUMENT_TYPE_PLACEHOLDER' | translate"
+            formControlName="documentType"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.DOCUMENT_NUMBER' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.DOCUMENT_NUMBER_PLACEHOLDER' | translate"
+            formControlName="documentNumber"
+          />
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'STAFF.CONTACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'COMMON.EMAIL' | translate }}</label>
+          <input
+            type="email"
+            class="form-control"
+            [placeholder]="'STAFF.EMAIL_PLACEHOLDER' | translate"
+            formControlName="email"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.PHONE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.PHONE_PLACEHOLDER' | translate"
+            formControlName="phone"
+          />
+        </div>
+      </div>
+
+      <!-- Contract Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'STAFF.CONTRACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.START_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="startDate"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.END_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="endDate"
+          />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="staffForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit Staff Modal -->
+<ng-template #editStaffModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-title">
+      {{ 'STAFF.EDIT' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editStaffForm" (ngSubmit)="onEditStaffSave()">
+      <!-- Personal Info -->
+      <h6 class="text-muted mb-3">{{ 'STAFF.PERSONAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.FIRST_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.FIRST_NAME_PLACEHOLDER' | translate"
+            formControlName="firstName"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.LAST_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.LAST_NAME_PLACEHOLDER' | translate"
+            formControlName="lastName"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.ROLE' | translate }}</label>
+          <select class="form-control" formControlName="role">
+            @for (r of staffRoles; track r) {
+              <option [value]="r">{{ getRoleLabel(r) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.NATIONALITY' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.NATIONALITY_PLACEHOLDER' | translate"
+            formControlName="nationality"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.BIRTH_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="birthDate"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.LICENSE_NUMBER' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.LICENSE_NUMBER_PLACEHOLDER' | translate"
+            formControlName="licenseNumber"
+          />
+        </div>
+      </div>
+
+      <!-- Document Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'STAFF.DOCUMENT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.DOCUMENT_TYPE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.DOCUMENT_TYPE_PLACEHOLDER' | translate"
+            formControlName="documentType"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.DOCUMENT_NUMBER' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.DOCUMENT_NUMBER_PLACEHOLDER' | translate"
+            formControlName="documentNumber"
+          />
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'STAFF.CONTACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'COMMON.EMAIL' | translate }}</label>
+          <input
+            type="email"
+            class="form-control"
+            [placeholder]="'STAFF.EMAIL_PLACEHOLDER' | translate"
+            formControlName="email"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.PHONE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'STAFF.PHONE_PLACEHOLDER' | translate"
+            formControlName="phone"
+          />
+        </div>
+      </div>
+
+      <!-- Contract Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'STAFF.CONTRACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.START_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="startDate"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'STAFF.END_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="endDate"
+          />
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="editStaffForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
