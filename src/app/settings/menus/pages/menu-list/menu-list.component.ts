@@ -90,7 +90,7 @@ export class MenuListComponent implements OnInit {
     this.menuForm = this.fb.group({
       code: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(50)]],
       title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      resourceId: [null],
+      resourceId: [null, [Validators.required]],
       path: ['', [Validators.maxLength(255)]],
       iconType: ['', [Validators.maxLength(50)]],
       icon: ['', [Validators.maxLength(100)]],
@@ -105,7 +105,7 @@ export class MenuListComponent implements OnInit {
   private initEditForm(): void {
     this.editMenuForm = this.fb.group({
       title: ['', [Validators.required, Validators.minLength(2), Validators.maxLength(100)]],
-      resourceId: [null],
+      resourceId: [null, [Validators.required]],
       path: ['', [Validators.maxLength(255)]],
       iconType: ['', [Validators.maxLength(50)]],
       icon: ['', [Validators.maxLength(100)]],
