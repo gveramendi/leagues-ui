@@ -46,6 +46,11 @@ export const APP_ROUTE: Route[] = [
                 loadChildren: () =>
                     import('./players/players.module').then((m) => m.PlayersModule),
             },
+            {
+                path: 'tournaments',
+                loadChildren: () =>
+                    import('./tournaments/tournaments.module').then((m) => m.TournamentsModule),
+            },
         ],
     },
     {

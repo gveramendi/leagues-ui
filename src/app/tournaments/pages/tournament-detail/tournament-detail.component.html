@@ -1,0 +1,357 @@
+<section class="main-content">
+  <ul class="breadcrumb breadcrumb-style">
+    <li class="breadcrumb-item">
+      <h5 class="page-title m-b-0">{{ 'TOURNAMENTS.TITLE' | translate }}</h5>
+    </li>
+    <li class="breadcrumb-item bcrumb-1">
+      <a routerLink="/dashboard">
+        <i class="fas fa-home font-17"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item">
+      <a routerLink="/tournaments/list">{{ 'TOURNAMENTS.TITLE' | translate }}</a>
+    </li>
+    <li class="breadcrumb-item active">{{ tournament?.name || '' }}</li>
+  </ul>
+  <div class="section-body">
+    @if (loading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    } @else if (tournament) {
+      <!-- Tournament Info Card -->
+      <div class="row clearfix mb-4">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <h5 class="m-0">{{ 'TOURNAMENTS.TOURNAMENT_INFO' | translate }}</h5>
+              <div>
+                <button class="btn btn-outline-secondary btn-sm me-2" (click)="goBack()">
+                  <i class="fas fa-arrow-left me-1"></i>
+                  {{ 'COMMON.BACK' | translate }}
+                </button>
+                <!-- Status Actions -->
+                @if (tournament.status === 'DRAFT') {
+                  <button class="btn btn-info btn-sm" (click)="openRegistration()">
+                    <i class="fas fa-door-open me-1"></i> {{ 'TOURNAMENTS.OPEN_REGISTRATION' | translate }}
+                  </button>
+                }
+                @if (tournament.status === 'REGISTRATION_OPEN') {
+                  <button class="btn btn-warning btn-sm" (click)="closeRegistration()">
+                    <i class="fas fa-door-closed me-1"></i> {{ 'TOURNAMENTS.CLOSE_REGISTRATION' | translate }}
+                  </button>
+                }
+                @if (tournament.status === 'REGISTRATION_CLOSED' || tournament.status === 'SCHEDULED') {
+                  <button class="btn btn-success btn-sm" (click)="startTournament()">
+                    <i class="fas fa-play me-1"></i> {{ 'TOURNAMENTS.START' | translate }}
+                  </button>
+                }
+                @if (tournament.status === 'IN_PROGRESS') {
+                  <button class="btn btn-dark btn-sm" (click)="finishTournament()">
+                    <i class="fas fa-flag-checkered me-1"></i> {{ 'TOURNAMENTS.FINISH' | translate }}
+                  </button>
+                }
+              </div>
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.CODE' | translate }}:</strong> <span class="badge bg-dark">{{ tournament.code }}</span></p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.NAME' | translate }}:</strong> {{ tournament.name }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.STATUS' | translate }}:</strong>
+                    <span class="badge {{ getStatusClass(tournament.status) }}">{{ tournament.statusDisplayName }}</span>
+                  </p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.SEASON' | translate }}:</strong> {{ tournament.seasonYear }}</p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.FORMAT' | translate }}:</strong> {{ tournament.formatDisplayName }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.CATEGORY' | translate }}:</strong> {{ tournament.categoryDisplayName }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.GENDER' | translate }}:</strong> {{ tournament.genderDisplayName }}</p>
+                </div>
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.FOOTBALL_TYPE' | translate }}:</strong> {{ tournament.footballTypeDisplayName }}</p>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-3">
+                  <p><strong>{{ 'TOURNAMENTS.TEAMS' | translate }}:</strong>
+                    <span class="badge bg-primary">{{ tournament.approvedTeamsCount || 0 }} / {{ tournament.maxTeams }}</span>
+                  </p>
+                </div>
+                @if (tournament.location) {
+                  <div class="col-md-3">
+                    <p><strong>{{ 'TOURNAMENTS.LOCATION' | translate }}:</strong> {{ tournament.location }}</p>
+                  </div>
+                }
+                @if (tournament.startDate) {
+                  <div class="col-md-3">
+                    <p><strong>{{ 'TOURNAMENTS.START_DATE' | translate }}:</strong> {{ tournament.startDate }}</p>
+                  </div>
+                }
+                @if (tournament.endDate) {
+                  <div class="col-md-3">
+                    <p><strong>{{ 'TOURNAMENTS.END_DATE' | translate }}:</strong> {{ tournament.endDate }}</p>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Teams List -->
+      <div class="row clearfix">
+        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+          <div class="card">
+            <div class="p-10">
+              <div class="row">
+                <div class="col-lg-6">
+                  <div class="row m-0">
+                    <div class="col-auto p-0">
+                      <div class="ngxTableHeader">
+                        <div class="table-title">
+                          <h2><strong>{{ 'TOURNAMENTS.REGISTERED_TEAMS' | translate }}</strong></h2>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="col-lg-8 p-0">
+                      <div class="ngxTableHeader">
+                        <div class="table-search-area">
+                          <div>
+                            <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                            <input
+                              [placeholder]="'COMMON.SEARCH' | translate"
+                              type="text"
+                              class="browser-default search-field"
+                              (keyup)="filterTeams($event)"
+                              [attr.aria-label]="'COMMON.SEARCH' | translate"
+                            />
+                          </div>
+                        </div>
+                        @if (canRegisterTeams()) {
+                          <div class="header-buttons-left">
+                            <div class="tbl-btn-style">
+                              <button
+                                class="btn btn-icon icon-left btn-primary rounded-button"
+                                (click)="openRegisterTeamModal(registerTeamModal)"
+                              >
+                                <i class="material-icons">add</i>
+                              </button>
+                            </div>
+                          </div>
+                        }
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <ngx-datatable
+                #table
+                class="material"
+                [rows]="filteredTeams"
+                [loadingIndicator]="teamsLoading"
+                columnMode="force"
+                [headerHeight]="60"
+                [footerHeight]="80"
+                rowHeight="auto"
+                [limit]="10"
+              >
+                <ngx-datatable-column prop="registrationNumber" [width]="60">
+                  <ng-template ngx-datatable-header-template>
+                    #
+                  </ng-template>
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <span class="badge bg-dark">{{ row.registrationNumber || row.seed || '-' }}</span>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column prop="teamName" [width]="200">
+                  <ng-template ngx-datatable-header-template>
+                    {{ 'TOURNAMENTS.TEAM' | translate }}
+                  </ng-template>
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div>
+                      <strong>{{ row.teamName }}</strong>
+                      <small class="text-muted d-block">{{ row.teamCode }} - {{ row.clubName }}</small>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column prop="registrationDate" [width]="120">
+                  <ng-template ngx-datatable-header-template>
+                    {{ 'TOURNAMENTS.REGISTRATION_DATE' | translate }}
+                  </ng-template>
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    {{ row.registrationDate }}
+                  </ng-template>
+                </ngx-datatable-column>
+
+                <ngx-datatable-column prop="status" [width]="100">
+                  <ng-template ngx-datatable-header-template>
+                    {{ 'TOURNAMENTS.STATUS' | translate }}
+                  </ng-template>
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <span class="badge {{ getStatusClass(row.status) }}">
+                      {{ getStatusLabel(row.status) }}
+                    </span>
+                  </ng-template>
+                </ngx-datatable-column>
+
+                @if (tournament.status === 'IN_PROGRESS' || tournament.status === 'FINISHED') {
+                  <ngx-datatable-column [width]="180" [sortable]="false">
+                    <ng-template ngx-datatable-header-template>
+                      {{ 'TOURNAMENTS.STATS' | translate }}
+                    </ng-template>
+                    <ng-template let-row="row" ngx-datatable-cell-template>
+                      <small>
+                        PJ: {{ row.totalPlayed || 0 }} |
+                        G: {{ row.totalWon || 0 }} |
+                        E: {{ row.totalDrawn || 0 }} |
+                        P: {{ row.totalLost || 0 }}
+                      </small>
+                    </ng-template>
+                  </ngx-datatable-column>
+                }
+
+                <ngx-datatable-column name="Actions" [sortable]="false" [width]="150">
+                  <ng-template ngx-datatable-header-template>
+                    {{ 'COMMON.ACTIONS' | translate }}
+                  </ng-template>
+                  <ng-template let-row="row" ngx-datatable-cell-template>
+                    <div class="d-flex gap-1">
+                      @if (row.status === 'PENDING' && canApproveReject()) {
+                        <button class="btn btn-sm btn-success" (click)="approveTeam(row)" [title]="'TOURNAMENTS.APPROVE' | translate">
+                          <i class="fas fa-check"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" (click)="openRejectModal(rejectModal, row)" [title]="'TOURNAMENTS.REJECT' | translate">
+                          <i class="fas fa-times"></i>
+                        </button>
+                      }
+                      @if (row.status === 'APPROVED' && canApproveReject()) {
+                        <button class="btn btn-sm btn-warning" (click)="openWithdrawModal(rejectModal, row)" [title]="'TOURNAMENTS.WITHDRAW' | translate">
+                          <i class="fas fa-sign-out-alt"></i>
+                        </button>
+                      }
+                      <button class="btn btn-tbl-delete btn-sm" (click)="deleteTeamRegistration(row)" [title]="'COMMON.DELETE' | translate">
+                        <i class="far fa-trash-alt"></i>
+                      </button>
+                    </div>
+                  </ng-template>
+                </ngx-datatable-column>
+              </ngx-datatable>
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Register Team Modal -->
+<ng-template #registerTeamModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-register-title">{{ 'TOURNAMENTS.REGISTER_TEAM' | translate }}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="registerTeamForm">
+      <div class="mb-3">
+        <label class="form-label">{{ 'TOURNAMENTS.SEARCH_TEAM' | translate }} <span class="text-danger">*</span></label>
+        <input
+          type="text"
+          class="form-control"
+          [placeholder]="'TOURNAMENTS.SEARCH_TEAM_PLACEHOLDER' | translate"
+          (input)="onTeamSearch($event)"
+        />
+        @if (availableTeams.length > 0) {
+          <div class="list-group mt-2">
+            @for (team of availableTeams; track team.id) {
+              <button
+                type="button"
+                class="list-group-item list-group-item-action"
+                [class.active]="registerTeamForm.get('teamId')?.value === team.id"
+                (click)="selectTeam(team)"
+              >
+                <div class="d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{{ team.name }}</strong>
+                    <small class="text-muted d-block">{{ team.code }} - {{ team.clubName }}</small>
+                  </div>
+                  <span class="badge bg-secondary">{{ team.category }}</span>
+                </div>
+              </button>
+            }
+          </div>
+        }
+        @if (registerTeamForm.get('teamId')?.invalid && registerTeamForm.get('teamId')?.touched) {
+          <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+        }
+      </div>
+      <div class="mb-3">
+        <label class="form-label">{{ 'TOURNAMENTS.NOTES' | translate }}</label>
+        <textarea class="form-control" formControlName="notes" rows="3"></textarea>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="onRegisterTeamSave()" [disabled]="registerTeamForm.invalid">
+      {{ 'TOURNAMENTS.REGISTER' | translate }}
+    </button>
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
+  </div>
+</ng-template>
+
+<!-- Reject/Withdraw Modal -->
+<ng-template #rejectModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-reject-title">
+      @if (actionType === 'reject') {
+        {{ 'TOURNAMENTS.REJECT_TEAM' | translate }}: {{ selectedTeamRegistration?.teamName }}
+      } @else {
+        {{ 'TOURNAMENTS.WITHDRAW_TEAM' | translate }}: {{ selectedTeamRegistration?.teamName }}
+      }
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="rejectForm">
+      <div class="mb-3">
+        <label class="form-label">{{ 'TOURNAMENTS.REASON' | translate }} <span class="text-danger">*</span></label>
+        <textarea class="form-control" formControlName="reason" rows="4" [placeholder]="'TOURNAMENTS.REASON_PLACEHOLDER' | translate"></textarea>
+        @if (rejectForm.get('reason')?.invalid && rejectForm.get('reason')?.touched) {
+          <small class="text-danger">{{ 'VALIDATION.MIN_LENGTH' | translate: { length: 10 } }}</small>
+        }
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn {{ actionType === 'reject' ? 'btn-danger' : 'btn-warning' }}"
+      (click)="onRejectWithdrawSave()"
+      [disabled]="rejectForm.invalid"
+    >
+      @if (actionType === 'reject') {
+        {{ 'TOURNAMENTS.REJECT' | translate }}
+      } @else {
+        {{ 'TOURNAMENTS.WITHDRAW' | translate }}
+      }
+    </button>
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
+  </div>
+</ng-template>

@@ -1,0 +1,40 @@
+.badge {
+  font-size: 0.75rem;
+}
+
+.btn-sm {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.75rem;
+}
+
+.text-primary {
+  border-bottom: 1px solid #dee2e6;
+  padding-bottom: 0.5rem;
+}
+
+.btn-tbl-view {
+  background-color: #17a2b8;
+  color: white;
+  &:hover {
+    background-color: #138496;
+    color: white;
+  }
+}
+
+.btn-tbl-edit {
+  background-color: #ffc107;
+  color: #212529;
+  &:hover {
+    background-color: #e0a800;
+    color: #212529;
+  }
+}
+
+.btn-tbl-delete {
+  background-color: #dc3545;
+  color: white;
+  &:hover {
+    background-color: #c82333;
+    color: white;
+  }
+}
