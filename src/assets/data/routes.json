@@ -12,6 +12,28 @@
       "submenu": []
     },
     {
+      "path": "/clubs/list",
+      "title": "CLUBS.TEXT",
+      "iconType": "feather",
+      "icon": "shield",
+      "class": "",
+      "groupTitle": false,
+      "badge": "",
+      "badgeClass": "",
+      "submenu": []
+    },
+    {
+      "path": "/players/list",
+      "title": "PLAYERS.TEXT",
+      "iconType": "feather",
+      "icon": "user",
+      "class": "",
+      "groupTitle": false,
+      "badge": "",
+      "badgeClass": "",
+      "submenu": []
+    },
+    {
       "path": "",
       "title": "Settings",
       "iconType": "feather",

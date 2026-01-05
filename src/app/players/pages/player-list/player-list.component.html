@@ -1,0 +1,798 @@
+<section class="main-content">
+  <ul class="breadcrumb breadcrumb-style">
+    <li class="breadcrumb-item">
+      <h5 class="page-title m-b-0">{{ 'PLAYERS.TEXT' | translate }}</h5>
+    </li>
+    <li class="breadcrumb-item bcrumb-1">
+      <a routerLink="/dashboard">
+        <i class="fas fa-home font-17"></i>
+      </a>
+    </li>
+    <li class="breadcrumb-item">{{ 'PLAYERS.TEXT' | translate }}</li>
+    <li class="breadcrumb-item active">{{ 'PLAYERS.TITLE' | translate }}</li>
+  </ul>
+  <div class="section-body">
+    <div class="row clearfix">
+      <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card">
+          <div class="p-10">
+            <div class="row">
+              <div class="col-lg-6">
+                <div class="row m-0">
+                  <div class="col-auto p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-title">
+                        <h2><strong>{{ 'PLAYERS.TITLE' | translate }}</strong></h2>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="col-lg-8 p-0">
+                    <div class="ngxTableHeader">
+                      <div class="table-search-area">
+                        <div>
+                          <label for="search-input"><i class="material-icons search-icon">search</i></label>
+                          <input
+                            [placeholder]="'PLAYERS.SEARCH_PLACEHOLDER' | translate"
+                            type="text"
+                            class="browser-default search-field"
+                            (keyup)="filterDatatable($event)"
+                            [attr.aria-label]="'COMMON.SEARCH' | translate"
+                          />
+                        </div>
+                      </div>
+                      <div class="header-buttons-left">
+                        <div class="tbl-btn-style">
+                          <button
+                            class="btn btn-icon icon-left btn-primary rounded-button"
+                            (click)="openAddModal(addPlayerModal)"
+                          >
+                            <i class="material-icons">add</i>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <ngx-datatable
+              #table
+              class="material"
+              [rows]="filteredRows"
+              [loadingIndicator]="loading"
+              columnMode="force"
+              [headerHeight]="60"
+              [footerHeight]="80"
+              rowHeight="auto"
+              [limit]="size"
+              [externalPaging]="true"
+              [externalSorting]="true"
+              [count]="totalElements"
+              [offset]="page"
+              (page)="onPageChange($event)"
+              (sort)="onSort($event)"
+            >
+              <ngx-datatable-column prop="id" [width]="80">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ID' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.id }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="fullName" [width]="200">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.NAME' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.fullName || (row.firstName + ' ' + row.lastName) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="documentNumber" [width]="120">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'PLAYERS.DOCUMENT_NUMBER' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.documentNumber || '-' }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="birthDate" [width]="100">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'PLAYERS.AGE' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.age || getAge(row.birthDate) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="nationality" [width]="120">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'PLAYERS.NATIONALITY' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ row.nationality || '-' }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column prop="primaryPosition" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'PLAYERS.POSITION' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  {{ getPositionLabel(row.primaryPosition) }}
+                </ng-template>
+              </ngx-datatable-column>
+
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="150">
+                <ng-template ngx-datatable-header-template>
+                  {{ 'COMMON.ACTIONS' | translate }}
+                </ng-template>
+                <ng-template let-row="row" ngx-datatable-cell-template>
+                  <div class="d-flex gap-2">
+                    <button class="btn btn-tbl-view btn-sm" (click)="openViewTeamsModal(viewTeamsModal, row)" [title]="'PLAYERS.VIEW_TEAMS' | translate">
+                      <i class="fas fa-users"></i>
+                    </button>
+                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editPlayerModal, row)" [title]="'COMMON.EDIT' | translate">
+                      <i class="fas fa-pencil-alt"></i>
+                    </button>
+                    <button class="btn btn-tbl-delete btn-sm" (click)="deletePlayer(row)" [title]="'COMMON.DELETE' | translate">
+                      <i class="far fa-trash-alt"></i>
+                    </button>
+                  </div>
+                </ng-template>
+              </ngx-datatable-column>
+            </ngx-datatable>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Add Player Modal -->
+<ng-template #addPlayerModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-basic-title">
+      {{ 'PLAYERS.ADD_NEW' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="playerForm" (ngSubmit)="onAddPlayerSave()">
+      <!-- Personal Info -->
+      <h6 class="text-muted mb-3">{{ 'PLAYERS.PERSONAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.FIRST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.FIRST_NAME_PLACEHOLDER' | translate"
+            formControlName="firstName"
+          />
+          @if (playerForm.get('firstName')?.invalid && playerForm.get('firstName')?.touched) {
+            <small class="form-text text-danger">
+              @if (playerForm.get('firstName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.LAST_NAME' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.LAST_NAME_PLACEHOLDER' | translate"
+            formControlName="lastName"
+          />
+          @if (playerForm.get('lastName')?.invalid && playerForm.get('lastName')?.touched) {
+            <small class="form-text text-danger">
+              @if (playerForm.get('lastName')?.errors?.['required']) {
+                {{ 'VALIDATION.REQUIRED' | translate }}
+              }
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.BIRTH_DATE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="birthDate"
+          />
+          @if (playerForm.get('birthDate')?.invalid && playerForm.get('birthDate')?.touched) {
+            <small class="form-text text-danger">
+              {{ 'VALIDATION.REQUIRED' | translate }}
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.BIRTH_PLACE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.BIRTH_PLACE_PLACEHOLDER' | translate"
+            formControlName="birthPlace"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.NATIONALITY' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.NATIONALITY_PLACEHOLDER' | translate"
+            formControlName="nationality"
+          />
+          @if (playerForm.get('nationality')?.invalid && playerForm.get('nationality')?.touched) {
+            <small class="form-text text-danger">
+              {{ 'VALIDATION.REQUIRED' | translate }}
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.SECOND_NATIONALITY' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.SECOND_NATIONALITY_PLACEHOLDER' | translate"
+            formControlName="secondNationality"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.GENDER' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" formControlName="gender">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (gender of genders; track gender) {
+              <option [value]="gender">{{ genderLabels[gender] | translate }}</option>
+            }
+          </select>
+          @if (playerForm.get('gender')?.invalid && playerForm.get('gender')?.touched) {
+            <small class="form-text text-danger">
+              {{ 'VALIDATION.REQUIRED' | translate }}
+            </small>
+          }
+        </div>
+      </div>
+
+      <!-- Document Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.DOCUMENT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.DOCUMENT_TYPE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" formControlName="documentType">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (docType of documentTypes; track docType) {
+              <option [value]="docType">{{ documentTypeLabels[docType] }}</option>
+            }
+          </select>
+          @if (playerForm.get('documentType')?.invalid && playerForm.get('documentType')?.touched) {
+            <small class="form-text text-danger">
+              {{ 'VALIDATION.REQUIRED' | translate }}
+            </small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.DOCUMENT_NUMBER' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.DOCUMENT_NUMBER_PLACEHOLDER' | translate"
+            formControlName="documentNumber"
+          />
+          @if (playerForm.get('documentNumber')?.invalid && playerForm.get('documentNumber')?.touched) {
+            <small class="form-text text-danger">
+              {{ 'VALIDATION.REQUIRED' | translate }}
+            </small>
+          }
+        </div>
+      </div>
+
+      <!-- Physical Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.PHYSICAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.HEIGHT' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            [placeholder]="'PLAYERS.HEIGHT_PLACEHOLDER' | translate"
+            formControlName="height"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.WEIGHT' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            [placeholder]="'PLAYERS.WEIGHT_PLACEHOLDER' | translate"
+            formControlName="weight"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PREFERRED_FOOT' | translate }}</label>
+          <select class="form-select" formControlName="footPreference">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (foot of footPreferences; track foot) {
+              <option [value]="foot">{{ footPreferenceLabels[foot] | translate }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PRIMARY_POSITION' | translate }}</label>
+          <select class="form-select" formControlName="primaryPosition">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (pos of positions; track pos) {
+              <option [value]="pos">{{ positionLabels[pos] | translate }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.SECONDARY_POSITION' | translate }}</label>
+          <select class="form-select" formControlName="secondaryPosition">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (pos of positions; track pos) {
+              <option [value]="pos">{{ positionLabels[pos] | translate }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.CONTACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'COMMON.EMAIL' | translate }}</label>
+          <input
+            type="email"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMAIL_PLACEHOLDER' | translate"
+            formControlName="email"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PHONE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.PHONE_PLACEHOLDER' | translate"
+            formControlName="phone"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'PLAYERS.ADDRESS' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.ADDRESS_PLACEHOLDER' | translate"
+            formControlName="address"
+          />
+        </div>
+      </div>
+
+      <!-- Emergency Contact -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.EMERGENCY_CONTACT' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.EMERGENCY_CONTACT_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMERGENCY_CONTACT_NAME_PLACEHOLDER' | translate"
+            formControlName="emergencyContactName"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.EMERGENCY_CONTACT_PHONE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMERGENCY_CONTACT_PHONE_PLACEHOLDER' | translate"
+            formControlName="emergencyContactPhone"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.EMERGENCY_CONTACT_RELATIONSHIP' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMERGENCY_CONTACT_RELATIONSHIP_PLACEHOLDER' | translate"
+            formControlName="emergencyContactRelationship"
+          />
+        </div>
+      </div>
+
+      <!-- Medical Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.MEDICAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.BLOOD_TYPE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.BLOOD_TYPE_PLACEHOLDER' | translate"
+            formControlName="bloodType"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.ALLERGIES' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.ALLERGIES_PLACEHOLDER' | translate"
+            formControlName="allergies"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PHOTO_URL' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.PHOTO_URL_PLACEHOLDER' | translate"
+            formControlName="photoUrl"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'PLAYERS.MEDICAL_NOTES' | translate }}</label>
+          <textarea
+            class="form-control"
+            [placeholder]="'PLAYERS.MEDICAL_NOTES_PLACEHOLDER' | translate"
+            formControlName="medicalNotes"
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="playerForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit Player Modal -->
+<ng-template #editPlayerModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-title">
+      {{ 'PLAYERS.EDIT' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editPlayerForm" (ngSubmit)="onEditPlayerSave()">
+      <!-- Personal Info -->
+      <h6 class="text-muted mb-3">{{ 'PLAYERS.PERSONAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.FIRST_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.FIRST_NAME_PLACEHOLDER' | translate"
+            formControlName="firstName"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.LAST_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.LAST_NAME_PLACEHOLDER' | translate"
+            formControlName="lastName"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.BIRTH_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="birthDate"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.BIRTH_PLACE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.BIRTH_PLACE_PLACEHOLDER' | translate"
+            formControlName="birthPlace"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.NATIONALITY' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.NATIONALITY_PLACEHOLDER' | translate"
+            formControlName="nationality"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.SECOND_NATIONALITY' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.SECOND_NATIONALITY_PLACEHOLDER' | translate"
+            formControlName="secondNationality"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.GENDER' | translate }}</label>
+          <select class="form-select" formControlName="gender">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (gender of genders; track gender) {
+              <option [value]="gender">{{ genderLabels[gender] | translate }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Document Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.DOCUMENT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.DOCUMENT_TYPE' | translate }}</label>
+          <select class="form-select" formControlName="documentType">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (docType of documentTypes; track docType) {
+              <option [value]="docType">{{ documentTypeLabels[docType] }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.DOCUMENT_NUMBER' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.DOCUMENT_NUMBER_PLACEHOLDER' | translate"
+            formControlName="documentNumber"
+          />
+        </div>
+      </div>
+
+      <!-- Physical Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.PHYSICAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.HEIGHT' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            [placeholder]="'PLAYERS.HEIGHT_PLACEHOLDER' | translate"
+            formControlName="height"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.WEIGHT' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            [placeholder]="'PLAYERS.WEIGHT_PLACEHOLDER' | translate"
+            formControlName="weight"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PREFERRED_FOOT' | translate }}</label>
+          <select class="form-select" formControlName="footPreference">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (foot of footPreferences; track foot) {
+              <option [value]="foot">{{ footPreferenceLabels[foot] | translate }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PRIMARY_POSITION' | translate }}</label>
+          <select class="form-select" formControlName="primaryPosition">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (pos of positions; track pos) {
+              <option [value]="pos">{{ positionLabels[pos] | translate }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.SECONDARY_POSITION' | translate }}</label>
+          <select class="form-select" formControlName="secondaryPosition">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (pos of positions; track pos) {
+              <option [value]="pos">{{ positionLabels[pos] | translate }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <!-- Contact Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.CONTACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'COMMON.EMAIL' | translate }}</label>
+          <input
+            type="email"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMAIL_PLACEHOLDER' | translate"
+            formControlName="email"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PHONE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.PHONE_PLACEHOLDER' | translate"
+            formControlName="phone"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'PLAYERS.ADDRESS' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.ADDRESS_PLACEHOLDER' | translate"
+            formControlName="address"
+          />
+        </div>
+      </div>
+
+      <!-- Emergency Contact -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.EMERGENCY_CONTACT' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.EMERGENCY_CONTACT_NAME' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMERGENCY_CONTACT_NAME_PLACEHOLDER' | translate"
+            formControlName="emergencyContactName"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.EMERGENCY_CONTACT_PHONE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMERGENCY_CONTACT_PHONE_PLACEHOLDER' | translate"
+            formControlName="emergencyContactPhone"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.EMERGENCY_CONTACT_RELATIONSHIP' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.EMERGENCY_CONTACT_RELATIONSHIP_PLACEHOLDER' | translate"
+            formControlName="emergencyContactRelationship"
+          />
+        </div>
+      </div>
+
+      <!-- Medical Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.MEDICAL_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.BLOOD_TYPE' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.BLOOD_TYPE_PLACEHOLDER' | translate"
+            formControlName="bloodType"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.ALLERGIES' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.ALLERGIES_PLACEHOLDER' | translate"
+            formControlName="allergies"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.PHOTO_URL' | translate }}</label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.PHOTO_URL_PLACEHOLDER' | translate"
+            formControlName="photoUrl"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'PLAYERS.MEDICAL_NOTES' | translate }}</label>
+          <textarea
+            class="form-control"
+            [placeholder]="'PLAYERS.MEDICAL_NOTES_PLACEHOLDER' | translate"
+            formControlName="medicalNotes"
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="editPlayerForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- View Teams Modal -->
+<ng-template #viewTeamsModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-teams-title">
+      {{ 'PLAYERS.PLAYER_TEAMS_TITLE' | translate: { name: viewingPlayer?.fullName || (viewingPlayer?.firstName + ' ' + viewingPlayer?.lastName) } }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (loadingRegistrations) {
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">{{ 'COMMON.LOADING' | translate }}</span>
+        </div>
+      </div>
+    } @else if (playerRegistrations.length === 0) {
+      <div class="alert alert-info mb-0">
+        {{ 'PLAYERS.NO_TEAMS' | translate }}
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="table table-hover">
+          <thead>
+            <tr>
+              <th>{{ 'PLAYERS.TEAM' | translate }}</th>
+              <th>{{ 'PLAYERS.JERSEY_NUMBER' | translate }}</th>
+              <th>{{ 'PLAYERS.POSITION' | translate }}</th>
+              <th>{{ 'COMMON.STATUS' | translate }}</th>
+              <th>{{ 'PLAYERS.REGISTRATION_DATE' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (reg of playerRegistrations; track reg.id) {
+              <tr>
+                <td>{{ reg.teamName || '-' }}</td>
+                <td>{{ reg.jerseyNumber || '-' }}</td>
+                <td>{{ reg.positionDisplayName || getPositionLabel(reg.position) }}</td>
+                <td>
+                  <span [class]="getPlayerStatusClass(reg.status)">
+                    {{ getPlayerStatusLabel(reg.status) }}
+                  </span>
+                </td>
+                <td>{{ reg.registrationDate || '-' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-light" (click)="modal.close()">
+      {{ 'COMMON.CLOSE' | translate }}
+    </button>
+  </div>
+</ng-template>

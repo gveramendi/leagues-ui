@@ -50,131 +50,544 @@
       </div>
     </div>
 
-    <!-- Staff Members List -->
+    <!-- Tabs for Players and Staff -->
     <div class="row clearfix">
       <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
-          <div class="p-10">
-            <div class="row">
-              <div class="col-lg-6">
-                <div class="row m-0">
-                  <div class="col-auto p-0">
-                    <div class="ngxTableHeader">
-                      <div class="table-title">
-                        <h2><strong>{{ 'STAFF.TITLE' | translate }}</strong></h2>
-                      </div>
-                    </div>
-                  </div>
-                  <div class="col-lg-8 p-0">
-                    <div class="ngxTableHeader">
-                      <div class="table-search-area">
-                        <div>
-                          <label for="search-input"><i class="material-icons search-icon">search</i></label>
-                          <input
-                            [placeholder]="'STAFF.SEARCH_PLACEHOLDER' | translate"
-                            type="text"
-                            class="browser-default search-field"
-                            (keyup)="filterDatatable($event)"
-                            [attr.aria-label]="'COMMON.SEARCH' | translate"
-                          />
+          <div class="card-body">
+            <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+              <!-- Players Tab -->
+              <li [ngbNavItem]="1">
+                <button ngbNavLink>
+                  <i class="fas fa-users me-2"></i>
+                  {{ 'PLAYERS.TITLE' | translate }}
+                  <span class="badge bg-primary ms-2">{{ playerRegistrations.length }}</span>
+                </button>
+                <ng-template ngbNavContent>
+                  <div class="p-10">
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class="row m-0">
+                          <div class="col-auto p-0">
+                            <div class="ngxTableHeader">
+                              <div class="table-title">
+                                <h2><strong>{{ 'PLAYERS.TITLE' | translate }}</strong></h2>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-8 p-0">
+                            <div class="ngxTableHeader">
+                              <div class="table-search-area">
+                                <div class="searchbox">
+                                  <label for="search-players"><i class="material-icons search-icon">search</i></label>
+                                  <input
+                                    id="search-players"
+                                    [placeholder]="'PLAYERS.SEARCH_PLACEHOLDER' | translate"
+                                    type="text"
+                                    class="browser-default search-field"
+                                    (keyup)="filterPlayerDatatable($event)"
+                                    [attr.aria-label]="'COMMON.SEARCH' | translate"
+                                  />
+                                </div>
+                              </div>
+                              <div class="header-buttons-left">
+                                <div class="tbl-btn-style">
+                                  <button
+                                    class="btn btn-icon icon-left btn-primary rounded-button"
+                                    (click)="openAddPlayerRegistrationModal(addPlayerModal)"
+                                  >
+                                    <i class="material-icons">add</i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
-                      <div class="header-buttons-left">
-                        <div class="tbl-btn-style">
-                          <button
-                            class="btn btn-icon icon-left btn-primary rounded-button"
-                            (click)="openAddModal(addStaffModal)"
-                          >
-                            <i class="material-icons">add</i>
-                          </button>
+                    </div>
+
+                    <ngx-datatable
+                      #playersTable
+                      class="material"
+                      [rows]="filteredPlayerRegistrations"
+                      [loadingIndicator]="loadingPlayers"
+                      columnMode="force"
+                      [headerHeight]="60"
+                      [footerHeight]="80"
+                      rowHeight="auto"
+                      [limit]="10"
+                    >
+                      <ngx-datatable-column prop="jerseyNumber" [width]="80">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'PLAYERS.NUMBER' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          <span class="badge bg-dark">{{ row.jerseyNumber || '-' }}</span>
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column prop="playerFullName" [width]="200">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'COMMON.NAME' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          {{ row.playerFullName }}
+                          @if (row.isCaptain) {
+                            <span class="badge bg-warning ms-1" title="Captain">C</span>
+                          }
+                          @if (row.isViceCaptain) {
+                            <span class="badge bg-info ms-1" title="Vice Captain">VC</span>
+                          }
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column prop="position" [width]="150">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'PLAYERS.POSITION' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          {{ row.positionDisplayName || (row.position ? getPositionLabel(row.position) : '-') }}
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column prop="status" [width]="120">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'COMMON.STATUS' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          <span [class]="getPlayerStatusClass(row.status)">
+                            {{ row.statusDisplayName || getPlayerStatusLabel(row.status) }}
+                          </span>
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column name="Actions" [sortable]="false" [width]="120">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'COMMON.ACTIONS' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          <div class="d-flex gap-2">
+                            <button class="btn btn-tbl-edit btn-sm" (click)="openEditPlayerRegistrationModal(editPlayerModal, row)" [title]="'COMMON.EDIT' | translate">
+                              <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn btn-tbl-delete btn-sm" (click)="deletePlayerRegistration(row)" [title]="'COMMON.DELETE' | translate">
+                              <i class="far fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </ng-template>
+                      </ngx-datatable-column>
+                    </ngx-datatable>
+                  </div>
+                </ng-template>
+              </li>
+
+              <!-- Staff Tab -->
+              <li [ngbNavItem]="2">
+                <button ngbNavLink>
+                  <i class="fas fa-user-tie me-2"></i>
+                  {{ 'STAFF.TITLE' | translate }}
+                  <span class="badge bg-secondary ms-2">{{ staffMembers.length }}</span>
+                </button>
+                <ng-template ngbNavContent>
+                  <div class="p-10">
+                    <div class="row">
+                      <div class="col-lg-6">
+                        <div class="row m-0">
+                          <div class="col-auto p-0">
+                            <div class="ngxTableHeader">
+                              <div class="table-title">
+                                <h2><strong>{{ 'STAFF.TITLE' | translate }}</strong></h2>
+                              </div>
+                            </div>
+                          </div>
+                          <div class="col-lg-8 p-0">
+                            <div class="ngxTableHeader">
+                              <div class="table-search-area">
+                                <div class="searchbox">
+                                  <label for="search-staff"><i class="material-icons search-icon">search</i></label>
+                                  <input
+                                    id="search-staff"
+                                    [placeholder]="'STAFF.SEARCH_PLACEHOLDER' | translate"
+                                    type="text"
+                                    class="browser-default search-field"
+                                    (keyup)="filterStaffDatatable($event)"
+                                    [attr.aria-label]="'COMMON.SEARCH' | translate"
+                                  />
+                                </div>
+                              </div>
+                              <div class="header-buttons-left">
+                                <div class="tbl-btn-style">
+                                  <button
+                                    class="btn btn-icon icon-left btn-primary rounded-button"
+                                    (click)="openAddStaffModal(addStaffModal)"
+                                  >
+                                    <i class="material-icons">add</i>
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
+
+                    <ngx-datatable
+                      #staffTable
+                      class="material"
+                      [rows]="filteredStaffMembers"
+                      [loadingIndicator]="loadingStaff"
+                      columnMode="force"
+                      [headerHeight]="60"
+                      [footerHeight]="80"
+                      rowHeight="auto"
+                      [limit]="10"
+                    >
+                      <ngx-datatable-column prop="fullName" [width]="200">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'COMMON.NAME' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          {{ row.fullName || (row.firstName + ' ' + row.lastName) }}
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column prop="role" [width]="150">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'STAFF.ROLE' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          {{ getRoleLabel(row.role) }}
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column prop="email" [width]="200">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'COMMON.EMAIL' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          {{ row.email || '-' }}
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column prop="phone" [width]="120">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'STAFF.PHONE' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          {{ row.phone || '-' }}
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column prop="currentlyActive" [width]="100">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'COMMON.STATUS' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          <span [class]="getActiveStatusClass(row.currentlyActive)">
+                            {{ getActiveStatusLabel(row.currentlyActive) }}
+                          </span>
+                        </ng-template>
+                      </ngx-datatable-column>
+
+                      <ngx-datatable-column name="Actions" [sortable]="false" [width]="120">
+                        <ng-template ngx-datatable-header-template>
+                          {{ 'COMMON.ACTIONS' | translate }}
+                        </ng-template>
+                        <ng-template let-row="row" ngx-datatable-cell-template>
+                          <div class="d-flex gap-2">
+                            <button class="btn btn-tbl-edit btn-sm" (click)="openEditStaffModal(editStaffModal, row)" [title]="'COMMON.EDIT' | translate">
+                              <i class="fas fa-pencil-alt"></i>
+                            </button>
+                            <button class="btn btn-tbl-delete btn-sm" (click)="deleteStaff(row)" [title]="'COMMON.DELETE' | translate">
+                              <i class="far fa-trash-alt"></i>
+                            </button>
+                          </div>
+                        </ng-template>
+                      </ngx-datatable-column>
+                    </ngx-datatable>
                   </div>
-                </div>
-              </div>
-            </div>
-
-            <ngx-datatable
-              #table
-              class="material"
-              [rows]="filteredStaffMembers"
-              [loadingIndicator]="loading"
-              columnMode="force"
-              [headerHeight]="60"
-              [footerHeight]="80"
-              rowHeight="auto"
-              [limit]="10"
-            >
-              <ngx-datatable-column prop="fullName" [width]="200">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'COMMON.NAME' | translate }}
                 </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  {{ row.fullName || (row.firstName + ' ' + row.lastName) }}
-                </ng-template>
-              </ngx-datatable-column>
-
-              <ngx-datatable-column prop="role" [width]="150">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'STAFF.ROLE' | translate }}
-                </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  {{ getRoleLabel(row.role) }}
-                </ng-template>
-              </ngx-datatable-column>
-
-              <ngx-datatable-column prop="email" [width]="200">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'COMMON.EMAIL' | translate }}
-                </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  {{ row.email || '-' }}
-                </ng-template>
-              </ngx-datatable-column>
-
-              <ngx-datatable-column prop="phone" [width]="120">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'STAFF.PHONE' | translate }}
-                </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  {{ row.phone || '-' }}
-                </ng-template>
-              </ngx-datatable-column>
-
-              <ngx-datatable-column prop="currentlyActive" [width]="100">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'COMMON.STATUS' | translate }}
-                </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  <span [class]="getActiveStatusClass(row.currentlyActive)">
-                    {{ getActiveStatusLabel(row.currentlyActive) }}
-                  </span>
-                </ng-template>
-              </ngx-datatable-column>
-
-              <ngx-datatable-column name="Actions" [sortable]="false" [width]="120">
-                <ng-template ngx-datatable-header-template>
-                  {{ 'COMMON.ACTIONS' | translate }}
-                </ng-template>
-                <ng-template let-row="row" ngx-datatable-cell-template>
-                  <div class="d-flex gap-2">
-                    <button class="btn btn-tbl-edit btn-sm" (click)="openEditModal(editStaffModal, row)" [title]="'COMMON.EDIT' | translate">
-                      <i class="fas fa-pencil-alt"></i>
-                    </button>
-                    <button class="btn btn-tbl-delete btn-sm" (click)="deleteStaff(row)" [title]="'COMMON.DELETE' | translate">
-                      <i class="far fa-trash-alt"></i>
-                    </button>
-                  </div>
-                </ng-template>
-              </ngx-datatable-column>
-            </ngx-datatable>
+              </li>
+            </ul>
+            <div [ngbNavOutlet]="nav" class="mt-2"></div>
           </div>
         </div>
       </div>
     </div>
   </div>
 </section>
+
+<!-- Add Player Registration Modal -->
+<ng-template #addPlayerModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-player-title">
+      {{ 'PLAYERS.REGISTER_PLAYER' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="playerRegistrationForm" (ngSubmit)="onAddPlayerRegistrationSave()">
+      <!-- Search Player -->
+      <h6 class="text-muted mb-3">{{ 'PLAYERS.SELECT_PLAYER' | translate }}</h6>
+      <div class="row">
+        <div class="col-12 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.SEARCH_PLAYER' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="text"
+            class="form-control"
+            [placeholder]="'PLAYERS.SEARCH_PLAYER_PLACEHOLDER' | translate"
+            (keyup)="searchPlayers($event)"
+          />
+          @if (loadingAvailablePlayers) {
+            <small class="text-muted">{{ 'COMMON.LOADING' | translate }}...</small>
+          }
+          @if (availablePlayers.length > 0) {
+            <div class="list-group mt-2" style="max-height: 200px; overflow-y: auto;">
+              @for (player of availablePlayers; track player.id) {
+                <button
+                  type="button"
+                  class="list-group-item list-group-item-action"
+                  [class.active]="playerRegistrationForm.get('playerId')?.value == player.id"
+                  (click)="playerRegistrationForm.patchValue({ playerId: player.id })"
+                >
+                  <strong>{{ player.fullName }}</strong>
+                  <small class="text-muted ms-2">{{ player.documentNumber }}</small>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Registration Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.REGISTRATION_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.JERSEY_NUMBER' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            [placeholder]="'PLAYERS.NUMBER_PLACEHOLDER' | translate"
+            formControlName="jerseyNumber"
+            min="1"
+            max="99"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.POSITION' | translate }}</label>
+          <select class="form-control" formControlName="position">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (pos of positions; track pos) {
+              <option [value]="pos">{{ getPositionLabel(pos) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">
+            {{ 'COMMON.STATUS' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-control" formControlName="status">
+            @for (s of playerStatuses; track s) {
+              <option [value]="s">{{ getPlayerStatusLabel(s) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'PLAYERS.REGISTRATION_DATE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="registrationDate"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.END_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="endDate"
+          />
+        </div>
+      </div>
+
+      <!-- Team Role -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.TEAM_ROLE' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" formControlName="isCaptain" id="isCaptain">
+            <label class="form-check-label" for="isCaptain">
+              {{ 'PLAYERS.IS_CAPTAIN' | translate }}
+            </label>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" formControlName="isViceCaptain" id="isViceCaptain">
+            <label class="form-check-label" for="isViceCaptain">
+              {{ 'PLAYERS.IS_VICE_CAPTAIN' | translate }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contract Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.CONTRACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.CONTRACT_START' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="contractStart"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.CONTRACT_END' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="contractEnd"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'COMMON.NOTES' | translate }}</label>
+          <textarea
+            class="form-control"
+            formControlName="notes"
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="playerRegistrationForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
+
+<!-- Edit Player Registration Modal -->
+<ng-template #editPlayerModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-edit-player-title">
+      {{ 'PLAYERS.EDIT_REGISTRATION' | translate }}: {{ editingPlayerRegistration?.playerFullName }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="editPlayerRegistrationForm" (ngSubmit)="onEditPlayerRegistrationSave()">
+      <!-- Registration Info -->
+      <h6 class="text-muted mb-3">{{ 'PLAYERS.REGISTRATION_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.JERSEY_NUMBER' | translate }}</label>
+          <input
+            type="number"
+            class="form-control"
+            [placeholder]="'PLAYERS.NUMBER_PLACEHOLDER' | translate"
+            formControlName="jerseyNumber"
+            min="1"
+            max="99"
+          />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'PLAYERS.POSITION' | translate }}</label>
+          <select class="form-control" formControlName="position">
+            <option value="">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (pos of positions; track pos) {
+              <option [value]="pos">{{ getPositionLabel(pos) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'COMMON.STATUS' | translate }}</label>
+          <select class="form-control" formControlName="status">
+            @for (s of playerStatuses; track s) {
+              <option [value]="s">{{ getPlayerStatusLabel(s) }}</option>
+            }
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.END_DATE' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="endDate"
+          />
+        </div>
+      </div>
+
+      <!-- Team Role -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.TEAM_ROLE' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" formControlName="isCaptain" id="editIsCaptain">
+            <label class="form-check-label" for="editIsCaptain">
+              {{ 'PLAYERS.IS_CAPTAIN' | translate }}
+            </label>
+          </div>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input class="form-check-input" type="checkbox" formControlName="isViceCaptain" id="editIsViceCaptain">
+            <label class="form-check-label" for="editIsViceCaptain">
+              {{ 'PLAYERS.IS_VICE_CAPTAIN' | translate }}
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contract Info -->
+      <h6 class="text-muted mb-3 mt-3">{{ 'PLAYERS.CONTRACT_INFO' | translate }}</h6>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.CONTRACT_START' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="contractStart"
+          />
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'PLAYERS.CONTRACT_END' | translate }}</label>
+          <input
+            type="date"
+            class="form-control"
+            formControlName="contractEnd"
+          />
+        </div>
+        <div class="col-12 mb-3">
+          <label class="form-label">{{ 'COMMON.NOTES' | translate }}</label>
+          <textarea
+            class="form-control"
+            formControlName="notes"
+            rows="2"
+          ></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary" [disabled]="editPlayerRegistrationForm.invalid">
+          {{ 'COMMON.SAVE' | translate }}
+        </button>
+        <button type="button" class="btn btn-light" (click)="modal.close()">
+          {{ 'COMMON.CLOSE' | translate }}
+        </button>
+      </div>
+    </form>
+  </div>
+</ng-template>
 
 <!-- Add Staff Modal -->
 <ng-template #addStaffModal let-modal>

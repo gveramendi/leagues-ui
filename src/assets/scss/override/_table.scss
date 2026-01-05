@@ -470,6 +470,24 @@ table tr:hover .table-links {
 .btn-tbl-delete:hover {
   color: #fff;
 }
+.btn-tbl-view {
+  background-color: #5cb8ff !important;
+  height: 30px !important;
+  width: 30px !important;
+  margin: 2px !important;
+  line-height: 30px !important;
+  color: #fff;
+  border-radius: 50%;
+  i {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+}
+.btn-tbl-view:focus,
+.btn-tbl-view:hover {
+  color: #fff;
+}
 .datatable-checkbox input[type="checkbox"]:before {
   border: 2px solid #807b7b;
 }

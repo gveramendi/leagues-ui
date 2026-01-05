@@ -9,6 +9,8 @@ export { PermissionService } from './service/permission.service';
 export { ResourceService } from './service/resource.service';
 export { RightSidebarService } from './service/rightsidebar.service';
 export { RoleService } from './service/role.service';
+export { PlayerService } from './service/player.service';
+export { PlayerRegistrationService } from './service/player-registration.service';
 export { StaffMemberService } from './service/staff-member.service';
 export { TeamService } from './service/team.service';
 export { UserService } from './service/user.service';
@@ -59,4 +61,14 @@ export {
   StaffMemberResponse,
   CreateStaffMemberRequest,
   UpdateStaffMemberRequest,
+  DocumentType,
+  FootPreference,
+  Position,
+  PlayerStatus,
+  PlayerResponse,
+  CreatePlayerRequest,
+  UpdatePlayerRequest,
+  PlayerRegistrationResponse,
+  CreatePlayerRegistrationRequest,
+  UpdatePlayerRegistrationRequest,
 } from './models/response';

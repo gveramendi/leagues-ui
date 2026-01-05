@@ -425,3 +425,176 @@ export interface UpdateStaffMemberRequest {
   startDate?: string;
   endDate?: string;
 }
+
+// Player enums
+export type DocumentType = 'CI' | 'PASSPORT' | 'DNI' | 'FOREIGN_ID' | 'OTHER';
+export type FootPreference = 'RIGHT' | 'LEFT' | 'BOTH';
+export type Position =
+  | 'GOALKEEPER'
+  | 'CENTER_BACK'
+  | 'LEFT_BACK'
+  | 'RIGHT_BACK'
+  | 'SWEEPER'
+  | 'DEFENSIVE_MIDFIELDER'
+  | 'CENTRAL_MIDFIELDER'
+  | 'ATTACKING_MIDFIELDER'
+  | 'LEFT_MIDFIELDER'
+  | 'RIGHT_MIDFIELDER'
+  | 'LEFT_WINGER'
+  | 'RIGHT_WINGER'
+  | 'CENTER_FORWARD'
+  | 'STRIKER'
+  | 'SECOND_STRIKER';
+export type PlayerStatus = 'ACTIVE' | 'INJURED' | 'SUSPENDED' | 'ON_LOAN' | 'INACTIVE' | 'TRANSFERRED';
+
+// Player interfaces (personal data)
+export interface PlayerResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fullName?: string;
+  documentType: DocumentType;
+  documentTypeDisplayName?: string;
+  documentNumber: string;
+  birthDate: string;
+  age?: number;
+  birthPlace?: string;
+  nationality: string;
+  secondNationality?: string;
+  gender: string;
+  height?: number;
+  weight?: number;
+  footPreference?: FootPreference;
+  footPreferenceDisplayName?: string;
+  primaryPosition?: Position;
+  primaryPositionDisplayName?: string;
+  secondaryPosition?: Position;
+  secondaryPositionDisplayName?: string;
+  email?: string;
+  phone?: string;
+  address?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
+  bloodType?: string;
+  medicalNotes?: string;
+  allergies?: string;
+  photoUrl?: string;
+  isMinor?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreatePlayerRequest {
+  firstName: string;
+  lastName: string;
+  documentType: DocumentType;
+  documentNumber: string;
+  birthDate: string;
+  birthPlace?: string;
+  nationality: string;
+  secondNationality?: string;
+  gender: string;
+  height?: number;
+  weight?: number;
+  footPreference?: FootPreference;
+  primaryPosition?: Position;
+  secondaryPosition?: Position;
+  email?: string;
+  phone?: string;
+  address?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
+  bloodType?: string;
+  medicalNotes?: string;
+  allergies?: string;
+  photoUrl?: string;
+}
+
+export interface UpdatePlayerRequest {
+  firstName?: string;
+  lastName?: string;
+  documentType?: DocumentType;
+  documentNumber?: string;
+  birthDate?: string;
+  birthPlace?: string;
+  nationality?: string;
+  secondNationality?: string;
+  gender?: string;
+  height?: number;
+  weight?: number;
+  footPreference?: FootPreference;
+  primaryPosition?: Position;
+  secondaryPosition?: Position;
+  email?: string;
+  phone?: string;
+  address?: string;
+  emergencyContactName?: string;
+  emergencyContactPhone?: string;
+  emergencyContactRelationship?: string;
+  bloodType?: string;
+  medicalNotes?: string;
+  allergies?: string;
+  photoUrl?: string;
+}
+
+// Player Registration interfaces (player-team relationship)
+export interface PlayerRegistrationResponse {
+  id: number;
+  playerId: number;
+  playerFullName?: string;
+  teamId: number;
+  teamName?: string;
+  seasonYear: number;
+  jerseyNumber?: number;
+  position?: Position;
+  positionDisplayName?: string;
+  status: PlayerStatus;
+  statusDisplayName?: string;
+  registrationDate: string;
+  endDate?: string;
+  isCaptain?: boolean;
+  isViceCaptain?: boolean;
+  contractStart?: string;
+  contractEnd?: string;
+  onLoanFrom?: string;
+  loanEndDate?: string;
+  notes?: string;
+  isCurrentlyActive?: boolean;
+  isOnLoan?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreatePlayerRegistrationRequest {
+  playerId: number;
+  teamId: number;
+  seasonYear: number;
+  jerseyNumber?: number;
+  position?: Position;
+  status: PlayerStatus;
+  registrationDate: string;
+  endDate?: string;
+  isCaptain?: boolean;
+  isViceCaptain?: boolean;
+  contractStart?: string;
+  contractEnd?: string;
+  onLoanFrom?: string;
+  loanEndDate?: string;
+  notes?: string;
+}
+
+export interface UpdatePlayerRegistrationRequest {
+  jerseyNumber?: number;
+  position?: Position;
+  status?: PlayerStatus;
+  endDate?: string;
+  isCaptain?: boolean;
+  isViceCaptain?: boolean;
+  contractStart?: string;
+  contractEnd?: string;
+  onLoanFrom?: string;
+  loanEndDate?: string;
+  notes?: string;
+}
