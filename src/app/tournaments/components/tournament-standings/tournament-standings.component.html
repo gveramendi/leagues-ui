@@ -1,0 +1,86 @@
+<div class="card">
+  <div class="card-header">
+    <h5 class="m-0">{{ 'STANDINGS.TITLE' | translate }}</h5>
+  </div>
+  <div class="card-body p-0">
+    @if (loading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    } @else if (error) {
+      <div class="alert alert-warning m-3">
+        {{ error }}
+      </div>
+    } @else if (standingTable && standingTable.standings.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-striped table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th class="text-center" style="width: 50px;">#</th>
+              <th>{{ 'STANDINGS.TEAM' | translate }}</th>
+              <th class="text-center" style="width: 50px;">{{ 'STANDINGS.PLAYED_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 50px;">{{ 'STANDINGS.WON_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 50px;">{{ 'STANDINGS.DRAWN_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 50px;">{{ 'STANDINGS.LOST_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 50px;">{{ 'STANDINGS.GOALS_FOR_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 50px;">{{ 'STANDINGS.GOALS_AGAINST_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 50px;">{{ 'STANDINGS.GOAL_DIFFERENCE_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 60px;">{{ 'STANDINGS.POINTS_SHORT' | translate }}</th>
+              <th class="text-center" style="width: 120px;">{{ 'STANDINGS.FORM' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (standing of standingTable.standings; track standing.id) {
+              <tr [class]="getPositionClass(standing)">
+                <td class="text-center fw-bold">{{ standing.position }}</td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    @if (standing.teamLogoUrl) {
+                      <img [src]="standing.teamLogoUrl" [alt]="standing.teamName" class="team-logo me-2" />
+                    }
+                    <div>
+                      <span class="fw-semibold">{{ standing.teamName }}</span>
+                      <small class="text-muted d-block">{{ standing.teamCode }}</small>
+                    </div>
+                  </div>
+                </td>
+                <td class="text-center">{{ standing.played || 0 }}</td>
+                <td class="text-center text-success fw-semibold">{{ standing.won || 0 }}</td>
+                <td class="text-center text-warning fw-semibold">{{ standing.drawn || 0 }}</td>
+                <td class="text-center text-danger fw-semibold">{{ standing.lost || 0 }}</td>
+                <td class="text-center">{{ standing.goalsFor || 0 }}</td>
+                <td class="text-center">{{ standing.goalsAgainst || 0 }}</td>
+                <td class="text-center">
+                  <span [class.text-success]="(standing.goalDifference || 0) > 0"
+                        [class.text-danger]="(standing.goalDifference || 0) < 0">
+                    {{ (standing.goalDifference || 0) > 0 ? '+' : '' }}{{ standing.goalDifference || 0 }}
+                  </span>
+                </td>
+                <td class="text-center fw-bold fs-5">{{ standing.points || 0 }}</td>
+                <td class="text-center">
+                  <div class="d-flex justify-content-center gap-1">
+                    @for (result of getFormBadges(standing.form); track $index) {
+                      <span class="badge {{ getFormBadgeClass(result) }} form-badge">{{ result }}</span>
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (standingTable.lastUpdated) {
+        <div class="card-footer text-muted small">
+          {{ 'STANDINGS.LAST_UPDATED' | translate }}: {{ standingTable.lastUpdated }}
+        </div>
+      }
+    } @else {
+      <div class="text-center py-5 text-muted">
+        <i class="fas fa-table fa-3x mb-3"></i>
+        <p>{{ 'STANDINGS.NO_DATA' | translate }}</p>
+      </div>
+    }
+  </div>
+</div>

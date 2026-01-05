@@ -463,7 +463,41 @@
     "START_TITLE": "Start Tournament",
     "START_MESSAGE": "Are you sure you want to start this tournament?",
     "FINISH_TITLE": "Finish Tournament",
-    "FINISH_MESSAGE": "Are you sure you want to finish this tournament?"
+    "FINISH_MESSAGE": "Are you sure you want to finish this tournament?",
+    "TEAMS_TAB": "Teams",
+    "STANDINGS_TAB": "Standings",
+    "SCORERS_TAB": "Scorers",
+    "ASSISTS_TAB": "Assists"
+  },
+  "STANDINGS": {
+    "TITLE": "Standings Table",
+    "TEAM": "Team",
+    "PLAYED_SHORT": "P",
+    "WON_SHORT": "W",
+    "DRAWN_SHORT": "D",
+    "LOST_SHORT": "L",
+    "GOALS_FOR_SHORT": "GF",
+    "GOALS_AGAINST_SHORT": "GA",
+    "GOAL_DIFFERENCE_SHORT": "GD",
+    "POINTS_SHORT": "Pts",
+    "FORM": "Form",
+    "LAST_UPDATED": "Last updated",
+    "NO_DATA": "No standings data available"
+  },
+  "STATISTICS": {
+    "TOP_SCORERS": "Top Scorers",
+    "TOP_ASSISTS": "Top Assists",
+    "PLAYER": "Player",
+    "TEAM": "Team",
+    "GOALS": "G",
+    "PENALTIES": "Pen",
+    "ASSISTS": "A",
+    "MATCHES": "M",
+    "GOALS_PER_GAME": "G/M",
+    "ASSISTS_PER_GAME": "A/M",
+    "LAST_UPDATED": "Last updated",
+    "NO_SCORERS": "No scorers data available",
+    "NO_ASSISTS": "No assists data available"
   },
   "MENU_ITEMS": {
     "TITLE": "Menu Items for {{menu}}",

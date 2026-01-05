@@ -113,147 +113,196 @@
         </div>
       </div>
 
-      <!-- Teams List -->
+      <!-- Tabs Navigation -->
       <div class="row clearfix">
-        <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="col-lg-12">
           <div class="card">
-            <div class="p-10">
-              <div class="row">
-                <div class="col-lg-6">
-                  <div class="row m-0">
-                    <div class="col-auto p-0">
-                      <div class="ngxTableHeader">
-                        <div class="table-title">
-                          <h2><strong>{{ 'TOURNAMENTS.REGISTERED_TEAMS' | translate }}</strong></h2>
-                        </div>
-                      </div>
-                    </div>
-                    <div class="col-lg-8 p-0">
-                      <div class="ngxTableHeader">
-                        <div class="table-search-area">
-                          <div>
-                            <label for="search-input"><i class="material-icons search-icon">search</i></label>
-                            <input
-                              [placeholder]="'COMMON.SEARCH' | translate"
-                              type="text"
-                              class="browser-default search-field"
-                              (keyup)="filterTeams($event)"
-                              [attr.aria-label]="'COMMON.SEARCH' | translate"
-                            />
-                          </div>
-                        </div>
-                        @if (canRegisterTeams()) {
-                          <div class="header-buttons-left">
-                            <div class="tbl-btn-style">
-                              <button
-                                class="btn btn-icon icon-left btn-primary rounded-button"
-                                (click)="openRegisterTeamModal(registerTeamModal)"
-                              >
-                                <i class="material-icons">add</i>
-                              </button>
+            <div class="card-body">
+              <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+                <li [ngbNavItem]="1">
+                  <button ngbNavLink>
+                    <i class="fas fa-users me-2"></i>{{ 'TOURNAMENTS.TEAMS_TAB' | translate }}
+                  </button>
+                  <ng-template ngbNavContent>
+                    <!-- Teams List -->
+                    <div class="p-10">
+                      <div class="row">
+                        <div class="col-lg-6">
+                          <div class="row m-0">
+                            <div class="col-auto p-0">
+                              <div class="ngxTableHeader">
+                                <div class="table-title">
+                                  <h2><strong>{{ 'TOURNAMENTS.REGISTERED_TEAMS' | translate }}</strong></h2>
+                                </div>
+                              </div>
+                            </div>
+                            <div class="col-lg-8 p-0">
+                              <div class="ngxTableHeader">
+                                <div class="table-search-area">
+                                  <div class="searchbox">
+                                    <label for="teams-search-input"><i class="material-icons search-icon">search</i></label>
+                                    <input
+                                      id="teams-search-input"
+                                      [placeholder]="'COMMON.SEARCH' | translate"
+                                      type="text"
+                                      class="browser-default search-field"
+                                      (keyup)="filterTeams($event)"
+                                      [attr.aria-label]="'COMMON.SEARCH' | translate"
+                                    />
+                                  </div>
+                                </div>
+                                @if (canRegisterTeams()) {
+                                  <div class="header-buttons-left">
+                                    <div class="tbl-btn-style">
+                                      <button
+                                        class="btn btn-icon icon-left btn-primary rounded-button"
+                                        (click)="openRegisterTeamModal(registerTeamModal)"
+                                      >
+                                        <i class="material-icons">add</i>
+                                      </button>
+                                    </div>
+                                  </div>
+                                }
+                              </div>
                             </div>
                           </div>
-                        }
+                        </div>
                       </div>
+
+                      <ngx-datatable
+                        #table
+                        class="material"
+                        [rows]="filteredTeams"
+                        [loadingIndicator]="teamsLoading"
+                        columnMode="force"
+                        [headerHeight]="60"
+                        [footerHeight]="80"
+                        rowHeight="auto"
+                        [limit]="10"
+                      >
+                        <ngx-datatable-column prop="registrationNumber" [width]="60" [maxWidth]="60">
+                          <ng-template ngx-datatable-header-template>
+                            #
+                          </ng-template>
+                          <ng-template let-row="row" ngx-datatable-cell-template>
+                            <span class="badge bg-dark">{{ row.registrationNumber || row.seed || '-' }}</span>
+                          </ng-template>
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column prop="teamName" [flexGrow]="2">
+                          <ng-template ngx-datatable-header-template>
+                            {{ 'TOURNAMENTS.TEAM' | translate }}
+                          </ng-template>
+                          <ng-template let-row="row" ngx-datatable-cell-template>
+                            <div>
+                              <strong>{{ row.teamName }}</strong>
+                              <small class="text-muted d-block">{{ row.teamCode }} - {{ row.clubName }}</small>
+                            </div>
+                          </ng-template>
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column prop="registrationDate" [width]="120">
+                          <ng-template ngx-datatable-header-template>
+                            {{ 'TOURNAMENTS.REGISTRATION_DATE' | translate }}
+                          </ng-template>
+                          <ng-template let-row="row" ngx-datatable-cell-template>
+                            {{ row.registrationDate }}
+                          </ng-template>
+                        </ngx-datatable-column>
+
+                        <ngx-datatable-column prop="status" [width]="100">
+                          <ng-template ngx-datatable-header-template>
+                            {{ 'TOURNAMENTS.STATUS' | translate }}
+                          </ng-template>
+                          <ng-template let-row="row" ngx-datatable-cell-template>
+                            <span class="badge {{ getStatusClass(row.status) }}">
+                              {{ getStatusLabel(row.status) }}
+                            </span>
+                          </ng-template>
+                        </ngx-datatable-column>
+
+                        @if (tournament.status === 'IN_PROGRESS' || tournament.status === 'FINISHED') {
+                          <ngx-datatable-column [width]="180" [sortable]="false">
+                            <ng-template ngx-datatable-header-template>
+                              {{ 'TOURNAMENTS.STATS' | translate }}
+                            </ng-template>
+                            <ng-template let-row="row" ngx-datatable-cell-template>
+                              <small>
+                                PJ: {{ row.totalPlayed || 0 }} |
+                                G: {{ row.totalWon || 0 }} |
+                                E: {{ row.totalDrawn || 0 }} |
+                                P: {{ row.totalLost || 0 }}
+                              </small>
+                            </ng-template>
+                          </ngx-datatable-column>
+                        }
+
+                        <ngx-datatable-column name="Actions" [sortable]="false" [width]="130" [minWidth]="130">
+                          <ng-template ngx-datatable-header-template>
+                            {{ 'COMMON.ACTIONS' | translate }}
+                          </ng-template>
+                          <ng-template let-row="row" ngx-datatable-cell-template>
+                            <div class="d-flex gap-1 flex-nowrap">
+                              @if (row.status === 'PENDING' && canApproveReject()) {
+                                <button class="btn btn-sm btn-success" (click)="approveTeam(row)" [title]="'TOURNAMENTS.APPROVE' | translate">
+                                  <i class="fas fa-check"></i>
+                                </button>
+                                <button class="btn btn-sm btn-danger" (click)="openRejectModal(rejectModal, row)" [title]="'TOURNAMENTS.REJECT' | translate">
+                                  <i class="fas fa-times"></i>
+                                </button>
+                              }
+                              @if (row.status === 'APPROVED' && canApproveReject()) {
+                                <button class="btn btn-sm btn-warning" (click)="openWithdrawModal(rejectModal, row)" [title]="'TOURNAMENTS.WITHDRAW' | translate">
+                                  <i class="fas fa-sign-out-alt"></i>
+                                </button>
+                              }
+                              <button class="btn btn-tbl-delete btn-sm" (click)="deleteTeamRegistration(row)" [title]="'COMMON.DELETE' | translate">
+                                <i class="far fa-trash-alt"></i>
+                              </button>
+                            </div>
+                          </ng-template>
+                        </ngx-datatable-column>
+                      </ngx-datatable>
                     </div>
-                  </div>
-                </div>
-              </div>
-
-              <ngx-datatable
-                #table
-                class="material"
-                [rows]="filteredTeams"
-                [loadingIndicator]="teamsLoading"
-                columnMode="force"
-                [headerHeight]="60"
-                [footerHeight]="80"
-                rowHeight="auto"
-                [limit]="10"
-              >
-                <ngx-datatable-column prop="registrationNumber" [width]="60">
-                  <ng-template ngx-datatable-header-template>
-                    #
                   </ng-template>
-                  <ng-template let-row="row" ngx-datatable-cell-template>
-                    <span class="badge bg-dark">{{ row.registrationNumber || row.seed || '-' }}</span>
-                  </ng-template>
-                </ngx-datatable-column>
-
-                <ngx-datatable-column prop="teamName" [width]="200">
-                  <ng-template ngx-datatable-header-template>
-                    {{ 'TOURNAMENTS.TEAM' | translate }}
-                  </ng-template>
-                  <ng-template let-row="row" ngx-datatable-cell-template>
-                    <div>
-                      <strong>{{ row.teamName }}</strong>
-                      <small class="text-muted d-block">{{ row.teamCode }} - {{ row.clubName }}</small>
-                    </div>
-                  </ng-template>
-                </ngx-datatable-column>
-
-                <ngx-datatable-column prop="registrationDate" [width]="120">
-                  <ng-template ngx-datatable-header-template>
-                    {{ 'TOURNAMENTS.REGISTRATION_DATE' | translate }}
-                  </ng-template>
-                  <ng-template let-row="row" ngx-datatable-cell-template>
-                    {{ row.registrationDate }}
-                  </ng-template>
-                </ngx-datatable-column>
-
-                <ngx-datatable-column prop="status" [width]="100">
-                  <ng-template ngx-datatable-header-template>
-                    {{ 'TOURNAMENTS.STATUS' | translate }}
-                  </ng-template>
-                  <ng-template let-row="row" ngx-datatable-cell-template>
-                    <span class="badge {{ getStatusClass(row.status) }}">
-                      {{ getStatusLabel(row.status) }}
-                    </span>
-                  </ng-template>
-                </ngx-datatable-column>
+                </li>
 
                 @if (tournament.status === 'IN_PROGRESS' || tournament.status === 'FINISHED') {
-                  <ngx-datatable-column [width]="180" [sortable]="false">
-                    <ng-template ngx-datatable-header-template>
-                      {{ 'TOURNAMENTS.STATS' | translate }}
+                  <li [ngbNavItem]="2">
+                    <button ngbNavLink>
+                      <i class="fas fa-table me-2"></i>{{ 'TOURNAMENTS.STANDINGS_TAB' | translate }}
+                    </button>
+                    <ng-template ngbNavContent>
+                      <div class="mt-4">
+                        <app-tournament-standings [tournamentId]="tournamentId"></app-tournament-standings>
+                      </div>
                     </ng-template>
-                    <ng-template let-row="row" ngx-datatable-cell-template>
-                      <small>
-                        PJ: {{ row.totalPlayed || 0 }} |
-                        G: {{ row.totalWon || 0 }} |
-                        E: {{ row.totalDrawn || 0 }} |
-                        P: {{ row.totalLost || 0 }}
-                      </small>
-                    </ng-template>
-                  </ngx-datatable-column>
-                }
+                  </li>
 
-                <ngx-datatable-column name="Actions" [sortable]="false" [width]="150">
-                  <ng-template ngx-datatable-header-template>
-                    {{ 'COMMON.ACTIONS' | translate }}
-                  </ng-template>
-                  <ng-template let-row="row" ngx-datatable-cell-template>
-                    <div class="d-flex gap-1">
-                      @if (row.status === 'PENDING' && canApproveReject()) {
-                        <button class="btn btn-sm btn-success" (click)="approveTeam(row)" [title]="'TOURNAMENTS.APPROVE' | translate">
-                          <i class="fas fa-check"></i>
-                        </button>
-                        <button class="btn btn-sm btn-danger" (click)="openRejectModal(rejectModal, row)" [title]="'TOURNAMENTS.REJECT' | translate">
-                          <i class="fas fa-times"></i>
-                        </button>
-                      }
-                      @if (row.status === 'APPROVED' && canApproveReject()) {
-                        <button class="btn btn-sm btn-warning" (click)="openWithdrawModal(rejectModal, row)" [title]="'TOURNAMENTS.WITHDRAW' | translate">
-                          <i class="fas fa-sign-out-alt"></i>
-                        </button>
-                      }
-                      <button class="btn btn-tbl-delete btn-sm" (click)="deleteTeamRegistration(row)" [title]="'COMMON.DELETE' | translate">
-                        <i class="far fa-trash-alt"></i>
-                      </button>
-                    </div>
-                  </ng-template>
-                </ngx-datatable-column>
-              </ngx-datatable>
+                  <li [ngbNavItem]="3">
+                    <button ngbNavLink>
+                      <i class="fas fa-futbol me-2"></i>{{ 'TOURNAMENTS.SCORERS_TAB' | translate }}
+                    </button>
+                    <ng-template ngbNavContent>
+                      <div class="mt-4">
+                        <app-tournament-scorers [tournamentId]="tournamentId"></app-tournament-scorers>
+                      </div>
+                    </ng-template>
+                  </li>
+
+                  <li [ngbNavItem]="4">
+                    <button ngbNavLink>
+                      <i class="fas fa-hands-helping me-2"></i>{{ 'TOURNAMENTS.ASSISTS_TAB' | translate }}
+                    </button>
+                    <ng-template ngbNavContent>
+                      <div class="mt-4">
+                        <app-tournament-assists [tournamentId]="tournamentId"></app-tournament-assists>
+                      </div>
+                    </ng-template>
+                  </li>
+                }
+              </ul>
+              <div [ngbNavOutlet]="nav"></div>
             </div>
           </div>
         </div>

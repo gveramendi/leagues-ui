@@ -463,7 +463,41 @@
     "START_TITLE": "Iniciar Torneo",
     "START_MESSAGE": "¿Está seguro que desea iniciar este torneo?",
     "FINISH_TITLE": "Finalizar Torneo",
-    "FINISH_MESSAGE": "¿Está seguro que desea finalizar este torneo?"
+    "FINISH_MESSAGE": "¿Está seguro que desea finalizar este torneo?",
+    "TEAMS_TAB": "Equipos",
+    "STANDINGS_TAB": "Posiciones",
+    "SCORERS_TAB": "Goleadores",
+    "ASSISTS_TAB": "Asistencias"
+  },
+  "STANDINGS": {
+    "TITLE": "Tabla de Posiciones",
+    "TEAM": "Equipo",
+    "PLAYED_SHORT": "PJ",
+    "WON_SHORT": "G",
+    "DRAWN_SHORT": "E",
+    "LOST_SHORT": "P",
+    "GOALS_FOR_SHORT": "GF",
+    "GOALS_AGAINST_SHORT": "GC",
+    "GOAL_DIFFERENCE_SHORT": "DG",
+    "POINTS_SHORT": "Pts",
+    "FORM": "Forma",
+    "LAST_UPDATED": "Última actualización",
+    "NO_DATA": "No hay datos de posiciones disponibles"
+  },
+  "STATISTICS": {
+    "TOP_SCORERS": "Tabla de Goleadores",
+    "TOP_ASSISTS": "Tabla de Asistencias",
+    "PLAYER": "Jugador",
+    "TEAM": "Equipo",
+    "GOALS": "G",
+    "PENALTIES": "Pen",
+    "ASSISTS": "A",
+    "MATCHES": "PJ",
+    "GOALS_PER_GAME": "G/PJ",
+    "ASSISTS_PER_GAME": "A/PJ",
+    "LAST_UPDATED": "Última actualización",
+    "NO_SCORERS": "No hay datos de goleadores disponibles",
+    "NO_ASSISTS": "No hay datos de asistencias disponibles"
   },
   "MENU_ITEMS": {
     "TITLE": "Items del Menú {{menu}}",

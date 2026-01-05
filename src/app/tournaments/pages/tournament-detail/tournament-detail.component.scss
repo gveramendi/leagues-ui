@@ -32,3 +32,15 @@
     color: white;
   }
 }
+
+.searchbox {
+  position: relative;
+
+  .search-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 10px;
+    color: rgba(0, 0, 0, 0.54);
+  }
+}

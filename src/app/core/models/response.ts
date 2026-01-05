@@ -1006,3 +1006,227 @@ export interface AssistTableResponse {
   assists: TopAssistResponse[];
   lastUpdated?: string;
 }
+
+// ==================== Match Types ====================
+
+export type MatchStatus =
+  | 'SCHEDULED'
+  | 'CONFIRMED'
+  | 'IN_PROGRESS'
+  | 'HALF_TIME'
+  | 'SECOND_HALF'
+  | 'EXTRA_TIME'
+  | 'PENALTIES'
+  | 'FINISHED'
+  | 'SUSPENDED'
+  | 'POSTPONED'
+  | 'CANCELLED'
+  | 'WALKOVER';
+
+export type MatchEventType =
+  | 'GOAL'
+  | 'OWN_GOAL'
+  | 'PENALTY_GOAL'
+  | 'PENALTY_MISSED'
+  | 'PENALTY_SAVED'
+  | 'YELLOW_CARD'
+  | 'RED_CARD'
+  | 'SECOND_YELLOW'
+  | 'SUBSTITUTION_IN'
+  | 'SUBSTITUTION_OUT'
+  | 'INJURY'
+  | 'VAR_DECISION'
+  | 'KICK_OFF'
+  | 'HALF_TIME'
+  | 'FULL_TIME'
+  | 'EXTRA_TIME_START'
+  | 'PENALTY_SHOOTOUT_START';
+
+export type RefereeCategory = 'FIFA' | 'NATIONAL' | 'REGIONAL' | 'LOCAL' | 'TRAINEE';
+
+export type RefereeRole = 'MAIN' | 'ASSISTANT_1' | 'ASSISTANT_2' | 'FOURTH_OFFICIAL' | 'VAR' | 'AVAR';
+
+export interface MatchEventResponse {
+  id: number;
+  matchId: number;
+  eventType: MatchEventType;
+  eventTypeDisplayName?: string;
+  minute: number;
+  additionalTime?: number;
+  teamId: number;
+  teamName?: string;
+  playerId?: number;
+  playerName?: string;
+  playerNumber?: number;
+  assistPlayerId?: number;
+  assistPlayerName?: string;
+  playerOutId?: number;
+  playerOutName?: string;
+  description?: string;
+  createdAt?: string;
+}
+
+export interface MatchRefereeResponse {
+  id: number;
+  matchId: number;
+  refereeId: number;
+  refereeFullName?: string;
+  refereeLicenseNumber?: string;
+  refereeCategory?: RefereeCategory;
+  refereeCategoryDisplayName?: string;
+  refereePhotoUrl?: string;
+  role: RefereeRole;
+  roleDisplayName?: string;
+}
+
+export interface MatchResponse {
+  id: number;
+  tournamentId: number;
+  tournamentName?: string;
+  tournamentCode?: string;
+  homeTeamId: number;
+  homeTeamName?: string;
+  homeTeamShortName?: string;
+  homeTeamLogoUrl?: string;
+  awayTeamId: number;
+  awayTeamName?: string;
+  awayTeamShortName?: string;
+  awayTeamLogoUrl?: string;
+  matchday: number;
+  matchDate?: string;
+  matchTime?: string;
+  venue?: string;
+  status: MatchStatus;
+  statusDisplayName?: string;
+  homeScore?: number;
+  awayScore?: number;
+  homeScoreHalftime?: number;
+  awayScoreHalftime?: number;
+  homePenalties?: number;
+  awayPenalties?: number;
+  attendance?: number;
+  notes?: string;
+  events?: MatchEventResponse[];
+  referees?: MatchRefereeResponse[];
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface MatchSummaryResponse {
+  id: number;
+  tournamentId: number;
+  tournamentName?: string;
+  homeTeamId: number;
+  homeTeamName?: string;
+  homeTeamShortName?: string;
+  homeTeamLogoUrl?: string;
+  awayTeamId: number;
+  awayTeamName?: string;
+  awayTeamShortName?: string;
+  awayTeamLogoUrl?: string;
+  matchday: number;
+  matchDate?: string;
+  matchTime?: string;
+  venue?: string;
+  status: MatchStatus;
+  statusDisplayName?: string;
+  homeScore?: number;
+  awayScore?: number;
+}
+
+export interface CreateMatchRequest {
+  tournamentId: number;
+  homeTeamId: number;
+  awayTeamId: number;
+  matchday: number;
+  matchDate?: string;
+  matchTime?: string;
+  venue?: string;
+  notes?: string;
+}
+
+export interface UpdateMatchRequest {
+  matchDate?: string;
+  matchTime?: string;
+  venue?: string;
+  matchday?: number;
+  notes?: string;
+}
+
+export interface UpdateMatchScoreRequest {
+  homeScore: number;
+  awayScore: number;
+  homeScoreHalftime?: number;
+  awayScoreHalftime?: number;
+  homePenalties?: number;
+  awayPenalties?: number;
+}
+
+export interface CreateMatchEventRequest {
+  eventType: MatchEventType;
+  minute: number;
+  additionalTime?: number;
+  teamId: number;
+  playerId?: number;
+  assistPlayerId?: number;
+  playerOutId?: number;
+  description?: string;
+}
+
+export interface AssignRefereeRequest {
+  refereeId: number;
+  role: RefereeRole;
+}
+
+// ==================== Referee Types ====================
+
+export interface RefereeResponse {
+  id: number;
+  firstName: string;
+  lastName: string;
+  fullName?: string;
+  documentNumber?: string;
+  licenseNumber: string;
+  category: RefereeCategory;
+  categoryDisplayName?: string;
+  dateOfBirth?: string;
+  nationality?: string;
+  photoUrl?: string;
+  phone?: string;
+  email?: string;
+  licenseExpiration?: string;
+  isLicenseValid?: boolean;
+  totalMatchesAsMain?: number;
+  totalMatchesAsAssistant?: number;
+  totalYellowCardsGiven?: number;
+  totalRedCardsGiven?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateRefereeRequest {
+  firstName: string;
+  lastName: string;
+  documentNumber?: string;
+  licenseNumber: string;
+  category: RefereeCategory;
+  dateOfBirth?: string;
+  nationality?: string;
+  photoUrl?: string;
+  phone?: string;
+  email?: string;
+  licenseExpiration?: string;
+}
+
+export interface UpdateRefereeRequest {
+  firstName?: string;
+  lastName?: string;
+  documentNumber?: string;
+  category?: RefereeCategory;
+  dateOfBirth?: string;
+  nationality?: string;
+  photoUrl?: string;
+  phone?: string;
+  email?: string;
+  licenseExpiration?: string;
+}

@@ -1,0 +1,83 @@
+<div class="card">
+  <div class="card-header">
+    <h5 class="m-0">{{ 'STATISTICS.TOP_SCORERS' | translate }}</h5>
+  </div>
+  <div class="card-body p-0">
+    @if (loading) {
+      <div class="text-center py-5">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    } @else if (error) {
+      <div class="alert alert-warning m-3">
+        {{ error }}
+      </div>
+    } @else if (scorerTable && scorerTable.scorers.length > 0) {
+      <div class="table-responsive">
+        <table class="table table-hover mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th class="text-center" style="width: 50px;">#</th>
+              <th>{{ 'STATISTICS.PLAYER' | translate }}</th>
+              <th>{{ 'STATISTICS.TEAM' | translate }}</th>
+              <th class="text-center" style="width: 70px;">{{ 'STATISTICS.GOALS' | translate }}</th>
+              <th class="text-center" style="width: 70px;">{{ 'STATISTICS.PENALTIES' | translate }}</th>
+              <th class="text-center" style="width: 70px;">{{ 'STATISTICS.ASSISTS' | translate }}</th>
+              <th class="text-center" style="width: 70px;">{{ 'STATISTICS.MATCHES' | translate }}</th>
+              <th class="text-center" style="width: 80px;">{{ 'STATISTICS.GOALS_PER_GAME' | translate }}</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (scorer of scorerTable.scorers; track scorer.playerId) {
+              <tr>
+                <td class="text-center">
+                  <span class="rank-badge {{ getRankClass(scorer.rank) }}">{{ scorer.rank }}</span>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    @if (scorer.playerPhotoUrl) {
+                      <img [src]="scorer.playerPhotoUrl" [alt]="scorer.playerName" class="player-photo me-2" />
+                    } @else {
+                      <div class="player-photo-placeholder me-2">
+                        <i class="fas fa-user"></i>
+                      </div>
+                    }
+                    <span class="fw-semibold">{{ scorer.playerName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="d-flex align-items-center">
+                    @if (scorer.teamLogoUrl) {
+                      <img [src]="scorer.teamLogoUrl" [alt]="scorer.teamName" class="team-logo me-2" />
+                    }
+                    <span>{{ scorer.teamName }}</span>
+                  </div>
+                </td>
+                <td class="text-center">
+                  <span class="badge bg-success fs-6">{{ scorer.goals || 0 }}</span>
+                </td>
+                <td class="text-center text-muted">{{ scorer.penaltyGoals || 0 }}</td>
+                <td class="text-center">{{ scorer.assists || 0 }}</td>
+                <td class="text-center">{{ scorer.matchesPlayed || 0 }}</td>
+                <td class="text-center">
+                  <span class="badge bg-info">{{ (scorer.goalsPerGame || 0) | number:'1.2-2' }}</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      @if (scorerTable.lastUpdated) {
+        <div class="card-footer text-muted small">
+          {{ 'STATISTICS.LAST_UPDATED' | translate }}: {{ scorerTable.lastUpdated }}
+        </div>
+      }
+    } @else {
+      <div class="text-center py-5 text-muted">
+        <i class="fas fa-futbol fa-3x mb-3"></i>
+        <p>{{ 'STATISTICS.NO_SCORERS' | translate }}</p>
+      </div>
+    }
+  </div>
+</div>

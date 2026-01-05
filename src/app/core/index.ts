@@ -16,6 +16,10 @@ export { TeamService } from './service/team.service';
 export { TournamentService } from './service/tournament.service';
 export { TournamentTeamService } from './service/tournament-team.service';
 export { UserService } from './service/user.service';
+export { StandingService } from './service/standing.service';
+export { PlayerStatisticsService } from './service/player-statistics.service';
+export { MatchService } from './service/match.service';
+export { RefereeService } from './service/referee.service';
 
 // models
 export { User, AuthResponse, AuthData } from './models/user';
@@ -85,4 +89,31 @@ export {
   UpdateTournamentRequest,
   RegisterTeamRequest,
   RejectTeamRequest,
+  StandingResponse,
+  StandingSummaryResponse,
+  StandingTableResponse,
+  PlayerStatisticsResponse,
+  TopScorerResponse,
+  TopAssistResponse,
+  TopContributorResponse,
+  TopCleanSheetResponse,
+  CardStatsResponse,
+  ScorerTableResponse,
+  AssistTableResponse,
+  MatchStatus,
+  MatchEventType,
+  RefereeCategory,
+  RefereeRole,
+  MatchEventResponse,
+  MatchRefereeResponse,
+  MatchResponse,
+  MatchSummaryResponse,
+  CreateMatchRequest,
+  UpdateMatchRequest,
+  UpdateMatchScoreRequest,
+  CreateMatchEventRequest,
+  AssignRefereeRequest,
+  RefereeResponse,
+  CreateRefereeRequest,
+  UpdateRefereeRequest,
 } from './models/response';

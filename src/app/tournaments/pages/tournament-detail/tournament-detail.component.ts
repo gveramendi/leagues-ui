@@ -10,7 +10,7 @@ import {
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DatatableComponent, NgxDatatableModule } from '@swimlane/ngx-datatable';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
-import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbModal, NgbNavModule } from '@ng-bootstrap/ng-bootstrap';
 import { ToastrService } from 'ngx-toastr';
 import Swal from 'sweetalert2';
 import {
@@ -24,6 +24,9 @@ import {
   RejectTeamRequest,
 } from '@core';
 import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { TournamentStandingsComponent } from '../../components/tournament-standings/tournament-standings.component';
+import { TournamentScorersComponent } from '../../components/tournament-scorers/tournament-scorers.component';
+import { TournamentAssistsComponent } from '../../components/tournament-assists/tournament-assists.component';
 
 @Component({
   selector: 'app-tournament-detail',
@@ -34,7 +37,11 @@ import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
     ReactiveFormsModule,
     RouterLink,
     NgxDatatableModule,
+    NgbNavModule,
     TranslateModule,
+    TournamentStandingsComponent,
+    TournamentScorersComponent,
+    TournamentAssistsComponent,
   ],
   templateUrl: './tournament-detail.component.html',
   styleUrls: ['./tournament-detail.component.scss'],
@@ -45,6 +52,7 @@ export class TournamentDetailComponent implements OnInit {
   tournamentId!: number;
   tournament: TournamentResponse | null = null;
   loading = false;
+  activeTab = 1;
 
   // Teams
   teams: TournamentTeamResponse[] = [];
