@@ -805,3 +805,204 @@ export interface RegisterTeamRequest {
 export interface RejectTeamRequest {
   reason: string;
 }
+
+// ==================== Standing Types ====================
+
+export interface StandingResponse {
+  id: number;
+  tournamentId: number;
+  tournamentName?: string;
+  teamId: number;
+  teamName?: string;
+  teamCode?: string;
+  teamLogoUrl?: string;
+  position?: number;
+  played?: number;
+  won?: number;
+  drawn?: number;
+  lost?: number;
+  goalsFor?: number;
+  goalsAgainst?: number;
+  goalDifference?: number;
+  points?: number;
+  homePlayed?: number;
+  homeWon?: number;
+  homeDrawn?: number;
+  homeLost?: number;
+  homeGoalsFor?: number;
+  homeGoalsAgainst?: number;
+  homeGoalDifference?: number;
+  awayPlayed?: number;
+  awayWon?: number;
+  awayDrawn?: number;
+  awayLost?: number;
+  awayGoalsFor?: number;
+  awayGoalsAgainst?: number;
+  awayGoalDifference?: number;
+  form?: string;
+  currentStreak?: number;
+  streakType?: string;
+  yellowCards?: number;
+  redCards?: number;
+  fairPlayPoints?: number;
+  qualified?: boolean;
+  relegated?: boolean;
+  promotionPlayoff?: boolean;
+  relegationPlayoff?: boolean;
+  pointsPerGame?: number;
+  goalsPerGame?: number;
+  goalsAgainstPerGame?: number;
+  winPercentage?: number;
+  updatedAt?: string;
+}
+
+export interface StandingSummaryResponse {
+  id: number;
+  position?: number;
+  teamId: number;
+  teamName?: string;
+  teamCode?: string;
+  teamLogoUrl?: string;
+  played?: number;
+  won?: number;
+  drawn?: number;
+  lost?: number;
+  goalsFor?: number;
+  goalsAgainst?: number;
+  goalDifference?: number;
+  points?: number;
+  form?: string;
+  qualified?: boolean;
+  relegated?: boolean;
+}
+
+export interface StandingTableResponse {
+  tournamentId: number;
+  tournamentName?: string;
+  standings: StandingSummaryResponse[];
+  lastUpdated?: string;
+}
+
+// ==================== Player Statistics Types ====================
+
+export interface PlayerStatisticsResponse {
+  id: number;
+  tournamentId: number;
+  tournamentName?: string;
+  playerId: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  playerPosition?: string;
+  teamId: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  matchesPlayed?: number;
+  matchesStarted?: number;
+  minutesPlayed?: number;
+  goals?: number;
+  assists?: number;
+  goalContributions?: number;
+  penaltyGoals?: number;
+  penaltyMissed?: number;
+  ownGoals?: number;
+  yellowCards?: number;
+  redCards?: number;
+  secondYellowCards?: number;
+  totalCards?: number;
+  cleanSheets?: number;
+  goalsConceded?: number;
+  saves?: number;
+  penaltiesSaved?: number;
+  goalsRank?: number;
+  assistsRank?: number;
+  manOfTheMatch?: number;
+  goalsPerGame?: number;
+  assistsPerGame?: number;
+  minutesPerGoal?: number;
+  updatedAt?: string;
+}
+
+export interface TopScorerResponse {
+  rank?: number;
+  playerId: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  teamId: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  goals?: number;
+  penaltyGoals?: number;
+  assists?: number;
+  matchesPlayed?: number;
+  goalsPerGame?: number;
+}
+
+export interface TopAssistResponse {
+  rank?: number;
+  playerId: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  teamId: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  assists?: number;
+  goals?: number;
+  matchesPlayed?: number;
+  assistsPerGame?: number;
+}
+
+export interface TopContributorResponse {
+  rank?: number;
+  playerId: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  teamId: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  goals?: number;
+  assists?: number;
+  contributions?: number;
+  matchesPlayed?: number;
+}
+
+export interface TopCleanSheetResponse {
+  rank?: number;
+  playerId: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  teamId: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  cleanSheets?: number;
+  goalsConceded?: number;
+  matchesPlayed?: number;
+}
+
+export interface CardStatsResponse {
+  rank?: number;
+  playerId: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  teamId: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  yellowCards?: number;
+  redCards?: number;
+  secondYellowCards?: number;
+  totalCards?: number;
+  matchesPlayed?: number;
+}
+
+export interface ScorerTableResponse {
+  tournamentId: number;
+  tournamentName?: string;
+  scorers: TopScorerResponse[];
+  lastUpdated?: string;
+}
+
+export interface AssistTableResponse {
+  tournamentId: number;
+  tournamentName?: string;
+  assists: TopAssistResponse[];
+  lastUpdated?: string;
+}
