@@ -13,6 +13,8 @@ export { PlayerService } from './service/player.service';
 export { PlayerRegistrationService } from './service/player-registration.service';
 export { StaffMemberService } from './service/staff-member.service';
 export { TeamService } from './service/team.service';
+export { TournamentService } from './service/tournament.service';
+export { TournamentTeamService } from './service/tournament-team.service';
 export { UserService } from './service/user.service';
 
 // models
@@ -71,4 +73,16 @@ export {
   PlayerRegistrationResponse,
   CreatePlayerRegistrationRequest,
   UpdatePlayerRegistrationRequest,
+  TournamentStatus,
+  TournamentFormat,
+  RegistrationStatus,
+  TiebreakerCriteria,
+  TournamentRulesDto,
+  TournamentResponse,
+  TournamentSummaryResponse,
+  TournamentTeamResponse,
+  CreateTournamentRequest,
+  UpdateTournamentRequest,
+  RegisterTeamRequest,
+  RejectTeamRequest,
 } from './models/response';

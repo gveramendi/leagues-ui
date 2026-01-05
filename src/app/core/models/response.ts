@@ -598,3 +598,210 @@ export interface UpdatePlayerRegistrationRequest {
   loanEndDate?: string;
   notes?: string;
 }
+
+// ==================== Tournament Types ====================
+
+export type TournamentStatus =
+  | 'DRAFT'
+  | 'REGISTRATION_OPEN'
+  | 'REGISTRATION_CLOSED'
+  | 'SCHEDULED'
+  | 'IN_PROGRESS'
+  | 'PAUSED'
+  | 'FINISHED'
+  | 'CANCELLED';
+
+export type TournamentFormat =
+  | 'LEAGUE'
+  | 'SINGLE_ELIMINATION'
+  | 'DOUBLE_ELIMINATION'
+  | 'GROUP_STAGE'
+  | 'GROUP_STAGE_SINGLE'
+  | 'GROUP_STAGE_DOUBLE'
+  | 'ROUND_ROBIN'
+  | 'SWISS'
+  | 'PLAYOFF';
+
+export type RegistrationStatus =
+  | 'PENDING'
+  | 'APPROVED'
+  | 'REJECTED'
+  | 'WITHDRAWN'
+  | 'DISQUALIFIED';
+
+export type TiebreakerCriteria =
+  | 'GOAL_DIFFERENCE'
+  | 'GOALS_SCORED'
+  | 'HEAD_TO_HEAD'
+  | 'AWAY_GOALS'
+  | 'FAIR_PLAY'
+  | 'DRAW'
+  | 'EXTRA_TIME'
+  | 'PENALTIES';
+
+export interface TournamentRulesDto {
+  pointsForWin?: number;
+  pointsForDraw?: number;
+  pointsForLoss?: number;
+  yellowCardsForSuspension?: number;
+  redCardSuspensionMatches?: number;
+  maxPlayersPerTeam?: number;
+  minPlayersPerTeam?: number;
+  maxForeignPlayers?: number;
+  substitutionsAllowed?: number;
+  matchDurationMinutes?: number;
+  halfTimeDurationMinutes?: number;
+  extraTimeDurationMinutes?: number;
+  allowsExtraTime?: boolean;
+  allowsPenalties?: boolean;
+  homeAndAway?: boolean;
+  firstTiebreaker?: TiebreakerCriteria;
+  secondTiebreaker?: TiebreakerCriteria;
+  thirdTiebreaker?: TiebreakerCriteria;
+  firstTiebreakerDisplayName?: string;
+  secondTiebreakerDisplayName?: string;
+  thirdTiebreakerDisplayName?: string;
+}
+
+export interface TournamentResponse {
+  id: number;
+  name: string;
+  code: string;
+  shortName?: string;
+  description?: string;
+  format: TournamentFormat;
+  status: TournamentStatus;
+  category: Category;
+  gender: Gender;
+  footballType: FootballType;
+  seasonYear: number;
+  startDate?: string;
+  endDate?: string;
+  registrationStart?: string;
+  registrationEnd?: string;
+  maxTeams?: number;
+  minTeams?: number;
+  logoUrl?: string;
+  organizer?: string;
+  location?: string;
+  prizeDescription?: string;
+  rules?: TournamentRulesDto;
+  registeredTeamsCount?: number;
+  approvedTeamsCount?: number;
+  isRegistrationOpen?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  formatDisplayName?: string;
+  statusDisplayName?: string;
+  categoryDisplayName?: string;
+  genderDisplayName?: string;
+  footballTypeDisplayName?: string;
+}
+
+export interface TournamentSummaryResponse {
+  id: number;
+  name: string;
+  code: string;
+  shortName?: string;
+  format: TournamentFormat;
+  status: TournamentStatus;
+  category: Category;
+  gender: Gender;
+  footballType: FootballType;
+  seasonYear: number;
+  startDate?: string;
+  endDate?: string;
+  logoUrl?: string;
+  registeredTeamsCount?: number;
+  approvedTeamsCount?: number;
+  isRegistrationOpen?: boolean;
+  formatDisplayName?: string;
+  statusDisplayName?: string;
+  categoryDisplayName?: string;
+  genderDisplayName?: string;
+  footballTypeDisplayName?: string;
+}
+
+export interface TournamentTeamResponse {
+  id: number;
+  tournamentId: number;
+  tournamentName?: string;
+  teamId: number;
+  teamName?: string;
+  teamCode?: string;
+  clubName?: string;
+  status: RegistrationStatus;
+  registrationDate?: string;
+  approvalDate?: string;
+  seed?: number;
+  registrationNumber?: number;
+  rejectionReason?: string;
+  withdrawalReason?: string;
+  notes?: string;
+  totalPlayed?: number;
+  totalWon?: number;
+  totalDrawn?: number;
+  totalLost?: number;
+  totalGoalsFor?: number;
+  totalGoalsAgainst?: number;
+  totalGoalDifference?: number;
+  finalPosition?: number;
+  isChampion?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+  statusDisplayName?: string;
+}
+
+export interface CreateTournamentRequest {
+  name: string;
+  code: string;
+  shortName?: string;
+  description?: string;
+  format: TournamentFormat;
+  category: Category;
+  gender: Gender;
+  footballType: FootballType;
+  seasonYear: number;
+  startDate?: string;
+  endDate?: string;
+  registrationStart?: string;
+  registrationEnd?: string;
+  maxTeams?: number;
+  minTeams?: number;
+  logoUrl?: string;
+  organizer?: string;
+  location?: string;
+  prizeDescription?: string;
+  rules?: TournamentRulesDto;
+}
+
+export interface UpdateTournamentRequest {
+  name: string;
+  shortName?: string;
+  description?: string;
+  format?: TournamentFormat;
+  category?: Category;
+  gender?: Gender;
+  footballType?: FootballType;
+  seasonYear?: number;
+  startDate?: string;
+  endDate?: string;
+  registrationStart?: string;
+  registrationEnd?: string;
+  maxTeams?: number;
+  minTeams?: number;
+  logoUrl?: string;
+  organizer?: string;
+  location?: string;
+  prizeDescription?: string;
+  rules?: TournamentRulesDto;
+}
+
+export interface RegisterTeamRequest {
+  teamId: number;
+  notes?: string;
+}
+
+export interface RejectTeamRequest {
+  reason: string;
+}
