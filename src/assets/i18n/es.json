@@ -408,7 +408,8 @@
     "CATEGORY_LOCAL": "Local",
     "CATEGORY_TRAINEE": "En Formación",
     "DELETE_CONFIRM_TITLE": "¿Está seguro?",
-    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el árbitro '{{name}}'. Esta acción no se puede deshacer."
+    "DELETE_CONFIRM_MESSAGE": "Está a punto de eliminar el árbitro '{{name}}'. Esta acción no se puede deshacer.",
+    "ALL_CATEGORIES": "Todas las Categorías"
   },
   "TOURNAMENTS": {
     "TEXT": "Torneos",

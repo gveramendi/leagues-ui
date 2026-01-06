@@ -408,7 +408,8 @@
     "CATEGORY_LOCAL": "Local",
     "CATEGORY_TRAINEE": "Trainee",
     "DELETE_CONFIRM_TITLE": "Are you sure?",
-    "DELETE_CONFIRM_MESSAGE": "You are about to delete the referee '{{name}}'. This action cannot be undone."
+    "DELETE_CONFIRM_MESSAGE": "You are about to delete the referee '{{name}}'. This action cannot be undone.",
+    "ALL_CATEGORIES": "All Categories"
   },
   "TOURNAMENTS": {
     "TEXT": "Tournaments",

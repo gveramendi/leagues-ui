@@ -40,6 +40,10 @@ export class RefereeListComponent implements OnInit {
   totalElements = 0;
   loading = false;
 
+  // Filters
+  searchQuery = '';
+  selectedCategory: RefereeCategory | null = null;
+
   refereeForm!: UntypedFormGroup;
   editRefereeForm!: UntypedFormGroup;
   editingReferee: RefereeResponse | null = null;
@@ -101,7 +105,18 @@ export class RefereeListComponent implements OnInit {
 
   loadReferees(): void {
     this.loading = true;
-    this.refereeService.getAll(this.page, this.size).subscribe({
+
+    // Determine which endpoint to use based on filters
+    let request$;
+    if (this.searchQuery && this.searchQuery.length >= 2) {
+      request$ = this.refereeService.search(this.searchQuery, this.page, this.size);
+    } else if (this.selectedCategory) {
+      request$ = this.refereeService.getByCategory(this.selectedCategory, this.page, this.size);
+    } else {
+      request$ = this.refereeService.getAll(this.page, this.size);
+    }
+
+    request$.subscribe({
       next: (response) => {
         this.rows = response.body.data;
         this.filteredRows = [...this.rows];
@@ -115,17 +130,31 @@ export class RefereeListComponent implements OnInit {
     });
   }
 
-  filterDatatable(event: Event): void {
-    const val = (event.target as HTMLInputElement).value.toLowerCase();
-    this.filteredRows = this.rows.filter(
-      (row) =>
-        row.fullName?.toLowerCase().includes(val) ||
-        row.licenseNumber?.toLowerCase().includes(val) ||
-        row.email?.toLowerCase().includes(val)
-    );
+  onSearchChange(event: Event): void {
+    this.searchQuery = (event.target as HTMLInputElement).value;
+    this.page = 0;
     if (this.table) {
       this.table.offset = 0;
     }
+    this.loadReferees();
+  }
+
+  onCategoryChange(): void {
+    this.page = 0;
+    if (this.table) {
+      this.table.offset = 0;
+    }
+    this.loadReferees();
+  }
+
+  clearFilters(): void {
+    this.searchQuery = '';
+    this.selectedCategory = null;
+    this.page = 0;
+    if (this.table) {
+      this.table.offset = 0;
+    }
+    this.loadReferees();
   }
 
   onPageChange(pageInfo: any): void {

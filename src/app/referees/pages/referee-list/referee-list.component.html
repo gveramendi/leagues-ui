@@ -36,13 +36,35 @@
                             [placeholder]="'COMMON.SEARCH' | translate"
                             type="text"
                             class="browser-default search-field"
-                            (keyup)="filterDatatable($event)"
+                            [value]="searchQuery"
+                            (keyup.enter)="onSearchChange($event)"
+                            (blur)="onSearchChange($event)"
                             [attr.aria-label]="'COMMON.SEARCH' | translate"
                           />
                         </div>
                       </div>
                       <div class="header-buttons-left">
-                        <div class="tbl-btn-style">
+                        <div class="d-flex gap-2 align-items-center">
+                          <select
+                            class="form-select form-select-sm"
+                            [(ngModel)]="selectedCategory"
+                            (change)="onCategoryChange()"
+                            style="width: 150px;"
+                          >
+                            <option [ngValue]="null">{{ 'REFEREES.ALL_CATEGORIES' | translate }}</option>
+                            @for (cat of categories; track cat) {
+                              <option [ngValue]="cat">{{ getCategoryLabel(cat) }}</option>
+                            }
+                          </select>
+                          @if (searchQuery || selectedCategory) {
+                            <button
+                              class="btn btn-sm btn-outline-secondary"
+                              (click)="clearFilters()"
+                              [title]="'COMMON.CLEAR_FILTERS' | translate"
+                            >
+                              <i class="fas fa-times"></i>
+                            </button>
+                          }
                           <button
                             class="btn btn-icon icon-left btn-primary rounded-button"
                             (click)="openAddModal(addRefereeModal)"
@@ -72,7 +94,7 @@
               [offset]="page"
               (page)="onPageChange($event)"
             >
-              <ngx-datatable-column prop="fullName" [flexGrow]="2">
+              <ngx-datatable-column prop="fullName" [width]="250" [minWidth]="200">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.NAME' | translate }}
                 </ng-template>
@@ -101,7 +123,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="licenseNumber" [width]="120">
+              <ngx-datatable-column prop="licenseNumber" [width]="120" [minWidth]="120">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.LICENSE' | translate }}
                 </ng-template>
@@ -110,7 +132,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="category" [width]="120">
+              <ngx-datatable-column prop="category" [width]="120" [minWidth]="120">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.CATEGORY' | translate }}
                 </ng-template>
@@ -121,7 +143,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="email" [flexGrow]="1">
+              <ngx-datatable-column prop="email" [width]="200" [minWidth]="150">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.EMAIL' | translate }}
                 </ng-template>
@@ -130,7 +152,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="phone" [width]="130">
+              <ngx-datatable-column prop="phone" [width]="130" [minWidth]="130">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.PHONE' | translate }}
                 </ng-template>
@@ -139,7 +161,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="isLicenseValid" [width]="100">
+              <ngx-datatable-column prop="isLicenseValid" [width]="100" [minWidth]="100">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.STATUS' | translate }}
                 </ng-template>
@@ -152,7 +174,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column name="Actions" [sortable]="false" [width]="100">
+              <ngx-datatable-column name="Actions" [sortable]="false" [width]="100" [minWidth]="100" [maxWidth]="100">
                 <ng-template ngx-datatable-header-template>
                   {{ 'COMMON.ACTIONS' | translate }}
                 </ng-template>
