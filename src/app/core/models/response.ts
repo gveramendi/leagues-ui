@@ -1240,3 +1240,115 @@ export interface UpdateRefereeRequest {
   email?: string;
   licenseExpiration?: string;
 }
+
+// ==================== Sanction Types ====================
+
+export type SanctionType =
+  | 'YELLOW_CARD_ACCUMULATION'
+  | 'RED_CARD_DIRECT'
+  | 'SECOND_YELLOW_CARD'
+  | 'VIOLENT_CONDUCT'
+  | 'SERIOUS_FOUL_PLAY'
+  | 'SPITTING'
+  | 'OFFENSIVE_LANGUAGE'
+  | 'OFFENSIVE_GESTURES'
+  | 'AGGRESSION_TO_REFEREE'
+  | 'INSULT_TO_REFEREE'
+  | 'THREATENING_REFEREE'
+  | 'TEAM_MISCONDUCT'
+  | 'ABANDONMENT'
+  | 'CROWD_TROUBLE'
+  | 'DOCUMENT_FRAUD'
+  | 'INELIGIBLE_PLAYER'
+  | 'DOPING'
+  | 'OTHER';
+
+export type SanctionStatus =
+  | 'PENDING'
+  | 'ACTIVE'
+  | 'SERVED'
+  | 'APPEALED'
+  | 'REDUCED'
+  | 'CANCELLED'
+  | 'EXPIRED';
+
+export interface SanctionResponse {
+  id: number;
+  tournamentId: number;
+  tournamentName?: string;
+  playerId?: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  teamId?: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  matchId?: number;
+  matchDescription?: string;
+  matchEventId?: number;
+  sanctionType: SanctionType;
+  sanctionTypeDisplayName?: string;
+  status: SanctionStatus;
+  statusDisplayName?: string;
+  description?: string;
+  matchesSuspended?: number;
+  matchesServed?: number;
+  remainingMatches?: number;
+  fullyServed?: boolean;
+  fineAmount?: number;
+  fineCurrency?: string;
+  finePaid?: boolean;
+  infractionDate?: string;
+  effectiveDate?: string;
+  expiryDate?: string;
+  servedDate?: string;
+  appealDate?: string;
+  appealNotes?: string;
+  appealResolution?: string;
+  appealResolvedDate?: string;
+  resolutionNotes?: string;
+  resolvedBy?: string;
+  isAutomatic?: boolean;
+  yellowCardsCount?: number;
+  sanctionSummary?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface CreateSanctionRequest {
+  tournamentId: number;
+  playerId?: number;
+  teamId?: number;
+  matchId?: number;
+  matchEventId?: number;
+  sanctionType: SanctionType;
+  description?: string;
+  matchesSuspended?: number;
+  fineAmount?: number;
+  fineCurrency?: string;
+  infractionDate?: string;
+  effectiveDate?: string;
+  expiryDate?: string;
+  resolvedBy?: string;
+  resolutionNotes?: string;
+}
+
+export interface UpdateSanctionRequest {
+  description?: string;
+  matchesSuspended?: number;
+  fineAmount?: number;
+  finePaid?: boolean;
+  effectiveDate?: string;
+  expiryDate?: string;
+  resolvedBy?: string;
+  resolutionNotes?: string;
+}
+
+export interface AppealSanctionRequest {
+  appealNotes: string;
+}
+
+export interface ResolveAppealRequest {
+  resolution: string;
+  newMatchesSuspended?: number;
+  resolvedBy?: string;
+}

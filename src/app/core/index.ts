@@ -20,6 +20,7 @@ export { StandingService } from './service/standing.service';
 export { PlayerStatisticsService } from './service/player-statistics.service';
 export { MatchService } from './service/match.service';
 export { RefereeService } from './service/referee.service';
+export { SanctionService } from './service/sanction.service';
 
 // models
 export { User, AuthResponse, AuthData } from './models/user';
@@ -117,4 +118,11 @@ export {
   RefereeResponse,
   CreateRefereeRequest,
   UpdateRefereeRequest,
+  SanctionType,
+  SanctionStatus,
+  SanctionResponse,
+  CreateSanctionRequest,
+  UpdateSanctionRequest,
+  AppealSanctionRequest,
+  ResolveAppealRequest,
 } from './models/response';
