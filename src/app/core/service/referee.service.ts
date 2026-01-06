@@ -40,11 +40,13 @@ export class RefereeService {
    */
   getAll(
     page: number = 0,
-    size: number = 20
+    size: number = 20,
+    sort: string = 'lastName,asc'
   ): Observable<ApiResponse<RefereeResponse[]>> {
     const params = new HttpParams()
       .set('page', page.toString())
-      .set('size', size.toString());
+      .set('size', size.toString())
+      .set('sort', sort);
     return this.http.get<ApiResponse<RefereeResponse[]>>(this.apiUrl, { params });
   }
 
@@ -55,12 +57,14 @@ export class RefereeService {
   search(
     query: string,
     page: number = 0,
-    size: number = 20
+    size: number = 20,
+    sort: string = 'lastName,asc'
   ): Observable<ApiResponse<RefereeResponse[]>> {
     const params = new HttpParams()
       .set('query', query)
       .set('page', page.toString())
-      .set('size', size.toString());
+      .set('size', size.toString())
+      .set('sort', sort);
     return this.http.get<ApiResponse<RefereeResponse[]>>(
       `${this.apiUrl}/search`,
       { params }
@@ -74,11 +78,13 @@ export class RefereeService {
   getByCategory(
     category: RefereeCategory,
     page: number = 0,
-    size: number = 20
+    size: number = 20,
+    sort: string = 'lastName,asc'
   ): Observable<ApiResponse<RefereeResponse[]>> {
     const params = new HttpParams()
       .set('page', page.toString())
-      .set('size', size.toString());
+      .set('size', size.toString())
+      .set('sort', sort);
     return this.http.get<ApiResponse<RefereeResponse[]>>(
       `${this.apiUrl}/category/${category}`,
       { params }

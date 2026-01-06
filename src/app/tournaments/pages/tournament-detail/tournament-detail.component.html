@@ -49,6 +49,9 @@
                   </button>
                 }
                 @if (tournament.status === 'SCHEDULED') {
+                  <button class="btn btn-info btn-sm me-2" (click)="openGenerateFixtureModal(generateFixtureModal)">
+                    <i class="fas fa-calendar-alt me-1"></i> {{ 'TOURNAMENTS.GENERATE_FIXTURE' | translate }}
+                  </button>
                   <button class="btn btn-success btn-sm" (click)="startTournament()">
                     <i class="fas fa-play me-1"></i> {{ 'TOURNAMENTS.START' | translate }}
                   </button>
@@ -431,6 +434,69 @@
       } @else {
         {{ 'TOURNAMENTS.WITHDRAW' | translate }}
       }
+    </button>
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
+  </div>
+</ng-template>
+
+<!-- Generate Fixture Modal -->
+<ng-template #generateFixtureModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-generate-fixture-title">{{ 'TOURNAMENTS.GENERATE_FIXTURE_TITLE' | translate }}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="generateFixtureForm">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TOURNAMENTS.FIXTURE_START_DATE' | translate }} <span class="text-danger">*</span></label>
+          <input type="date" class="form-control" formControlName="startDate" />
+          @if (generateFixtureForm.get('startDate')?.invalid && generateFixtureForm.get('startDate')?.touched) {
+            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TOURNAMENTS.DAYS_BETWEEN_MATCHDAYS' | translate }} <span class="text-danger">*</span></label>
+          <input type="number" class="form-control" formControlName="daysBetweenMatchdays" min="1" />
+          @if (generateFixtureForm.get('daysBetweenMatchdays')?.invalid && generateFixtureForm.get('daysBetweenMatchdays')?.touched) {
+            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+          }
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TOURNAMENTS.DEFAULT_MATCH_TIME' | translate }} <span class="text-danger">*</span></label>
+          <input type="time" class="form-control" formControlName="defaultMatchTime" />
+          @if (generateFixtureForm.get('defaultMatchTime')?.invalid && generateFixtureForm.get('defaultMatchTime')?.touched) {
+            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TOURNAMENTS.DEFAULT_VENUE' | translate }}</label>
+          <input type="text" class="form-control" formControlName="defaultVenue" [placeholder]="'TOURNAMENTS.DEFAULT_VENUE_PLACEHOLDER' | translate" />
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="homeAndAway" formControlName="homeAndAway" />
+            <label class="form-check-label" for="homeAndAway">{{ 'TOURNAMENTS.HOME_AND_AWAY' | translate }}</label>
+          </div>
+          <small class="text-muted">{{ 'TOURNAMENTS.HOME_AND_AWAY_HINT' | translate }}</small>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="randomizeOrder" formControlName="randomizeOrder" />
+            <label class="form-check-label" for="randomizeOrder">{{ 'TOURNAMENTS.RANDOMIZE_ORDER' | translate }}</label>
+          </div>
+          <small class="text-muted">{{ 'TOURNAMENTS.RANDOMIZE_ORDER_HINT' | translate }}</small>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="onGenerateFixture()" [disabled]="generateFixtureForm.invalid">
+      {{ 'TOURNAMENTS.GENERATE' | translate }}
     </button>
     <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
   </div>

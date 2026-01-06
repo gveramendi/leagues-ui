@@ -13,6 +13,7 @@ import {
   UpdateMatchScoreRequest,
   CreateMatchEventRequest,
   AssignRefereeRequest,
+  GenerateFixtureRequest,
   MatchStatus,
 } from '../models/response';
 
@@ -204,6 +205,17 @@ export class MatchService {
    */
   delete(id: number): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
+  }
+
+  /**
+   * POST /api/matches/generate-fixture
+   * Generate fixtures for a tournament
+   */
+  generateFixture(request: GenerateFixtureRequest): Observable<ApiResponse<MatchSummaryResponse[]>> {
+    return this.http.post<ApiResponse<MatchSummaryResponse[]>>(
+      `${this.apiUrl}/generate-fixture`,
+      request
+    );
   }
 
   // ==================== Match Event endpoints ====================

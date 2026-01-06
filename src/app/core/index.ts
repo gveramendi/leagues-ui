@@ -111,6 +111,7 @@ export {
   CreateMatchRequest,
   UpdateMatchRequest,
   UpdateMatchScoreRequest,
+  GenerateFixtureRequest,
   CreateMatchEventRequest,
   AssignRefereeRequest,
   RefereeResponse,

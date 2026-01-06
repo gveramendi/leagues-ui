@@ -1162,6 +1162,16 @@ export interface UpdateMatchScoreRequest {
   awayPenalties?: number;
 }
 
+export interface GenerateFixtureRequest {
+  tournamentId: number;
+  startDate: string;
+  daysBetweenMatchdays: number;
+  defaultMatchTime: string;
+  defaultVenue?: string;
+  homeAndAway: boolean;
+  randomizeOrder: boolean;
+}
+
 export interface CreateMatchEventRequest {
   eventType: MatchEventType;
   minute: number;

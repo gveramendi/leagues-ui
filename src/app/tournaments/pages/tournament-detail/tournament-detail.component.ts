@@ -18,11 +18,13 @@ import {
   TournamentTeamService,
   TeamService,
   StandingService,
+  MatchService,
   TournamentResponse,
   TournamentTeamResponse,
   TeamResponse,
   RegisterTeamRequest,
   RejectTeamRequest,
+  GenerateFixtureRequest,
 } from '@core';
 import { debounceTime, distinctUntilChanged, forkJoin, of, Subject, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -76,6 +78,9 @@ export class TournamentDetailComponent implements OnInit {
   selectedTeamRegistration: TournamentTeamResponse | null = null;
   actionType: 'reject' | 'withdraw' = 'reject';
 
+  // Generate fixture form
+  generateFixtureForm!: UntypedFormGroup;
+
   // Status options
   registrationStatuses = [
     { value: 'PENDING', label: 'Pendiente', class: 'bg-warning' },
@@ -92,6 +97,7 @@ export class TournamentDetailComponent implements OnInit {
     private tournamentTeamService: TournamentTeamService,
     private teamService: TeamService,
     private standingService: StandingService,
+    private matchService: MatchService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -117,6 +123,15 @@ export class TournamentDetailComponent implements OnInit {
 
     this.rejectForm = this.fb.group({
       reason: ['', [Validators.required, Validators.minLength(10), Validators.maxLength(500)]],
+    });
+
+    this.generateFixtureForm = this.fb.group({
+      startDate: ['', [Validators.required]],
+      daysBetweenMatchdays: [7, [Validators.required, Validators.min(1)]],
+      defaultMatchTime: ['15:00', [Validators.required]],
+      defaultVenue: [''],
+      homeAndAway: [true],
+      randomizeOrder: [true],
     });
   }
 
@@ -313,6 +328,50 @@ export class TournamentDetailComponent implements OnInit {
           },
         });
       }
+    });
+  }
+
+  // Generate fixture
+  openGenerateFixtureModal(content: any): void {
+    this.generateFixtureForm.reset({
+      daysBetweenMatchdays: 7,
+      defaultMatchTime: '15:00',
+      homeAndAway: true,
+      randomizeOrder: true,
+    });
+    this.modalService.open(content, {
+      ariaLabelledBy: 'modal-generate-fixture-title',
+      size: 'lg',
+    });
+  }
+
+  onGenerateFixture(): void {
+    if (this.generateFixtureForm.invalid) {
+      this.generateFixtureForm.markAllAsTouched();
+      return;
+    }
+
+    const formValue = this.generateFixtureForm.value;
+    const request: GenerateFixtureRequest = {
+      tournamentId: this.tournamentId,
+      startDate: formValue.startDate,
+      daysBetweenMatchdays: formValue.daysBetweenMatchdays,
+      defaultMatchTime: formValue.defaultMatchTime + ':00',
+      defaultVenue: formValue.defaultVenue || undefined,
+      homeAndAway: formValue.homeAndAway,
+      randomizeOrder: formValue.randomizeOrder,
+    };
+
+    this.matchService.generateFixture(request).subscribe({
+      next: (response) => {
+        this.toastr.success(response.header.message);
+        this.modalService.dismissAll();
+        this.loadTournament();
+      },
+      error: (error) => {
+        const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
+        this.toastr.error(errorMessage);
+      },
     });
   }
 
