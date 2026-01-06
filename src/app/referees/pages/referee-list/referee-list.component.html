@@ -95,7 +95,7 @@
               [offset]="page"
               (page)="onPageChange($event)"
             >
-              <ngx-datatable-column prop="fullName" [width]="250" [minWidth]="200">
+              <ngx-datatable-column prop="fullName" [width]="320" [minWidth]="320" [maxWidth]="320" [resizeable]="false">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.NAME' | translate }}
                 </ng-template>
@@ -124,7 +124,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="licenseNumber" [width]="120" [minWidth]="120">
+              <ngx-datatable-column prop="licenseNumber" [width]="140" [minWidth]="140" [maxWidth]="140" [resizeable]="false">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.LICENSE' | translate }}
                 </ng-template>
@@ -133,7 +133,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="category" [width]="120" [minWidth]="120">
+              <ngx-datatable-column prop="category" [width]="150" [minWidth]="150" [maxWidth]="150" [resizeable]="false">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.CATEGORY' | translate }}
                 </ng-template>
@@ -144,7 +144,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="email" [width]="200" [minWidth]="150">
+              <ngx-datatable-column prop="email" [width]="300" [minWidth]="300" [maxWidth]="300" [resizeable]="false">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.EMAIL' | translate }}
                 </ng-template>
@@ -153,7 +153,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="phone" [width]="130" [minWidth]="130">
+              <ngx-datatable-column prop="phone" [width]="200" [minWidth]="200" [maxWidth]="200" [resizeable]="false">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.PHONE' | translate }}
                 </ng-template>
@@ -162,7 +162,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column prop="isLicenseValid" [width]="100" [minWidth]="100">
+              <ngx-datatable-column prop="isLicenseValid" [width]="120" [minWidth]="120" [maxWidth]="120" [resizeable]="false">
                 <ng-template ngx-datatable-header-template>
                   {{ 'REFEREES.STATUS' | translate }}
                 </ng-template>
@@ -175,7 +175,7 @@
                 </ng-template>
               </ngx-datatable-column>
 
-              <ngx-datatable-column name="Actions" [sortable]="false" [width]="100" [minWidth]="100" [maxWidth]="100">
+              <ngx-datatable-column name="Actions" [sortable]="false" [resizeable]="false" [draggable]="false" [width]="120" [minWidth]="120" [maxWidth]="120">
                 <ng-template ngx-datatable-header-template>
                   {{ 'COMMON.ACTIONS' | translate }}
                 </ng-template>
