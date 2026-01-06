@@ -139,7 +139,8 @@ export class RefereeListComponent implements OnInit {
     this.loadReferees();
   }
 
-  onCategoryChange(): void {
+  onCategoryFilter(category: string): void {
+    this.selectedCategory = category ? (category as RefereeCategory) : null;
     this.page = 0;
     if (this.table) {
       this.table.offset = 0;

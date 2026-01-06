@@ -43,17 +43,18 @@
                           />
                         </div>
                       </div>
-                      <div class="header-buttons-left">
+                      <div class="header-buttons-left ms-3">
                         <div class="d-flex gap-2 align-items-center">
                           <select
-                            class="form-select form-select-sm"
-                            [(ngModel)]="selectedCategory"
-                            (change)="onCategoryChange()"
-                            style="width: 150px;"
+                            #categorySelect
+                            class="form-select"
+                            [value]="selectedCategory || ''"
+                            (change)="onCategoryFilter(categorySelect.value)"
+                            style="width: 200px; height: 45px;"
                           >
-                            <option [ngValue]="null">{{ 'REFEREES.ALL_CATEGORIES' | translate }}</option>
+                            <option value="">{{ 'REFEREES.ALL_CATEGORIES' | translate }}</option>
                             @for (cat of categories; track cat) {
-                              <option [ngValue]="cat">{{ getCategoryLabel(cat) }}</option>
+                              <option [value]="cat">{{ getCategoryLabel(cat) }}</option>
                             }
                           </select>
                           @if (searchQuery || selectedCategory) {
