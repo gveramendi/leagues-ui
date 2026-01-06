@@ -1,0 +1,33 @@
+.badge {
+  font-size: 0.75rem;
+}
+
+.btn-tbl-edit {
+  background-color: #96a2b4;
+  color: white;
+  &:hover {
+    background-color: #7a8a9a;
+    color: white;
+  }
+}
+
+.btn-tbl-delete {
+  background-color: #dc3545;
+  color: white;
+  &:hover {
+    background-color: #c82333;
+    color: white;
+  }
+}
+
+.searchbox {
+  position: relative;
+
+  .search-icon {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 10px;
+    color: rgba(0, 0, 0, 0.54);
+  }
+}

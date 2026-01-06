@@ -51,6 +51,11 @@ export const APP_ROUTE: Route[] = [
                 loadChildren: () =>
                     import('./tournaments/tournaments.module').then((m) => m.TournamentsModule),
             },
+            {
+                path: 'referees',
+                loadChildren: () =>
+                    import('./referees/referees.module').then((m) => m.RefereesModule),
+            },
         ],
     },
     {

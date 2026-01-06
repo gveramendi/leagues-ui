@@ -1,0 +1,76 @@
+.tournament-matches {
+  .matchday-header {
+    font-weight: 600;
+    color: #333;
+  }
+
+  .match-card {
+    transition: box-shadow 0.2s ease;
+
+    &:hover {
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    }
+  }
+
+  .match-score {
+    .team {
+      min-width: 100px;
+
+      .team-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+      }
+
+      .team-logo-placeholder {
+        width: 50px;
+        height: 50px;
+        background: #e9ecef;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+
+        i {
+          font-size: 1.5rem;
+          color: #6c757d;
+        }
+      }
+
+      .team-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        max-width: 120px;
+        margin: 0 auto;
+      }
+    }
+
+    .score-display {
+      .score {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+      }
+
+      .vs {
+        font-size: 1.2rem;
+        font-weight: 600;
+        color: #6c757d;
+      }
+    }
+  }
+
+  .venue {
+    font-size: 0.85rem;
+  }
+
+  .match-actions {
+    .btn-sm {
+      padding: 0.25rem 0.5rem;
+    }
+  }
+}

@@ -27,6 +27,9 @@ export class ErrorInterceptor implements HttpInterceptor {
           if (typeof err.error === 'string') {
             // Error is a plain string
             errorMessage = err.error;
+          } else if (err.error.header?.message) {
+            // Error uses the API response structure { header: { message: "..." } }
+            errorMessage = err.error.header.message;
           } else if (err.error.message) {
             // Error is an object with message property (API error response)
             errorMessage = err.error.message;

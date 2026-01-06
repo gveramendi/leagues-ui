@@ -321,8 +321,19 @@ export class TournamentService {
   }
 
   /**
+   * POST /api/tournaments/{id}/schedule
+   * Schedule a tournament (REGISTRATION_CLOSED → SCHEDULED)
+   */
+  schedule(id: number): Observable<ApiResponse<TournamentResponse>> {
+    return this.http.post<ApiResponse<TournamentResponse>>(
+      `${this.apiUrl}/${id}/schedule`,
+      {}
+    );
+  }
+
+  /**
    * POST /api/tournaments/{id}/start
-   * Start a tournament
+   * Start a tournament (SCHEDULED → IN_PROGRESS)
    */
   start(id: number): Observable<ApiResponse<TournamentResponse>> {
     return this.http.post<ApiResponse<TournamentResponse>>(

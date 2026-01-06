@@ -17,16 +17,19 @@ import {
   TournamentService,
   TournamentTeamService,
   TeamService,
+  StandingService,
   TournamentResponse,
   TournamentTeamResponse,
   TeamResponse,
   RegisterTeamRequest,
   RejectTeamRequest,
 } from '@core';
-import { debounceTime, distinctUntilChanged, Subject } from 'rxjs';
+import { debounceTime, distinctUntilChanged, forkJoin, of, Subject, switchMap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { TournamentStandingsComponent } from '../../components/tournament-standings/tournament-standings.component';
 import { TournamentScorersComponent } from '../../components/tournament-scorers/tournament-scorers.component';
 import { TournamentAssistsComponent } from '../../components/tournament-assists/tournament-assists.component';
+import { TournamentMatchesComponent } from '../../components/tournament-matches/tournament-matches.component';
 
 @Component({
   selector: 'app-tournament-detail',
@@ -42,6 +45,7 @@ import { TournamentAssistsComponent } from '../../components/tournament-assists/
     TournamentStandingsComponent,
     TournamentScorersComponent,
     TournamentAssistsComponent,
+    TournamentMatchesComponent,
   ],
   templateUrl: './tournament-detail.component.html',
   styleUrls: ['./tournament-detail.component.scss'],
@@ -58,6 +62,9 @@ export class TournamentDetailComponent implements OnInit {
   teams: TournamentTeamResponse[] = [];
   filteredTeams: TournamentTeamResponse[] = [];
   teamsLoading = false;
+  teamsPage = 0;
+  teamsSize = 10;
+  totalTeams = 0;
 
   // Team registration form
   registerTeamForm!: UntypedFormGroup;
@@ -84,6 +91,7 @@ export class TournamentDetailComponent implements OnInit {
     private tournamentService: TournamentService,
     private tournamentTeamService: TournamentTeamService,
     private teamService: TeamService,
+    private standingService: StandingService,
     private fb: UntypedFormBuilder,
     private modalService: NgbModal,
     private toastr: ToastrService,
@@ -141,10 +149,42 @@ export class TournamentDetailComponent implements OnInit {
 
   loadTeams(): void {
     this.teamsLoading = true;
-    this.tournamentTeamService.getAll(this.tournamentId).subscribe({
-      next: (response) => {
-        this.teams = response.body.data;
+
+    forkJoin({
+      teams: this.tournamentTeamService.getAll(this.tournamentId, this.teamsPage, this.teamsSize),
+      standings: this.standingService.getByTournament(this.tournamentId).pipe(
+        catchError(() => of(null))
+      ),
+    }).subscribe({
+      next: ({ teams, standings }) => {
+        this.teams = teams.body.data;
+
+        // Merge standings data with teams if available
+        if (standings?.body?.data?.standings) {
+          const standingsMap = new Map(
+            standings.body.data.standings.map((s) => [s.teamId, s])
+          );
+
+          this.teams = this.teams.map((team) => {
+            const standing = standingsMap.get(team.teamId);
+            if (standing) {
+              return {
+                ...team,
+                totalPlayed: standing.played || 0,
+                totalWon: standing.won || 0,
+                totalDrawn: standing.drawn || 0,
+                totalLost: standing.lost || 0,
+                totalGoalsFor: standing.goalsFor || 0,
+                totalGoalsAgainst: standing.goalsAgainst || 0,
+                totalGoalDifference: standing.goalDifference || 0,
+              };
+            }
+            return team;
+          });
+        }
+
         this.filteredTeams = [...this.teams];
+        this.totalTeams = teams.body.pagination?.totalElements || this.teams.length;
         this.teamsLoading = false;
       },
       error: (error) => {
@@ -186,9 +226,15 @@ export class TournamentDetailComponent implements OnInit {
       );
     });
 
+    this.teamsPage = 0;
     if (this.table) {
       this.table.offset = 0;
     }
+  }
+
+  onTeamsPageChange(pageInfo: { offset: number }): void {
+    this.teamsPage = pageInfo.offset;
+    this.loadTeams();
   }
 
   // Tournament state actions
@@ -210,7 +256,7 @@ export class TournamentDetailComponent implements OnInit {
             this.loadTournament();
           },
           error: (error) => {
-            const errorMessage = typeof error === 'string' ? error : (error.message || 'Error');
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
             this.toastr.error(errorMessage);
           },
         });
@@ -236,7 +282,33 @@ export class TournamentDetailComponent implements OnInit {
             this.loadTournament();
           },
           error: (error) => {
-            const errorMessage = typeof error === 'string' ? error : (error.message || 'Error');
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
+            this.toastr.error(errorMessage);
+          },
+        });
+      }
+    });
+  }
+
+  scheduleTournament(): void {
+    Swal.fire({
+      title: this.translate.instant('TOURNAMENTS.SCHEDULE_TITLE'),
+      text: this.translate.instant('TOURNAMENTS.SCHEDULE_MESSAGE'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#8963ff',
+      cancelButtonColor: '#fb7823',
+      confirmButtonText: this.translate.instant('COMMON.YES'),
+      cancelButtonText: this.translate.instant('COMMON.NO'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.tournamentService.schedule(this.tournamentId).subscribe({
+          next: (response) => {
+            this.toastr.success(response.header.message);
+            this.loadTournament();
+          },
+          error: (error) => {
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
             this.toastr.error(errorMessage);
           },
         });
@@ -256,14 +328,19 @@ export class TournamentDetailComponent implements OnInit {
       cancelButtonText: this.translate.instant('COMMON.NO'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.tournamentService.start(this.tournamentId).subscribe({
-          next: (response) => {
+        this.tournamentService.start(this.tournamentId).pipe(
+          switchMap((response) => {
             this.toastr.success(response.header.message);
+            return this.standingService.initializeStandings(this.tournamentId);
+          })
+        ).subscribe({
+          next: () => {
             this.loadTournament();
           },
           error: (error) => {
-            const errorMessage = typeof error === 'string' ? error : (error.message || 'Error');
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
             this.toastr.error(errorMessage);
+            this.loadTournament();
           },
         });
       }
@@ -288,7 +365,7 @@ export class TournamentDetailComponent implements OnInit {
             this.loadTournament();
           },
           error: (error) => {
-            const errorMessage = typeof error === 'string' ? error : (error.message || 'Error');
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
             this.toastr.error(errorMessage);
           },
         });
@@ -330,7 +407,7 @@ export class TournamentDetailComponent implements OnInit {
         this.loadTournament(); // Refresh team counts
       },
       error: (error) => {
-        const errorMessage = typeof error === 'string' ? error : (error.message || 'Error registering team');
+        const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error registering team');
         this.toastr.error(errorMessage);
       },
     });
@@ -356,8 +433,48 @@ export class TournamentDetailComponent implements OnInit {
             this.loadTournament();
           },
           error: (error) => {
-            const errorMessage = typeof error === 'string' ? error : (error.message || 'Error');
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
             this.toastr.error(errorMessage);
+          },
+        });
+      }
+    });
+  }
+
+  // Approve all pending teams
+  approveAllPendingTeams(): void {
+    const pendingTeams = this.teams.filter((t) => t.status === 'PENDING');
+
+    if (pendingTeams.length === 0) {
+      this.toastr.info(this.translate.instant('TOURNAMENTS.NO_PENDING_TEAMS'));
+      return;
+    }
+
+    Swal.fire({
+      title: this.translate.instant('TOURNAMENTS.APPROVE_ALL_TITLE'),
+      text: this.translate.instant('TOURNAMENTS.APPROVE_ALL_MESSAGE', { count: pendingTeams.length }),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#8963ff',
+      cancelButtonColor: '#fb7823',
+      confirmButtonText: this.translate.instant('COMMON.YES'),
+      cancelButtonText: this.translate.instant('COMMON.NO'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        const approveRequests = pendingTeams.map((team) =>
+          this.tournamentTeamService.approve(this.tournamentId, team.id)
+        );
+
+        forkJoin(approveRequests).subscribe({
+          next: () => {
+            this.toastr.success(this.translate.instant('TOURNAMENTS.APPROVE_ALL_SUCCESS', { count: pendingTeams.length }));
+            this.loadTeams();
+            this.loadTournament();
+          },
+          error: (error) => {
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
+            this.toastr.error(errorMessage);
+            this.loadTeams();
           },
         });
       }
@@ -409,7 +526,7 @@ export class TournamentDetailComponent implements OnInit {
         this.loadTournament();
       },
       error: (error) => {
-        const errorMessage = typeof error === 'string' ? error : (error.message || 'Error');
+        const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
         this.toastr.error(errorMessage);
       },
     });
@@ -435,7 +552,7 @@ export class TournamentDetailComponent implements OnInit {
             this.loadTournament();
           },
           error: (error) => {
-            const errorMessage = typeof error === 'string' ? error : (error.message || 'Error');
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
             this.toastr.error(errorMessage);
           },
         });

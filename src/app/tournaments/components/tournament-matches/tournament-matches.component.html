@@ -1,0 +1,279 @@
+<div class="tournament-matches">
+  <!-- Filters -->
+  <div class="row mb-3">
+    <div class="col-md-3">
+      <label class="form-label">{{ 'MATCHES.MATCHDAY' | translate }}</label>
+      <select class="form-select" [(ngModel)]="selectedMatchday" (change)="onMatchdayChange()">
+        <option [ngValue]="null">{{ 'MATCHES.ALL_MATCHDAYS' | translate }}</option>
+        @for (matchday of matchdays; track matchday) {
+          <option [ngValue]="matchday">{{ 'MATCHES.MATCHDAY' | translate }} {{ matchday }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-3">
+      <label class="form-label">{{ 'MATCHES.STATUS' | translate }}</label>
+      <select class="form-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+        <option [ngValue]="null">{{ 'MATCHES.ALL_STATUSES' | translate }}</option>
+        @for (status of statusOptions; track status) {
+          <option [ngValue]="status">{{ getStatusLabel(status) }}</option>
+        }
+      </select>
+    </div>
+    <div class="col-md-3 d-flex align-items-end">
+      <button class="btn btn-outline-secondary" (click)="clearFilters()">
+        <i class="fas fa-times me-1"></i>{{ 'MATCHES.CLEAR_FILTERS' | translate }}
+      </button>
+    </div>
+    @if (canEdit) {
+      <div class="col-md-3 d-flex align-items-end justify-content-end">
+        <button class="btn btn-primary" (click)="openAddModal(matchModal)">
+          <i class="fas fa-plus me-1"></i>{{ 'MATCHES.ADD_MATCH' | translate }}
+        </button>
+      </div>
+    }
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  }
+
+  <!-- Error -->
+  @if (error && !loading) {
+    <div class="alert alert-danger" role="alert">
+      {{ error }}
+    </div>
+  }
+
+  <!-- No matches -->
+  @if (!loading && !error && filteredMatches.length === 0) {
+    <div class="alert alert-info text-center" role="alert">
+      {{ 'MATCHES.NO_MATCHES' | translate }}
+    </div>
+  }
+
+  <!-- Match cards by matchday -->
+  @if (!loading && !error && filteredMatches.length > 0) {
+    @for (matchday of getUniqueMatchdays(); track matchday) {
+      <div class="matchday-group mb-4">
+        <h5 class="matchday-header bg-light p-2 rounded">
+          <i class="fas fa-calendar-alt me-2"></i>{{ 'MATCHES.MATCHDAY' | translate }} {{ matchday }}
+        </h5>
+        <div class="row">
+          @for (match of getMatchesByMatchday(matchday); track match.id) {
+            <div class="col-lg-6 mb-3">
+              <div class="card match-card h-100">
+                <div class="card-body">
+                  <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge {{ getStatusClass(match.status) }}">
+                      {{ match.statusDisplayName || getStatusLabel(match.status) }}
+                    </span>
+                    @if (match.matchDate) {
+                      <small class="text-muted">
+                        <i class="far fa-calendar me-1"></i>{{ match.matchDate }}
+                        @if (match.matchTime) {
+                          <i class="far fa-clock ms-2 me-1"></i>{{ match.matchTime }}
+                        }
+                      </small>
+                    }
+                  </div>
+
+                  <!-- Match Score Display -->
+                  <div class="match-score d-flex align-items-center justify-content-between py-3">
+                    <div class="team home-team text-center flex-grow-1">
+                      @if (match.homeTeamLogoUrl) {
+                        <img [src]="match.homeTeamLogoUrl" alt="{{ match.homeTeamName }}" class="team-logo mb-2" />
+                      } @else {
+                        <div class="team-logo-placeholder mb-2">
+                          <i class="fas fa-shield-alt"></i>
+                        </div>
+                      }
+                      <div class="team-name" [title]="match.homeTeamName">
+                        {{ match.homeTeamShortName || match.homeTeamName }}
+                      </div>
+                    </div>
+
+                    <div class="score-display text-center mx-3">
+                      @if (match.status === 'FINISHED' || match.status === 'IN_PROGRESS') {
+                        <span class="score">{{ match.homeScore ?? 0 }} - {{ match.awayScore ?? 0 }}</span>
+                      } @else {
+                        <span class="vs">VS</span>
+                      }
+                    </div>
+
+                    <div class="team away-team text-center flex-grow-1">
+                      @if (match.awayTeamLogoUrl) {
+                        <img [src]="match.awayTeamLogoUrl" alt="{{ match.awayTeamName }}" class="team-logo mb-2" />
+                      } @else {
+                        <div class="team-logo-placeholder mb-2">
+                          <i class="fas fa-shield-alt"></i>
+                        </div>
+                      }
+                      <div class="team-name" [title]="match.awayTeamName">
+                        {{ match.awayTeamShortName || match.awayTeamName }}
+                      </div>
+                    </div>
+                  </div>
+
+                  @if (match.venue) {
+                    <div class="venue text-center text-muted mt-2">
+                      <small><i class="fas fa-map-marker-alt me-1"></i>{{ match.venue }}</small>
+                    </div>
+                  }
+
+                  <!-- Actions -->
+                  @if (canEdit) {
+                    <div class="match-actions d-flex justify-content-center gap-2 mt-3 pt-3 border-top">
+                      @if (match.status === 'SCHEDULED') {
+                        <button class="btn btn-sm btn-success" (click)="startMatch(match)" [title]="'MATCHES.START' | translate">
+                          <i class="fas fa-play"></i>
+                        </button>
+                      }
+                      @if (match.status === 'IN_PROGRESS') {
+                        <button class="btn btn-sm btn-info" (click)="openScoreModal(scoreModal, match)" [title]="'MATCHES.UPDATE_SCORE' | translate">
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-dark" (click)="finishMatch(match)" [title]="'MATCHES.FINISH' | translate">
+                          <i class="fas fa-flag-checkered"></i>
+                        </button>
+                      }
+                      @if (match.status === 'SCHEDULED' || match.status === 'POSTPONED') {
+                        <button class="btn btn-sm btn-secondary" (click)="openEditModal(matchModal, match)" [title]="'COMMON.EDIT' | translate">
+                          <i class="far fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" (click)="deleteMatch(match)" [title]="'COMMON.DELETE' | translate">
+                          <i class="far fa-trash-alt"></i>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Add/Edit Match Modal -->
+<ng-template #matchModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-match-title">
+      @if (isEditMode) {
+        {{ 'MATCHES.EDIT_MATCH' | translate }}
+      } @else {
+        {{ 'MATCHES.ADD_MATCH' | translate }}
+      }
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="matchForm">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MATCHES.HOME_TEAM' | translate }} <span class="text-danger">*</span></label>
+          <select class="form-select" formControlName="homeTeamId" [attr.disabled]="isEditMode ? '' : null">
+            <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (team of teams; track team.id) {
+              <option [ngValue]="team.teamId">{{ team.teamName }}</option>
+            }
+          </select>
+          @if (matchForm.get('homeTeamId')?.invalid && matchForm.get('homeTeamId')?.touched) {
+            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'MATCHES.AWAY_TEAM' | translate }} <span class="text-danger">*</span></label>
+          <select class="form-select" formControlName="awayTeamId" [attr.disabled]="isEditMode ? '' : null">
+            <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
+            @for (team of teams; track team.id) {
+              <option [ngValue]="team.teamId">{{ team.teamName }}</option>
+            }
+          </select>
+          @if (matchForm.get('awayTeamId')?.invalid && matchForm.get('awayTeamId')?.touched) {
+            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+          }
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'MATCHES.MATCHDAY' | translate }} <span class="text-danger">*</span></label>
+          <input type="number" class="form-control" formControlName="matchday" min="1" />
+          @if (matchForm.get('matchday')?.invalid && matchForm.get('matchday')?.touched) {
+            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+          }
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'MATCHES.DATE' | translate }}</label>
+          <input type="date" class="form-control" formControlName="matchDate" />
+        </div>
+        <div class="col-md-4 mb-3">
+          <label class="form-label">{{ 'MATCHES.TIME' | translate }}</label>
+          <input type="time" class="form-control" formControlName="matchTime" />
+        </div>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">{{ 'MATCHES.VENUE' | translate }}</label>
+        <input type="text" class="form-control" formControlName="venue" />
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="onSaveMatch()" [disabled]="matchForm.invalid">
+      {{ 'COMMON.SAVE' | translate }}
+    </button>
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
+  </div>
+</ng-template>
+
+<!-- Update Score Modal -->
+<ng-template #scoreModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-score-title">{{ 'MATCHES.UPDATE_SCORE' | translate }}</h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <div class="text-center mb-3">
+      <strong>{{ editingMatch?.homeTeamName }}</strong>
+      vs
+      <strong>{{ editingMatch?.awayTeamName }}</strong>
+    </div>
+    <div class="d-flex justify-content-center align-items-center gap-3">
+      <div class="text-center">
+        <label class="form-label">{{ editingMatch?.homeTeamShortName }}</label>
+        <input
+          type="number"
+          #homeScoreInput
+          class="form-control text-center"
+          min="0"
+          [value]="editingMatch?.homeScore ?? 0"
+          style="width: 80px;"
+        />
+      </div>
+      <span class="fs-4">-</span>
+      <div class="text-center">
+        <label class="form-label">{{ editingMatch?.awayTeamShortName }}</label>
+        <input
+          type="number"
+          #awayScoreInput
+          class="form-control text-center"
+          min="0"
+          [value]="editingMatch?.awayScore ?? 0"
+          style="width: 80px;"
+        />
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-primary" (click)="onUpdateScore(+homeScoreInput.value, +awayScoreInput.value)">
+      {{ 'COMMON.SAVE' | translate }}
+    </button>
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
+  </div>
+</ng-template>

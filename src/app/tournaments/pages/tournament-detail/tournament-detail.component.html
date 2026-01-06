@@ -43,7 +43,12 @@
                     <i class="fas fa-door-closed me-1"></i> {{ 'TOURNAMENTS.CLOSE_REGISTRATION' | translate }}
                   </button>
                 }
-                @if (tournament.status === 'REGISTRATION_CLOSED' || tournament.status === 'SCHEDULED') {
+                @if (tournament.status === 'REGISTRATION_CLOSED') {
+                  <button class="btn btn-primary btn-sm" (click)="scheduleTournament()">
+                    <i class="fas fa-calendar-check me-1"></i> {{ 'TOURNAMENTS.SCHEDULE' | translate }}
+                  </button>
+                }
+                @if (tournament.status === 'SCHEDULED') {
                   <button class="btn btn-success btn-sm" (click)="startTournament()">
                     <i class="fas fa-play me-1"></i> {{ 'TOURNAMENTS.START' | translate }}
                   </button>
@@ -58,14 +63,14 @@
             <div class="card-body">
               <div class="row">
                 <div class="col-md-3">
-                  <p><strong>{{ 'TOURNAMENTS.CODE' | translate }}:</strong> <span class="badge bg-dark">{{ tournament.code }}</span></p>
+                  <p><strong>{{ 'TOURNAMENTS.CODE' | translate }}:</strong> <span class="badge bg-dark ms-2">{{ tournament.code }}</span></p>
                 </div>
                 <div class="col-md-3">
                   <p><strong>{{ 'TOURNAMENTS.NAME' | translate }}:</strong> {{ tournament.name }}</p>
                 </div>
                 <div class="col-md-3">
                   <p><strong>{{ 'TOURNAMENTS.STATUS' | translate }}:</strong>
-                    <span class="badge {{ getStatusClass(tournament.status) }}">{{ tournament.statusDisplayName }}</span>
+                    <span class="badge {{ getStatusClass(tournament.status) }} ms-2">{{ tournament.statusDisplayName }}</span>
                   </p>
                 </div>
                 <div class="col-md-3">
@@ -89,7 +94,7 @@
               <div class="row">
                 <div class="col-md-3">
                   <p><strong>{{ 'TOURNAMENTS.TEAMS' | translate }}:</strong>
-                    <span class="badge bg-primary">{{ tournament.approvedTeamsCount || 0 }} / {{ tournament.maxTeams }}</span>
+                    <span class="badge bg-primary ms-2">{{ tournament.approvedTeamsCount || 0 }} / {{ tournament.maxTeams }}</span>
                   </p>
                 </div>
                 @if (tournament.location) {
@@ -151,18 +156,26 @@
                                     />
                                   </div>
                                 </div>
-                                @if (canRegisterTeams()) {
-                                  <div class="header-buttons-left">
-                                    <div class="tbl-btn-style">
+                                <div class="header-buttons-left">
+                                  <div class="tbl-btn-style d-flex gap-2">
+                                    @if (canRegisterTeams()) {
                                       <button
                                         class="btn btn-icon icon-left btn-primary rounded-button"
                                         (click)="openRegisterTeamModal(registerTeamModal)"
+                                        [title]="'TOURNAMENTS.REGISTER_TEAM' | translate"
                                       >
                                         <i class="material-icons">add</i>
                                       </button>
-                                    </div>
+                                    }
+                                    <button
+                                      class="btn btn-icon icon-left btn-success rounded-button"
+                                      (click)="approveAllPendingTeams()"
+                                      [title]="'TOURNAMENTS.APPROVE_ALL' | translate"
+                                    >
+                                      <i class="material-icons">done_all</i>
+                                    </button>
                                   </div>
-                                }
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -178,9 +191,13 @@
                         [headerHeight]="60"
                         [footerHeight]="80"
                         rowHeight="auto"
-                        [limit]="10"
+                        [limit]="teamsSize"
+                        [externalPaging]="true"
+                        [count]="totalTeams"
+                        [offset]="teamsPage"
+                        (page)="onTeamsPageChange($event)"
                       >
-                        <ngx-datatable-column prop="registrationNumber" [width]="60" [maxWidth]="60">
+                        <ngx-datatable-column prop="registrationNumber" [width]="60" [minWidth]="60" [maxWidth]="60">
                           <ng-template ngx-datatable-header-template>
                             #
                           </ng-template>
@@ -189,7 +206,7 @@
                           </ng-template>
                         </ngx-datatable-column>
 
-                        <ngx-datatable-column prop="teamName" [flexGrow]="2">
+                        <ngx-datatable-column prop="teamName" [width]="250" [minWidth]="200">
                           <ng-template ngx-datatable-header-template>
                             {{ 'TOURNAMENTS.TEAM' | translate }}
                           </ng-template>
@@ -201,7 +218,7 @@
                           </ng-template>
                         </ngx-datatable-column>
 
-                        <ngx-datatable-column prop="registrationDate" [width]="120">
+                        <ngx-datatable-column prop="registrationDate" [width]="120" [minWidth]="120">
                           <ng-template ngx-datatable-header-template>
                             {{ 'TOURNAMENTS.REGISTRATION_DATE' | translate }}
                           </ng-template>
@@ -210,7 +227,7 @@
                           </ng-template>
                         </ngx-datatable-column>
 
-                        <ngx-datatable-column prop="status" [width]="100">
+                        <ngx-datatable-column prop="status" [width]="100" [minWidth]="100">
                           <ng-template ngx-datatable-header-template>
                             {{ 'TOURNAMENTS.STATUS' | translate }}
                           </ng-template>
@@ -222,22 +239,22 @@
                         </ngx-datatable-column>
 
                         @if (tournament.status === 'IN_PROGRESS' || tournament.status === 'FINISHED') {
-                          <ngx-datatable-column [width]="180" [sortable]="false">
+                          <ngx-datatable-column [width]="200" [minWidth]="200" [sortable]="false">
                             <ng-template ngx-datatable-header-template>
                               {{ 'TOURNAMENTS.STATS' | translate }}
                             </ng-template>
                             <ng-template let-row="row" ngx-datatable-cell-template>
-                              <small>
-                                PJ: {{ row.totalPlayed || 0 }} |
-                                G: {{ row.totalWon || 0 }} |
-                                E: {{ row.totalDrawn || 0 }} |
-                                P: {{ row.totalLost || 0 }}
-                              </small>
+                              <span class="text-nowrap">
+                                PJ: <strong>{{ row.totalPlayed || 0 }}</strong> |
+                                G: <strong>{{ row.totalWon || 0 }}</strong> |
+                                E: <strong>{{ row.totalDrawn || 0 }}</strong> |
+                                P: <strong>{{ row.totalLost || 0 }}</strong>
+                              </span>
                             </ng-template>
                           </ngx-datatable-column>
                         }
 
-                        <ngx-datatable-column name="Actions" [sortable]="false" [width]="130" [minWidth]="130">
+                        <ngx-datatable-column name="Actions" [sortable]="false" [width]="130" [minWidth]="130" [maxWidth]="130">
                           <ng-template ngx-datatable-header-template>
                             {{ 'COMMON.ACTIONS' | translate }}
                           </ng-template>
@@ -270,6 +287,20 @@
                 @if (tournament.status === 'IN_PROGRESS' || tournament.status === 'FINISHED') {
                   <li [ngbNavItem]="2">
                     <button ngbNavLink>
+                      <i class="fas fa-calendar-alt me-2"></i>{{ 'TOURNAMENTS.MATCHES_TAB' | translate }}
+                    </button>
+                    <ng-template ngbNavContent>
+                      <div class="mt-4">
+                        <app-tournament-matches
+                          [tournamentId]="tournamentId"
+                          [canEdit]="tournament.status === 'IN_PROGRESS'"
+                        ></app-tournament-matches>
+                      </div>
+                    </ng-template>
+                  </li>
+
+                  <li [ngbNavItem]="3">
+                    <button ngbNavLink>
                       <i class="fas fa-table me-2"></i>{{ 'TOURNAMENTS.STANDINGS_TAB' | translate }}
                     </button>
                     <ng-template ngbNavContent>
@@ -279,7 +310,7 @@
                     </ng-template>
                   </li>
 
-                  <li [ngbNavItem]="3">
+                  <li [ngbNavItem]="4">
                     <button ngbNavLink>
                       <i class="fas fa-futbol me-2"></i>{{ 'TOURNAMENTS.SCORERS_TAB' | translate }}
                     </button>
@@ -290,7 +321,7 @@
                     </ng-template>
                   </li>
 
-                  <li [ngbNavItem]="4">
+                  <li [ngbNavItem]="5">
                     <button ngbNavLink>
                       <i class="fas fa-hands-helping me-2"></i>{{ 'TOURNAMENTS.ASSISTS_TAB' | translate }}
                     </button>
