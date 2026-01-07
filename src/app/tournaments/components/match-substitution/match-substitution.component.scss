@@ -1,0 +1,162 @@
+.match-substitution {
+  .match-header {
+    .team-info {
+      text-align: center;
+
+      .team-logo {
+        width: 50px;
+        height: 50px;
+        object-fit: contain;
+      }
+
+      .team-logo-placeholder {
+        width: 50px;
+        height: 50px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: #f0f0f0;
+        border-radius: 50%;
+        margin: 0 auto;
+
+        i {
+          font-size: 1.25rem;
+          color: #999;
+        }
+      }
+
+      .team-name {
+        font-weight: 600;
+        margin-top: 0.5rem;
+        font-size: 0.9rem;
+      }
+    }
+
+    .score-display {
+      .score {
+        font-size: 2rem;
+        font-weight: bold;
+      }
+    }
+  }
+
+  .section-title {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+  }
+
+  .players-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 0.75rem;
+  }
+
+  .player-card {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 8px;
+    background: #fff;
+    border: 1px solid #e9ecef;
+    transition: all 0.2s ease;
+
+    &.active {
+      border-left: 4px solid #198754;
+    }
+
+    &.bench {
+      border-left: 4px solid #6c757d;
+      opacity: 0.85;
+    }
+
+    &.subbed-out {
+      border-left: 4px solid #dc3545;
+      opacity: 0.7;
+      background: #f8f9fa;
+    }
+
+    &.selectable {
+      cursor: pointer;
+
+      &:hover {
+        background: #f8f9fa;
+        border-color: #198754;
+      }
+
+      &.selected {
+        background: rgba(25, 135, 84, 0.1);
+        border-color: #198754;
+      }
+    }
+
+    .player-number {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: #e9ecef;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      font-size: 1rem;
+      margin-right: 0.75rem;
+      flex-shrink: 0;
+    }
+
+    .player-info {
+      flex: 1;
+      min-width: 0;
+
+      .player-name {
+        font-weight: 600;
+        font-size: 0.9rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .player-position {
+        font-size: 0.8rem;
+      }
+
+      .badge {
+        font-size: 0.7rem;
+        margin-top: 0.25rem;
+      }
+    }
+
+    .substitute-btn,
+    .undo-btn {
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+  }
+
+  .substitution-player {
+    &.out .player-card {
+      border-left: 4px solid #dc3545;
+    }
+
+    &.in .player-card {
+      border-left: 4px solid #198754;
+    }
+
+    .available-players {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      max-height: 200px;
+      overflow-y: auto;
+    }
+  }
+}
+
+// Modal specific styles
+.modal-body {
+  .player-card.selected {
+    background: #f8f9fa;
+  }
+}

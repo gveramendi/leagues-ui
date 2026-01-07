@@ -1,0 +1,505 @@
+<div class="match-events">
+  <!-- Match Header with Score -->
+  <div class="match-header text-center mb-4">
+    <div class="d-flex align-items-center justify-content-center gap-4">
+      <div class="team-info">
+        @if (match.homeTeamLogoUrl) {
+          <img [src]="match.homeTeamLogoUrl" alt="{{ match.homeTeamName }}" class="team-logo" />
+        } @else {
+          <div class="team-logo-placeholder">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+        }
+        <div class="team-name">{{ match.homeTeamName }}</div>
+      </div>
+      <div class="score-display">
+        <span class="score">{{ getHomeGoals().length }} - {{ getAwayGoals().length }}</span>
+      </div>
+      <div class="team-info">
+        @if (match.awayTeamLogoUrl) {
+          <img [src]="match.awayTeamLogoUrl" alt="{{ match.awayTeamName }}" class="team-logo" />
+        } @else {
+          <div class="team-logo-placeholder">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+        }
+        <div class="team-name">{{ match.awayTeamName }}</div>
+      </div>
+    </div>
+  </div>
+
+  @if (loading) {
+    <div class="text-center py-4">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else {
+    <!-- Team Tabs -->
+    <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+      <li [ngbNavItem]="1">
+        <button ngbNavLink>
+          <i class="fas fa-home me-1"></i>{{ match.homeTeamName }}
+          <span class="badge bg-success ms-1">{{ getHomeGoals().length }}</span>
+          @if (getHomeCards().length > 0) {
+            <span class="badge bg-warning text-dark ms-1">{{ getHomeCards().length }}</span>
+          }
+        </button>
+        <ng-template ngbNavContent>
+          <div class="team-events-section mt-3">
+            <!-- GOALS SECTION -->
+            <h6 class="section-title">
+              <i class="fas fa-futbol text-success me-2"></i>{{ 'EVENTS.GOALS' | translate }}
+            </h6>
+
+            <!-- Add Goal Button -->
+            @if (canEdit && !showGoalForm) {
+              <div class="mb-3">
+                <button class="btn btn-success btn-sm" (click)="openGoalForm(match.homeTeamId)">
+                  <i class="fas fa-plus me-1"></i>{{ 'EVENTS.ADD_GOAL' | translate }}
+                </button>
+              </div>
+            }
+
+            <!-- Goal Form -->
+            @if (showGoalForm && selectedTeamIdForGoal === match.homeTeamId) {
+              <div class="card mb-3">
+                <div class="card-header bg-success text-white py-2">
+                  <i class="fas fa-futbol me-2"></i>{{ 'EVENTS.NEW_GOAL' | translate }}
+                </div>
+                <div class="card-body">
+                  <form [formGroup]="goalForm">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.TYPE' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="eventType">
+                          @for (type of goalTypes; track type) {
+                            <option [ngValue]="type">{{ getEventTypeLabel(type) }}</option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.MINUTE' | translate }} <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control form-control-sm" formControlName="minute" min="1" max="120" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.EXTRA_TIME' | translate }}</label>
+                        <input type="number" class="form-control form-control-sm" formControlName="additionalTime" min="0" max="15" />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.SCORER' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="playerId">
+                          <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
+                          @for (player of getActivePlayers(homeTeamLineup); track player.id) {
+                            <option [ngValue]="player.playerId">
+                              {{ player.shirtNumber ? '#' + player.shirtNumber + ' - ' : '' }}{{ player.playerName }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.ASSIST' | translate }}</label>
+                        <select class="form-select form-select-sm" formControlName="assistPlayerId">
+                          <option [ngValue]="null">{{ 'EVENTS.NO_ASSIST' | translate }}</option>
+                          @for (player of getActivePlayers(homeTeamLineup); track player.id) {
+                            <option [ngValue]="player.playerId">
+                              {{ player.shirtNumber ? '#' + player.shirtNumber + ' - ' : '' }}{{ player.playerName }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                      <button type="button" class="btn btn-primary btn-sm" (click)="onAddGoal()" [disabled]="goalForm.invalid || savingGoal">
+                        @if (savingGoal) {
+                          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        }
+                        <i class="fas fa-save me-1"></i>{{ 'COMMON.SAVE' | translate }}
+                      </button>
+                      <button type="button" class="btn btn-light btn-sm" (click)="cancelGoalForm()">{{ 'COMMON.CANCEL' | translate }}</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            }
+
+            <!-- Goals List -->
+            @if (getHomeGoals().length === 0) {
+              <div class="alert alert-secondary text-center py-2">
+                <small>{{ 'EVENTS.NO_GOALS' | translate }}</small>
+              </div>
+            } @else {
+              <div class="goals-list mb-4">
+                @for (goal of getHomeGoals(); track goal.id) {
+                  <div class="event-item d-flex align-items-center justify-content-between p-2 mb-2 border rounded">
+                    <div class="event-info">
+                      <span class="badge bg-success me-2">{{ formatMinute(goal) }}</span>
+                      <i class="fas fa-futbol text-success me-2"></i>
+                      <strong>{{ goal.playerName }}</strong>
+                      @if (goal.playerNumber) {
+                        <span class="text-muted ms-1">(#{{ goal.playerNumber }})</span>
+                      }
+                      @if (goal.assistPlayerName) {
+                        <small class="text-muted ms-2">
+                          <i class="fas fa-hands-helping me-1"></i>{{ goal.assistPlayerName }}
+                        </small>
+                      }
+                      @if (goal.eventType !== 'GOAL') {
+                        <span class="badge bg-info ms-2">{{ getEventTypeLabel(goal.eventType) }}</span>
+                      }
+                    </div>
+                    @if (canEdit) {
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteGoal(goal)" [title]="'COMMON.DELETE' | translate">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- CARDS SECTION -->
+            <h6 class="section-title mt-4">
+              <i class="fas fa-square text-warning me-2"></i>{{ 'EVENTS.CARDS' | translate }}
+            </h6>
+
+            <!-- Add Card Button -->
+            @if (canEdit && !showCardForm) {
+              <div class="mb-3">
+                <button class="btn btn-warning btn-sm" (click)="openCardForm(match.homeTeamId)">
+                  <i class="fas fa-plus me-1"></i>{{ 'EVENTS.ADD_CARD' | translate }}
+                </button>
+              </div>
+            }
+
+            <!-- Card Form -->
+            @if (showCardForm && selectedTeamIdForCard === match.homeTeamId) {
+              <div class="card mb-3">
+                <div class="card-header bg-warning text-dark py-2">
+                  <i class="fas fa-square me-2"></i>{{ 'EVENTS.NEW_CARD' | translate }}
+                </div>
+                <div class="card-body">
+                  <form [formGroup]="cardForm">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.TYPE' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="eventType">
+                          @for (type of cardTypes; track type) {
+                            <option [ngValue]="type">{{ getEventTypeLabel(type) }}</option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.MINUTE' | translate }} <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control form-control-sm" formControlName="minute" min="1" max="120" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.EXTRA_TIME' | translate }}</label>
+                        <input type="number" class="form-control form-control-sm" formControlName="additionalTime" min="0" max="15" />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.PLAYER' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="playerId">
+                          <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
+                          @for (player of getActivePlayers(homeTeamLineup); track player.id) {
+                            <option [ngValue]="player.playerId">
+                              {{ player.shirtNumber ? '#' + player.shirtNumber + ' - ' : '' }}{{ player.playerName }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.REASON' | translate }}</label>
+                        <input type="text" class="form-control form-control-sm" formControlName="description" [placeholder]="'EVENTS.REASON_PLACEHOLDER' | translate" />
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                      <button type="button" class="btn btn-primary btn-sm" (click)="onAddCard()" [disabled]="cardForm.invalid || savingCard">
+                        @if (savingCard) {
+                          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        }
+                        <i class="fas fa-save me-1"></i>{{ 'COMMON.SAVE' | translate }}
+                      </button>
+                      <button type="button" class="btn btn-light btn-sm" (click)="cancelCardForm()">{{ 'COMMON.CANCEL' | translate }}</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            }
+
+            <!-- Cards List -->
+            @if (getHomeCards().length === 0) {
+              <div class="alert alert-secondary text-center py-2">
+                <small>{{ 'EVENTS.NO_CARDS' | translate }}</small>
+              </div>
+            } @else {
+              <div class="cards-list">
+                @for (card of getHomeCards(); track card.id) {
+                  <div class="event-item d-flex align-items-center justify-content-between p-2 mb-2 border rounded">
+                    <div class="event-info">
+                      <span class="badge {{ getCardClass(card.eventType) }} me-2">{{ formatMinute(card) }}</span>
+                      <i class="{{ getCardIcon(card.eventType) }} me-2"></i>
+                      <strong>{{ card.playerName }}</strong>
+                      @if (card.playerNumber) {
+                        <span class="text-muted ms-1">(#{{ card.playerNumber }})</span>
+                      }
+                      <span class="badge {{ getCardClass(card.eventType) }} ms-2">{{ getEventTypeLabel(card.eventType) }}</span>
+                      @if (card.description) {
+                        <small class="text-muted ms-2">{{ card.description }}</small>
+                      }
+                    </div>
+                    @if (canEdit) {
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteCard(card)" [title]="'COMMON.DELETE' | translate">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </ng-template>
+      </li>
+
+      <li [ngbNavItem]="2">
+        <button ngbNavLink>
+          <i class="fas fa-plane me-1"></i>{{ match.awayTeamName }}
+          <span class="badge bg-success ms-1">{{ getAwayGoals().length }}</span>
+          @if (getAwayCards().length > 0) {
+            <span class="badge bg-warning text-dark ms-1">{{ getAwayCards().length }}</span>
+          }
+        </button>
+        <ng-template ngbNavContent>
+          <div class="team-events-section mt-3">
+            <!-- GOALS SECTION -->
+            <h6 class="section-title">
+              <i class="fas fa-futbol text-success me-2"></i>{{ 'EVENTS.GOALS' | translate }}
+            </h6>
+
+            <!-- Add Goal Button -->
+            @if (canEdit && !showGoalForm) {
+              <div class="mb-3">
+                <button class="btn btn-success btn-sm" (click)="openGoalForm(match.awayTeamId)">
+                  <i class="fas fa-plus me-1"></i>{{ 'EVENTS.ADD_GOAL' | translate }}
+                </button>
+              </div>
+            }
+
+            <!-- Goal Form -->
+            @if (showGoalForm && selectedTeamIdForGoal === match.awayTeamId) {
+              <div class="card mb-3">
+                <div class="card-header bg-success text-white py-2">
+                  <i class="fas fa-futbol me-2"></i>{{ 'EVENTS.NEW_GOAL' | translate }}
+                </div>
+                <div class="card-body">
+                  <form [formGroup]="goalForm">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.TYPE' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="eventType">
+                          @for (type of goalTypes; track type) {
+                            <option [ngValue]="type">{{ getEventTypeLabel(type) }}</option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.MINUTE' | translate }} <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control form-control-sm" formControlName="minute" min="1" max="120" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.EXTRA_TIME' | translate }}</label>
+                        <input type="number" class="form-control form-control-sm" formControlName="additionalTime" min="0" max="15" />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.SCORER' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="playerId">
+                          <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
+                          @for (player of getActivePlayers(awayTeamLineup); track player.id) {
+                            <option [ngValue]="player.playerId">
+                              {{ player.shirtNumber ? '#' + player.shirtNumber + ' - ' : '' }}{{ player.playerName }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.ASSIST' | translate }}</label>
+                        <select class="form-select form-select-sm" formControlName="assistPlayerId">
+                          <option [ngValue]="null">{{ 'EVENTS.NO_ASSIST' | translate }}</option>
+                          @for (player of getActivePlayers(awayTeamLineup); track player.id) {
+                            <option [ngValue]="player.playerId">
+                              {{ player.shirtNumber ? '#' + player.shirtNumber + ' - ' : '' }}{{ player.playerName }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                      <button type="button" class="btn btn-primary btn-sm" (click)="onAddGoal()" [disabled]="goalForm.invalid || savingGoal">
+                        @if (savingGoal) {
+                          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        }
+                        <i class="fas fa-save me-1"></i>{{ 'COMMON.SAVE' | translate }}
+                      </button>
+                      <button type="button" class="btn btn-light btn-sm" (click)="cancelGoalForm()">{{ 'COMMON.CANCEL' | translate }}</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            }
+
+            <!-- Goals List -->
+            @if (getAwayGoals().length === 0) {
+              <div class="alert alert-secondary text-center py-2">
+                <small>{{ 'EVENTS.NO_GOALS' | translate }}</small>
+              </div>
+            } @else {
+              <div class="goals-list mb-4">
+                @for (goal of getAwayGoals(); track goal.id) {
+                  <div class="event-item d-flex align-items-center justify-content-between p-2 mb-2 border rounded">
+                    <div class="event-info">
+                      <span class="badge bg-success me-2">{{ formatMinute(goal) }}</span>
+                      <i class="fas fa-futbol text-success me-2"></i>
+                      <strong>{{ goal.playerName }}</strong>
+                      @if (goal.playerNumber) {
+                        <span class="text-muted ms-1">(#{{ goal.playerNumber }})</span>
+                      }
+                      @if (goal.assistPlayerName) {
+                        <small class="text-muted ms-2">
+                          <i class="fas fa-hands-helping me-1"></i>{{ goal.assistPlayerName }}
+                        </small>
+                      }
+                      @if (goal.eventType !== 'GOAL') {
+                        <span class="badge bg-info ms-2">{{ getEventTypeLabel(goal.eventType) }}</span>
+                      }
+                    </div>
+                    @if (canEdit) {
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteGoal(goal)" [title]="'COMMON.DELETE' | translate">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- CARDS SECTION -->
+            <h6 class="section-title mt-4">
+              <i class="fas fa-square text-warning me-2"></i>{{ 'EVENTS.CARDS' | translate }}
+            </h6>
+
+            <!-- Add Card Button -->
+            @if (canEdit && !showCardForm) {
+              <div class="mb-3">
+                <button class="btn btn-warning btn-sm" (click)="openCardForm(match.awayTeamId)">
+                  <i class="fas fa-plus me-1"></i>{{ 'EVENTS.ADD_CARD' | translate }}
+                </button>
+              </div>
+            }
+
+            <!-- Card Form -->
+            @if (showCardForm && selectedTeamIdForCard === match.awayTeamId) {
+              <div class="card mb-3">
+                <div class="card-header bg-warning text-dark py-2">
+                  <i class="fas fa-square me-2"></i>{{ 'EVENTS.NEW_CARD' | translate }}
+                </div>
+                <div class="card-body">
+                  <form [formGroup]="cardForm">
+                    <div class="row">
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.TYPE' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="eventType">
+                          @for (type of cardTypes; track type) {
+                            <option [ngValue]="type">{{ getEventTypeLabel(type) }}</option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.MINUTE' | translate }} <span class="text-danger">*</span></label>
+                        <input type="number" class="form-control form-control-sm" formControlName="minute" min="1" max="120" />
+                      </div>
+                      <div class="col-md-4 mb-3">
+                        <label class="form-label">{{ 'EVENTS.EXTRA_TIME' | translate }}</label>
+                        <input type="number" class="form-control form-control-sm" formControlName="additionalTime" min="0" max="15" />
+                      </div>
+                    </div>
+                    <div class="row">
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.PLAYER' | translate }} <span class="text-danger">*</span></label>
+                        <select class="form-select form-select-sm" formControlName="playerId">
+                          <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
+                          @for (player of getActivePlayers(awayTeamLineup); track player.id) {
+                            <option [ngValue]="player.playerId">
+                              {{ player.shirtNumber ? '#' + player.shirtNumber + ' - ' : '' }}{{ player.playerName }}
+                            </option>
+                          }
+                        </select>
+                      </div>
+                      <div class="col-md-6 mb-3">
+                        <label class="form-label">{{ 'EVENTS.REASON' | translate }}</label>
+                        <input type="text" class="form-control form-control-sm" formControlName="description" [placeholder]="'EVENTS.REASON_PLACEHOLDER' | translate" />
+                      </div>
+                    </div>
+                    <div class="d-flex justify-content-end gap-2">
+                      <button type="button" class="btn btn-primary btn-sm" (click)="onAddCard()" [disabled]="cardForm.invalid || savingCard">
+                        @if (savingCard) {
+                          <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                        }
+                        <i class="fas fa-save me-1"></i>{{ 'COMMON.SAVE' | translate }}
+                      </button>
+                      <button type="button" class="btn btn-light btn-sm" (click)="cancelCardForm()">{{ 'COMMON.CANCEL' | translate }}</button>
+                    </div>
+                  </form>
+                </div>
+              </div>
+            }
+
+            <!-- Cards List -->
+            @if (getAwayCards().length === 0) {
+              <div class="alert alert-secondary text-center py-2">
+                <small>{{ 'EVENTS.NO_CARDS' | translate }}</small>
+              </div>
+            } @else {
+              <div class="cards-list">
+                @for (card of getAwayCards(); track card.id) {
+                  <div class="event-item d-flex align-items-center justify-content-between p-2 mb-2 border rounded">
+                    <div class="event-info">
+                      <span class="badge {{ getCardClass(card.eventType) }} me-2">{{ formatMinute(card) }}</span>
+                      <i class="{{ getCardIcon(card.eventType) }} me-2"></i>
+                      <strong>{{ card.playerName }}</strong>
+                      @if (card.playerNumber) {
+                        <span class="text-muted ms-1">(#{{ card.playerNumber }})</span>
+                      }
+                      <span class="badge {{ getCardClass(card.eventType) }} ms-2">{{ getEventTypeLabel(card.eventType) }}</span>
+                      @if (card.description) {
+                        <small class="text-muted ms-2">{{ card.description }}</small>
+                      }
+                    </div>
+                    @if (canEdit) {
+                      <button class="btn btn-sm btn-outline-danger" (click)="deleteCard(card)" [title]="'COMMON.DELETE' | translate">
+                        <i class="fas fa-trash"></i>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </ng-template>
+      </li>
+    </ul>
+    <div [ngbNavOutlet]="nav"></div>
+
+    <!-- Close button -->
+    <div class="d-flex justify-content-end mt-3">
+      <button class="btn btn-light" (click)="closeRequested.emit()">
+        {{ 'COMMON.CLOSE' | translate }}
+      </button>
+    </div>
+  }
+</div>

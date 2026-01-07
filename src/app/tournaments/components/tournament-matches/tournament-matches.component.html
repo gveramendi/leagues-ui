@@ -129,19 +129,45 @@
                   @if (canEdit) {
                     <div class="match-actions d-flex justify-content-center gap-2 mt-3 pt-3 border-top">
                       @if (match.status === 'SCHEDULED') {
-                        <button class="btn btn-sm btn-success" (click)="startMatch(match)" [title]="'MATCHES.START' | translate">
+                        <!-- 1. Lineup - always enabled -->
+                        <button class="btn btn-sm btn-primary" (click)="openLineupModal(lineupModal, match)" [title]="'MATCHES.LINEUP' | translate">
+                          <i class="fas fa-users"></i>
+                        </button>
+                        <!-- 2. Start - enabled only when lineup is complete -->
+                        <button
+                          class="btn btn-sm btn-success"
+                          (click)="startMatch(match)"
+                          [disabled]="!isLineupComplete(match.id)"
+                          [title]="isLineupComplete(match.id) ? ('MATCHES.START' | translate) : ('MATCHES.LINEUP_REQUIRED' | translate)"
+                        >
                           <i class="fas fa-play"></i>
                         </button>
+                        <!-- 3. Edit - disabled until match starts -->
+                        <button
+                          class="btn btn-sm btn-info"
+                          [disabled]="true"
+                          [title]="'MATCHES.START_REQUIRED' | translate"
+                        >
+                          <i class="fas fa-edit"></i>
+                        </button>
+                        <!-- 4. Delete - always enabled -->
+                        <button class="btn btn-sm btn-danger" (click)="deleteMatch(match)" [title]="'COMMON.DELETE' | translate">
+                          <i class="far fa-trash-alt"></i>
+                        </button>
                       }
-                      @if (match.status === 'IN_PROGRESS') {
+                      @if (match.status === 'IN_PROGRESS' || match.status === 'HALF_TIME' || match.status === 'SECOND_HALF') {
+                        <!-- Edit score - enabled when match is in progress -->
                         <button class="btn btn-sm btn-info" (click)="openScoreModal(scoreModal, match)" [title]="'MATCHES.UPDATE_SCORE' | translate">
                           <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning" (click)="openSubstitutionModal(substitutionModal, match)" [title]="'MATCHES.SUBSTITUTIONS' | translate">
+                          <i class="fas fa-exchange-alt"></i>
                         </button>
                         <button class="btn btn-sm btn-dark" (click)="finishMatch(match)" [title]="'MATCHES.FINISH' | translate">
                           <i class="fas fa-flag-checkered"></i>
                         </button>
                       }
-                      @if (match.status === 'SCHEDULED' || match.status === 'POSTPONED') {
+                      @if (match.status === 'POSTPONED') {
                         <button class="btn btn-sm btn-secondary" (click)="openEditModal(matchModal, match)" [title]="'COMMON.EDIT' | translate">
                           <i class="far fa-edit"></i>
                         </button>
@@ -235,45 +261,60 @@
 <!-- Update Score Modal -->
 <ng-template #scoreModal let-modal>
   <div class="modal-header">
-    <h4 class="modal-title" id="modal-score-title">{{ 'MATCHES.UPDATE_SCORE' | translate }}</h4>
+    <h4 class="modal-title" id="modal-score-title">
+      <i class="fas fa-futbol me-2"></i>{{ 'EVENTS.TITLE' | translate }}
+    </h4>
     <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
   </div>
   <div class="modal-body">
-    <div class="text-center mb-3">
-      <strong>{{ editingMatch?.homeTeamName }}</strong>
-      vs
-      <strong>{{ editingMatch?.awayTeamName }}</strong>
-    </div>
-    <div class="d-flex justify-content-center align-items-center gap-3">
-      <div class="text-center">
-        <label class="form-label">{{ editingMatch?.homeTeamShortName }}</label>
-        <input
-          type="number"
-          #homeScoreInput
-          class="form-control text-center"
-          min="0"
-          [value]="editingMatch?.homeScore ?? 0"
-          style="width: 80px;"
-        />
-      </div>
-      <span class="fs-4">-</span>
-      <div class="text-center">
-        <label class="form-label">{{ editingMatch?.awayTeamShortName }}</label>
-        <input
-          type="number"
-          #awayScoreInput
-          class="form-control text-center"
-          min="0"
-          [value]="editingMatch?.awayScore ?? 0"
-          style="width: 80px;"
-        />
-      </div>
-    </div>
+    @if (selectedMatchFull) {
+      <app-match-events
+        [match]="selectedMatchFull"
+        [canEdit]="canEdit"
+        (eventAdded)="onEventAdded()"
+        (closeRequested)="modal.dismiss()"
+      ></app-match-events>
+    }
   </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="onUpdateScore(+homeScoreInput.value, +awayScoreInput.value)">
-      {{ 'COMMON.SAVE' | translate }}
-    </button>
-    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
+</ng-template>
+
+<!-- Lineup Modal -->
+<ng-template #lineupModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-lineup-title">
+      <i class="fas fa-users me-2"></i>{{ 'LINEUP.TITLE' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedMatchFull) {
+      <app-match-lineup
+        [match]="selectedMatchFull"
+        [seasonYear]="seasonYear"
+        [canEdit]="canEdit"
+        (lineupSaved)="onLineupSaved()"
+        (closeRequested)="modal.dismiss()"
+      ></app-match-lineup>
+    }
+  </div>
+</ng-template>
+
+<!-- Substitution Modal -->
+<ng-template #substitutionModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-substitution-title">
+      <i class="fas fa-exchange-alt me-2"></i>{{ 'SUBSTITUTION.TITLE' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (selectedMatchFull) {
+      <app-match-substitution
+        [match]="selectedMatchFull"
+        [canEdit]="canEdit"
+        (substitutionMade)="onSubstitutionMade()"
+        (closeRequested)="modal.dismiss()"
+      ></app-match-substitution>
+    }
   </div>
 </ng-template>

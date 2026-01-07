@@ -1,0 +1,422 @@
+<div class="match-lineup">
+  <!-- Match Header -->
+  <div class="match-header text-center mb-4">
+    <div class="d-flex align-items-center justify-content-center gap-4">
+      <div class="team-info">
+        @if (match.homeTeamLogoUrl) {
+          <img [src]="match.homeTeamLogoUrl" alt="{{ match.homeTeamName }}" class="team-logo" />
+        } @else {
+          <div class="team-logo-placeholder">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+        }
+        <div class="team-name">{{ match.homeTeamName }}</div>
+      </div>
+      <div class="vs-separator">VS</div>
+      <div class="team-info">
+        @if (match.awayTeamLogoUrl) {
+          <img [src]="match.awayTeamLogoUrl" alt="{{ match.awayTeamName }}" class="team-logo" />
+        } @else {
+          <div class="team-logo-placeholder">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+        }
+        <div class="team-name">{{ match.awayTeamName }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Team Tabs -->
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+    <li [ngbNavItem]="1">
+      <button ngbNavLink>
+        <i class="fas fa-home me-1"></i>{{ match.homeTeamName }}
+        <span class="badge bg-primary ms-2">{{ getSelectedPlayers(homeTeamPlayers).length }}</span>
+      </button>
+      <ng-template ngbNavContent>
+        <!-- Home Team Lineup -->
+        <div class="team-lineup-section mt-3">
+          @if (homeLoading) {
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          } @else {
+            <!-- Instructions -->
+            @if (canEdit) {
+              <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ 'LINEUP.INSTRUCTIONS' | translate }}
+              </div>
+            }
+
+            <!-- Stats and Legend -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="lineup-stats">
+                <span class="badge bg-success me-2">
+                  <i class="fas fa-play me-1"></i>{{ 'LINEUP.STARTERS' | translate }}: {{ getStarters(homeTeamPlayers).length }}
+                </span>
+                <span class="badge bg-info">
+                  <i class="fas fa-exchange-alt me-1"></i>{{ 'LINEUP.SUBSTITUTES' | translate }}: {{ getSubstitutes(homeTeamPlayers).length }}
+                </span>
+              </div>
+              <div class="legend">
+                <small class="me-3"><span class="legend-color bg-success"></span> {{ 'LINEUP.STARTER' | translate }}</small>
+                <small><span class="legend-color bg-info"></span> {{ 'LINEUP.SUBSTITUTE' | translate }}</small>
+              </div>
+            </div>
+
+            <!-- Players Table -->
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>{{ 'LINEUP.PLAYER' | translate }}</th>
+                    <th style="width: 80px;">{{ 'LINEUP.NUMBER' | translate }}</th>
+                    <th style="width: 180px;">{{ 'LINEUP.POSITION' | translate }}</th>
+                    <th style="width: 200px;" class="text-center">{{ 'LINEUP.ACTION' | translate }}</th>
+                    <th style="width: 80px;" class="text-center">{{ 'LINEUP.CAPTAIN' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ps of homeTeamPlayers; track ps.player.id) {
+                    <tr [class.table-success]="ps.isSelected && ps.isStarter" [class.table-info]="ps.isSelected && !ps.isStarter">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="player-photo me-2">
+                            @if (ps.player.playerFullName) {
+                              <span class="avatar-initials">{{ ps.player.playerFullName.charAt(0) }}</span>
+                            }
+                          </div>
+                          <div>
+                            <div class="fw-medium">{{ ps.player.playerFullName }}</div>
+                            @if (ps.player.positionDisplayName) {
+                              <small class="text-muted">{{ ps.player.positionDisplayName }}</small>
+                            }
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        @if (canEdit && ps.isSelected) {
+                          <input
+                            type="number"
+                            class="form-control form-control-sm"
+                            [(ngModel)]="ps.shirtNumber"
+                            min="1"
+                            max="99"
+                            style="width: 60px;"
+                          />
+                        } @else {
+                          {{ ps.shirtNumber || ps.player.jerseyNumber || '-' }}
+                        }
+                      </td>
+                      <td>
+                        @if (canEdit && ps.isSelected) {
+                          <select class="form-select form-select-sm" [(ngModel)]="ps.position">
+                            <option [ngValue]="undefined">{{ 'COMMON.SELECT' | translate }}</option>
+                            @for (pos of positions; track pos) {
+                              <option [ngValue]="pos">{{ getPositionLabel(pos) }}</option>
+                            }
+                          </select>
+                        } @else {
+                          {{ ps.position ? getPositionLabel(ps.position) : '-' }}
+                        }
+                      </td>
+                      <td class="text-center">
+                        @if (canEdit) {
+                          @if (!ps.isSelected) {
+                            <!-- Not selected - show add buttons -->
+                            <div class="d-flex gap-1 justify-content-center">
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-success"
+                                (click)="addAsStarter(ps)"
+                                [title]="'LINEUP.ADD_AS_STARTER' | translate"
+                              >
+                                <i class="fas fa-plus me-1"></i>{{ 'LINEUP.STARTER_SHORT' | translate }}
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-info"
+                                (click)="addAsSubstitute(ps)"
+                                [title]="'LINEUP.ADD_AS_SUBSTITUTE' | translate"
+                              >
+                                <i class="fas fa-plus me-1"></i>{{ 'LINEUP.SUB_SHORT' | translate }}
+                              </button>
+                            </div>
+                          } @else {
+                            <!-- Selected - show status and remove button -->
+                            <div class="d-flex align-items-center justify-content-center gap-1">
+                              @if (ps.isStarter) {
+                                <span class="badge bg-success">{{ 'LINEUP.STARTER_SHORT' | translate }}</span>
+                              } @else {
+                                <span class="badge bg-info">{{ 'LINEUP.SUB_SHORT' | translate }}</span>
+                              }
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                (click)="removeFromLineup(ps)"
+                                [title]="'LINEUP.REMOVE' | translate"
+                              >
+                                <i class="fas fa-times"></i>
+                              </button>
+                            </div>
+                          }
+                        } @else {
+                          <!-- Read-only view -->
+                          @if (ps.isSelected) {
+                            @if (ps.isStarter) {
+                              <span class="badge bg-success">{{ 'LINEUP.STARTER_SHORT' | translate }}</span>
+                            } @else {
+                              <span class="badge bg-info">{{ 'LINEUP.SUB_SHORT' | translate }}</span>
+                            }
+                          } @else {
+                            <span class="text-muted">-</span>
+                          }
+                        }
+                      </td>
+                      <td class="text-center">
+                        @if (canEdit && ps.isSelected) {
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            [class.btn-warning]="ps.isCaptain"
+                            [class.btn-outline-secondary]="!ps.isCaptain"
+                            (click)="toggleCaptain(ps, true)"
+                          >
+                            <i class="fas fa-copyright"></i>
+                          </button>
+                        } @else {
+                          @if (ps.isCaptain) {
+                            <i class="fas fa-copyright text-warning"></i>
+                          }
+                        }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-4">
+                        {{ 'LINEUP.NO_PLAYERS' | translate }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3 gap-2">
+              @if (canEdit) {
+                <button class="btn btn-primary" (click)="saveHomeLineup()" [disabled]="saving">
+                  @if (saving) {
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  }
+                  <i class="fas fa-save me-1"></i>{{ 'COMMON.SAVE' | translate }}
+                </button>
+              }
+              <button class="btn btn-light" (click)="closeRequested.emit()">
+                {{ 'COMMON.CLOSE' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+      </ng-template>
+    </li>
+
+    <li [ngbNavItem]="2">
+      <button ngbNavLink>
+        <i class="fas fa-plane me-1"></i>{{ match.awayTeamName }}
+        <span class="badge bg-primary ms-2">{{ getSelectedPlayers(awayTeamPlayers).length }}</span>
+      </button>
+      <ng-template ngbNavContent>
+        <!-- Away Team Lineup -->
+        <div class="team-lineup-section mt-3">
+          @if (awayLoading) {
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          } @else {
+            <!-- Instructions -->
+            @if (canEdit) {
+              <div class="alert alert-info mb-3">
+                <i class="fas fa-info-circle me-2"></i>
+                {{ 'LINEUP.INSTRUCTIONS' | translate }}
+              </div>
+            }
+
+            <!-- Stats and Legend -->
+            <div class="d-flex justify-content-between align-items-center mb-3">
+              <div class="lineup-stats">
+                <span class="badge bg-success me-2">
+                  <i class="fas fa-play me-1"></i>{{ 'LINEUP.STARTERS' | translate }}: {{ getStarters(awayTeamPlayers).length }}
+                </span>
+                <span class="badge bg-info">
+                  <i class="fas fa-exchange-alt me-1"></i>{{ 'LINEUP.SUBSTITUTES' | translate }}: {{ getSubstitutes(awayTeamPlayers).length }}
+                </span>
+              </div>
+              <div class="legend">
+                <small class="me-3"><span class="legend-color bg-success"></span> {{ 'LINEUP.STARTER' | translate }}</small>
+                <small><span class="legend-color bg-info"></span> {{ 'LINEUP.SUBSTITUTE' | translate }}</small>
+              </div>
+            </div>
+
+            <!-- Players Table -->
+            <div class="table-responsive">
+              <table class="table table-hover">
+                <thead class="table-light">
+                  <tr>
+                    <th>{{ 'LINEUP.PLAYER' | translate }}</th>
+                    <th style="width: 80px;">{{ 'LINEUP.NUMBER' | translate }}</th>
+                    <th style="width: 180px;">{{ 'LINEUP.POSITION' | translate }}</th>
+                    <th style="width: 200px;" class="text-center">{{ 'LINEUP.ACTION' | translate }}</th>
+                    <th style="width: 80px;" class="text-center">{{ 'LINEUP.CAPTAIN' | translate }}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (ps of awayTeamPlayers; track ps.player.id) {
+                    <tr [class.table-success]="ps.isSelected && ps.isStarter" [class.table-info]="ps.isSelected && !ps.isStarter">
+                      <td>
+                        <div class="d-flex align-items-center">
+                          <div class="player-photo me-2">
+                            @if (ps.player.playerFullName) {
+                              <span class="avatar-initials">{{ ps.player.playerFullName.charAt(0) }}</span>
+                            }
+                          </div>
+                          <div>
+                            <div class="fw-medium">{{ ps.player.playerFullName }}</div>
+                            @if (ps.player.positionDisplayName) {
+                              <small class="text-muted">{{ ps.player.positionDisplayName }}</small>
+                            }
+                          </div>
+                        </div>
+                      </td>
+                      <td>
+                        @if (canEdit && ps.isSelected) {
+                          <input
+                            type="number"
+                            class="form-control form-control-sm"
+                            [(ngModel)]="ps.shirtNumber"
+                            min="1"
+                            max="99"
+                            style="width: 60px;"
+                          />
+                        } @else {
+                          {{ ps.shirtNumber || ps.player.jerseyNumber || '-' }}
+                        }
+                      </td>
+                      <td>
+                        @if (canEdit && ps.isSelected) {
+                          <select class="form-select form-select-sm" [(ngModel)]="ps.position">
+                            <option [ngValue]="undefined">{{ 'COMMON.SELECT' | translate }}</option>
+                            @for (pos of positions; track pos) {
+                              <option [ngValue]="pos">{{ getPositionLabel(pos) }}</option>
+                            }
+                          </select>
+                        } @else {
+                          {{ ps.position ? getPositionLabel(ps.position) : '-' }}
+                        }
+                      </td>
+                      <td class="text-center">
+                        @if (canEdit) {
+                          @if (!ps.isSelected) {
+                            <!-- Not selected - show add buttons -->
+                            <div class="d-flex gap-1 justify-content-center">
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-success"
+                                (click)="addAsStarter(ps)"
+                                [title]="'LINEUP.ADD_AS_STARTER' | translate"
+                              >
+                                <i class="fas fa-plus me-1"></i>{{ 'LINEUP.STARTER_SHORT' | translate }}
+                              </button>
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-info"
+                                (click)="addAsSubstitute(ps)"
+                                [title]="'LINEUP.ADD_AS_SUBSTITUTE' | translate"
+                              >
+                                <i class="fas fa-plus me-1"></i>{{ 'LINEUP.SUB_SHORT' | translate }}
+                              </button>
+                            </div>
+                          } @else {
+                            <!-- Selected - show status and remove button -->
+                            <div class="d-flex align-items-center justify-content-center gap-1">
+                              @if (ps.isStarter) {
+                                <span class="badge bg-success">{{ 'LINEUP.STARTER_SHORT' | translate }}</span>
+                              } @else {
+                                <span class="badge bg-info">{{ 'LINEUP.SUB_SHORT' | translate }}</span>
+                              }
+                              <button
+                                type="button"
+                                class="btn btn-sm btn-outline-danger"
+                                (click)="removeFromLineup(ps)"
+                                [title]="'LINEUP.REMOVE' | translate"
+                              >
+                                <i class="fas fa-times"></i>
+                              </button>
+                            </div>
+                          }
+                        } @else {
+                          <!-- Read-only view -->
+                          @if (ps.isSelected) {
+                            @if (ps.isStarter) {
+                              <span class="badge bg-success">{{ 'LINEUP.STARTER_SHORT' | translate }}</span>
+                            } @else {
+                              <span class="badge bg-info">{{ 'LINEUP.SUB_SHORT' | translate }}</span>
+                            }
+                          } @else {
+                            <span class="text-muted">-</span>
+                          }
+                        }
+                      </td>
+                      <td class="text-center">
+                        @if (canEdit && ps.isSelected) {
+                          <button
+                            type="button"
+                            class="btn btn-sm"
+                            [class.btn-warning]="ps.isCaptain"
+                            [class.btn-outline-secondary]="!ps.isCaptain"
+                            (click)="toggleCaptain(ps, false)"
+                          >
+                            <i class="fas fa-copyright"></i>
+                          </button>
+                        } @else {
+                          @if (ps.isCaptain) {
+                            <i class="fas fa-copyright text-warning"></i>
+                          }
+                        }
+                      </td>
+                    </tr>
+                  } @empty {
+                    <tr>
+                      <td colspan="5" class="text-center text-muted py-4">
+                        {{ 'LINEUP.NO_PLAYERS' | translate }}
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+
+            <div class="d-flex justify-content-end mt-3 gap-2">
+              @if (canEdit) {
+                <button class="btn btn-primary" (click)="saveAwayLineup()" [disabled]="saving">
+                  @if (saving) {
+                    <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                  }
+                  <i class="fas fa-save me-1"></i>{{ 'COMMON.SAVE' | translate }}
+                </button>
+              }
+              <button class="btn btn-light" (click)="closeRequested.emit()">
+                {{ 'COMMON.CLOSE' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav"></div>
+</div>

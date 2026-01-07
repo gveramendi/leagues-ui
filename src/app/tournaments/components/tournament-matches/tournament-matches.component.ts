@@ -10,22 +10,35 @@ import {
   TournamentTeamService,
   StandingService,
   MatchSummaryResponse,
+  MatchResponse,
   MatchStatus,
   CreateMatchRequest,
   UpdateMatchRequest,
   TournamentTeamResponse,
 } from '@core';
 import { switchMap } from 'rxjs';
+import { MatchLineupComponent } from '../match-lineup/match-lineup.component';
+import { MatchSubstitutionComponent } from '../match-substitution/match-substitution.component';
+import { MatchEventsComponent } from '../match-events/match-events.component';
 
 @Component({
   selector: 'app-tournament-matches',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, TranslateModule],
+  imports: [
+    CommonModule,
+    FormsModule,
+    ReactiveFormsModule,
+    TranslateModule,
+    MatchLineupComponent,
+    MatchSubstitutionComponent,
+    MatchEventsComponent,
+  ],
   templateUrl: './tournament-matches.component.html',
   styleUrls: ['./tournament-matches.component.scss'],
 })
 export class TournamentMatchesComponent implements OnInit, OnChanges {
   @Input() tournamentId!: number;
+  @Input() seasonYear!: number;
   @Input() canEdit = false;
 
   matches: MatchSummaryResponse[] = [];
@@ -61,6 +74,13 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
 
   // Teams for dropdowns
   teams: TournamentTeamResponse[] = [];
+
+  // Lineup/Substitution
+  selectedMatchFull: MatchResponse | null = null;
+  loadingMatchDetail = false;
+
+  // Track lineup completion status per match
+  matchLineupStatus: Map<number, { homeComplete: boolean; awayComplete: boolean }> = new Map();
 
   constructor(
     private matchService: MatchService,
@@ -109,6 +129,8 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
         this.extractMatchdays();
         this.applyFilters();
         this.loading = false;
+        // Check lineup status for SCHEDULED matches
+        this.checkLineupsForScheduledMatches();
       },
       error: (err) => {
         console.error('Error loading matches:', err);
@@ -116,6 +138,49 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
         this.loading = false;
       },
     });
+  }
+
+  private checkLineupsForScheduledMatches(): void {
+    const scheduledMatches = this.matches.filter((m) => m.status === 'SCHEDULED');
+    scheduledMatches.forEach((match) => {
+      this.checkMatchLineupStatus(match.id, match.homeTeamId, match.awayTeamId);
+    });
+  }
+
+  private checkMatchLineupStatus(matchId: number, homeTeamId: number, awayTeamId: number): void {
+    // Initialize status
+    this.matchLineupStatus.set(matchId, { homeComplete: false, awayComplete: false });
+
+    // Check home team lineup
+    this.matchService.getTeamLineup(matchId, homeTeamId).subscribe({
+      next: (response) => {
+        const lineup = response.body.data;
+        const hasStarters = lineup.starters && lineup.starters.length > 0;
+        const current = this.matchLineupStatus.get(matchId) || { homeComplete: false, awayComplete: false };
+        this.matchLineupStatus.set(matchId, { ...current, homeComplete: hasStarters });
+      },
+      error: () => {
+        // No lineup yet
+      },
+    });
+
+    // Check away team lineup
+    this.matchService.getTeamLineup(matchId, awayTeamId).subscribe({
+      next: (response) => {
+        const lineup = response.body.data;
+        const hasStarters = lineup.starters && lineup.starters.length > 0;
+        const current = this.matchLineupStatus.get(matchId) || { homeComplete: false, awayComplete: false };
+        this.matchLineupStatus.set(matchId, { ...current, awayComplete: hasStarters });
+      },
+      error: () => {
+        // No lineup yet
+      },
+    });
+  }
+
+  isLineupComplete(matchId: number): boolean {
+    const status = this.matchLineupStatus.get(matchId);
+    return status ? status.homeComplete && status.awayComplete : false;
   }
 
   loadTeams(): void {
@@ -343,30 +408,29 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
     });
   }
 
-  // Score update
+  // Score/Events update
   openScoreModal(content: any, match: MatchSummaryResponse): void {
-    this.editingMatch = match;
-    this.modalService.open(content, {
-      ariaLabelledBy: 'modal-score-title',
-      size: 'sm',
-      centered: true,
+    this.loadingMatchDetail = true;
+    this.matchService.getById(match.id).subscribe({
+      next: (response) => {
+        this.selectedMatchFull = response.body.data;
+        this.loadingMatchDetail = false;
+        this.modalService.open(content, {
+          ariaLabelledBy: 'modal-score-title',
+          size: 'xl',
+        });
+      },
+      error: (error) => {
+        const errorMessage = typeof error === 'string' ? error : error?.message || 'Error';
+        this.toastr.error(errorMessage);
+        this.loadingMatchDetail = false;
+      },
     });
   }
 
-  onUpdateScore(homeScore: number, awayScore: number): void {
-    if (this.editingMatch) {
-      this.matchService.updateScore(this.editingMatch.id, { homeScore, awayScore }).subscribe({
-        next: (response) => {
-          this.toastr.success(response.header.message);
-          this.modalService.dismissAll();
-          this.loadMatches();
-        },
-        error: (error) => {
-          const errorMessage = typeof error === 'string' ? error : error?.message || 'Error';
-          this.toastr.error(errorMessage);
-        },
-      });
-    }
+  onEventAdded(): void {
+    // Reload matches to update the score display
+    this.loadMatches();
   }
 
   // Helper methods for template
@@ -377,5 +441,59 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
 
   getMatchesByMatchday(matchday: number): MatchSummaryResponse[] {
     return this.filteredMatches.filter((m) => m.matchday === matchday);
+  }
+
+  // Lineup and Substitution modals
+  openLineupModal(content: any, match: MatchSummaryResponse): void {
+    this.loadingMatchDetail = true;
+    this.matchService.getById(match.id).subscribe({
+      next: (response) => {
+        this.selectedMatchFull = response.body.data;
+        this.loadingMatchDetail = false;
+        this.modalService.open(content, {
+          ariaLabelledBy: 'modal-lineup-title',
+          size: 'xl',
+        });
+      },
+      error: (error) => {
+        const errorMessage = typeof error === 'string' ? error : error?.message || 'Error';
+        this.toastr.error(errorMessage);
+        this.loadingMatchDetail = false;
+      },
+    });
+  }
+
+  openSubstitutionModal(content: any, match: MatchSummaryResponse): void {
+    this.loadingMatchDetail = true;
+    this.matchService.getById(match.id).subscribe({
+      next: (response) => {
+        this.selectedMatchFull = response.body.data;
+        this.loadingMatchDetail = false;
+        this.modalService.open(content, {
+          ariaLabelledBy: 'modal-substitution-title',
+          size: 'xl',
+        });
+      },
+      error: (error) => {
+        const errorMessage = typeof error === 'string' ? error : error?.message || 'Error';
+        this.toastr.error(errorMessage);
+        this.loadingMatchDetail = false;
+      },
+    });
+  }
+
+  onLineupSaved(): void {
+    // Refresh lineup status for the current match
+    if (this.selectedMatchFull) {
+      this.checkMatchLineupStatus(
+        this.selectedMatchFull.id,
+        this.selectedMatchFull.homeTeamId,
+        this.selectedMatchFull.awayTeamId
+      );
+    }
+  }
+
+  onSubstitutionMade(): void {
+    // Optionally reload matches
   }
 }

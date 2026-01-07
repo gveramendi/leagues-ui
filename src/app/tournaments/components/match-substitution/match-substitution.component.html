@@ -1,0 +1,380 @@
+<div class="match-substitution">
+  <!-- Match Header -->
+  <div class="match-header text-center mb-4">
+    <div class="d-flex align-items-center justify-content-center gap-4">
+      <div class="team-info">
+        @if (match.homeTeamLogoUrl) {
+          <img [src]="match.homeTeamLogoUrl" alt="{{ match.homeTeamName }}" class="team-logo" />
+        } @else {
+          <div class="team-logo-placeholder">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+        }
+        <div class="team-name">{{ match.homeTeamName }}</div>
+      </div>
+      <div class="score-display">
+        <span class="score">{{ match.homeScore ?? 0 }} - {{ match.awayScore ?? 0 }}</span>
+      </div>
+      <div class="team-info">
+        @if (match.awayTeamLogoUrl) {
+          <img [src]="match.awayTeamLogoUrl" alt="{{ match.awayTeamName }}" class="team-logo" />
+        } @else {
+          <div class="team-logo-placeholder">
+            <i class="fas fa-shield-alt"></i>
+          </div>
+        }
+        <div class="team-name">{{ match.awayTeamName }}</div>
+      </div>
+    </div>
+  </div>
+
+  @if (!isMatchInProgress() && canEdit) {
+    <div class="alert alert-info text-center">
+      <i class="fas fa-info-circle me-2"></i>
+      {{ 'SUBSTITUTION.MATCH_NOT_IN_PROGRESS' | translate }}
+    </div>
+  }
+
+  <!-- Team Tabs -->
+  <ul ngbNav #nav="ngbNav" [(activeId)]="activeTab" class="nav-tabs">
+    <li [ngbNavItem]="1">
+      <button ngbNavLink>
+        <i class="fas fa-home me-1"></i>{{ match.homeTeamName }}
+      </button>
+      <ng-template ngbNavContent>
+        <!-- Home Team Substitutions -->
+        <div class="team-section mt-3">
+          @if (homeLoading) {
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          } @else if (!homeTeamLineup) {
+            <div class="alert alert-warning text-center">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              {{ 'SUBSTITUTION.NO_LINEUP' | translate }}
+            </div>
+          } @else {
+            <!-- Active Players (On the field) -->
+            <div class="players-section mb-4">
+              <h6 class="section-title">
+                <i class="fas fa-running me-2 text-success"></i>
+                {{ 'SUBSTITUTION.ON_FIELD' | translate }}
+                <span class="badge bg-success ms-2">{{ getActivePlayers(homeTeamLineup).length }}</span>
+              </h6>
+              <div class="players-grid">
+                @for (player of getActivePlayers(homeTeamLineup); track player.id) {
+                  <div class="player-card active">
+                    <div class="player-number">{{ player.shirtNumber || '-' }}</div>
+                    <div class="player-info">
+                      <div class="player-name">{{ player.playerName }}</div>
+                      <div class="player-position text-muted">{{ player.positionDisplay || '-' }}</div>
+                      @if (player.isCaptain) {
+                        <span class="badge bg-warning text-dark">
+                          <i class="fas fa-copyright"></i> {{ 'LINEUP.CAPTAIN' | translate }}
+                        </span>
+                      }
+                      @if (player.minuteIn) {
+                        <span class="badge bg-info">
+                          <i class="fas fa-arrow-right"></i> {{ player.minuteIn }}'
+                        </span>
+                      }
+                    </div>
+                    @if (canEdit && isMatchInProgress()) {
+                      <button
+                        class="btn btn-sm btn-outline-danger substitute-btn"
+                        (click)="openSubstitutionModal(substitutionModal, player, true)"
+                        [title]="'SUBSTITUTION.SUBSTITUTE_OUT' | translate"
+                      >
+                        <i class="fas fa-exchange-alt"></i>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Available Substitutes -->
+            <div class="players-section mb-4">
+              <h6 class="section-title">
+                <i class="fas fa-bench me-2 text-secondary"></i>
+                {{ 'SUBSTITUTION.AVAILABLE_SUBS' | translate }}
+                <span class="badge bg-secondary ms-2">{{ getAvailableSubstitutes(homeTeamLineup).length }}</span>
+              </h6>
+              @if (getAvailableSubstitutes(homeTeamLineup).length === 0) {
+                <div class="text-muted text-center py-2">
+                  {{ 'SUBSTITUTION.NO_AVAILABLE_SUBS' | translate }}
+                </div>
+              } @else {
+                <div class="players-grid">
+                  @for (player of getAvailableSubstitutes(homeTeamLineup); track player.id) {
+                    <div class="player-card bench">
+                      <div class="player-number">{{ player.shirtNumber || '-' }}</div>
+                      <div class="player-info">
+                        <div class="player-name">{{ player.playerName }}</div>
+                        <div class="player-position text-muted">{{ player.positionDisplay || '-' }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Subbed Out Players -->
+            @if (getSubbedOutPlayers(homeTeamLineup).length > 0) {
+              <div class="players-section">
+                <h6 class="section-title">
+                  <i class="fas fa-arrow-left me-2 text-danger"></i>
+                  {{ 'SUBSTITUTION.SUBBED_OUT' | translate }}
+                </h6>
+                <div class="players-grid">
+                  @for (player of getSubbedOutPlayers(homeTeamLineup); track player.id) {
+                    <div class="player-card subbed-out">
+                      <div class="player-number">{{ player.shirtNumber || '-' }}</div>
+                      <div class="player-info">
+                        <div class="player-name">{{ player.playerName }}</div>
+                        <div class="player-position text-muted">{{ player.positionDisplay || '-' }}</div>
+                        <span class="badge bg-danger">
+                          <i class="fas fa-arrow-left"></i> {{ player.minuteOut }}'
+                        </span>
+                      </div>
+                      @if (canEdit && isMatchInProgress()) {
+                        <button
+                          class="btn btn-sm btn-outline-warning undo-btn"
+                          (click)="undoSubstitution(player)"
+                          [title]="'SUBSTITUTION.UNDO' | translate"
+                        >
+                          <i class="fas fa-undo"></i>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </ng-template>
+    </li>
+
+    <li [ngbNavItem]="2">
+      <button ngbNavLink>
+        <i class="fas fa-plane me-1"></i>{{ match.awayTeamName }}
+      </button>
+      <ng-template ngbNavContent>
+        <!-- Away Team Substitutions -->
+        <div class="team-section mt-3">
+          @if (awayLoading) {
+            <div class="text-center py-4">
+              <div class="spinner-border text-primary" role="status">
+                <span class="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          } @else if (!awayTeamLineup) {
+            <div class="alert alert-warning text-center">
+              <i class="fas fa-exclamation-triangle me-2"></i>
+              {{ 'SUBSTITUTION.NO_LINEUP' | translate }}
+            </div>
+          } @else {
+            <!-- Active Players (On the field) -->
+            <div class="players-section mb-4">
+              <h6 class="section-title">
+                <i class="fas fa-running me-2 text-success"></i>
+                {{ 'SUBSTITUTION.ON_FIELD' | translate }}
+                <span class="badge bg-success ms-2">{{ getActivePlayers(awayTeamLineup).length }}</span>
+              </h6>
+              <div class="players-grid">
+                @for (player of getActivePlayers(awayTeamLineup); track player.id) {
+                  <div class="player-card active">
+                    <div class="player-number">{{ player.shirtNumber || '-' }}</div>
+                    <div class="player-info">
+                      <div class="player-name">{{ player.playerName }}</div>
+                      <div class="player-position text-muted">{{ player.positionDisplay || '-' }}</div>
+                      @if (player.isCaptain) {
+                        <span class="badge bg-warning text-dark">
+                          <i class="fas fa-copyright"></i> {{ 'LINEUP.CAPTAIN' | translate }}
+                        </span>
+                      }
+                      @if (player.minuteIn) {
+                        <span class="badge bg-info">
+                          <i class="fas fa-arrow-right"></i> {{ player.minuteIn }}'
+                        </span>
+                      }
+                    </div>
+                    @if (canEdit && isMatchInProgress()) {
+                      <button
+                        class="btn btn-sm btn-outline-danger substitute-btn"
+                        (click)="openSubstitutionModal(substitutionModal, player, false)"
+                        [title]="'SUBSTITUTION.SUBSTITUTE_OUT' | translate"
+                      >
+                        <i class="fas fa-exchange-alt"></i>
+                      </button>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Available Substitutes -->
+            <div class="players-section mb-4">
+              <h6 class="section-title">
+                <i class="fas fa-bench me-2 text-secondary"></i>
+                {{ 'SUBSTITUTION.AVAILABLE_SUBS' | translate }}
+                <span class="badge bg-secondary ms-2">{{ getAvailableSubstitutes(awayTeamLineup).length }}</span>
+              </h6>
+              @if (getAvailableSubstitutes(awayTeamLineup).length === 0) {
+                <div class="text-muted text-center py-2">
+                  {{ 'SUBSTITUTION.NO_AVAILABLE_SUBS' | translate }}
+                </div>
+              } @else {
+                <div class="players-grid">
+                  @for (player of getAvailableSubstitutes(awayTeamLineup); track player.id) {
+                    <div class="player-card bench">
+                      <div class="player-number">{{ player.shirtNumber || '-' }}</div>
+                      <div class="player-info">
+                        <div class="player-name">{{ player.playerName }}</div>
+                        <div class="player-position text-muted">{{ player.positionDisplay || '-' }}</div>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+
+            <!-- Subbed Out Players -->
+            @if (getSubbedOutPlayers(awayTeamLineup).length > 0) {
+              <div class="players-section">
+                <h6 class="section-title">
+                  <i class="fas fa-arrow-left me-2 text-danger"></i>
+                  {{ 'SUBSTITUTION.SUBBED_OUT' | translate }}
+                </h6>
+                <div class="players-grid">
+                  @for (player of getSubbedOutPlayers(awayTeamLineup); track player.id) {
+                    <div class="player-card subbed-out">
+                      <div class="player-number">{{ player.shirtNumber || '-' }}</div>
+                      <div class="player-info">
+                        <div class="player-name">{{ player.playerName }}</div>
+                        <div class="player-position text-muted">{{ player.positionDisplay || '-' }}</div>
+                        <span class="badge bg-danger">
+                          <i class="fas fa-arrow-left"></i> {{ player.minuteOut }}'
+                        </span>
+                      </div>
+                      @if (canEdit && isMatchInProgress()) {
+                        <button
+                          class="btn btn-sm btn-outline-warning undo-btn"
+                          (click)="undoSubstitution(player)"
+                          [title]="'SUBSTITUTION.UNDO' | translate"
+                        >
+                          <i class="fas fa-undo"></i>
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          }
+        </div>
+      </ng-template>
+    </li>
+  </ul>
+  <div [ngbNavOutlet]="nav"></div>
+
+  <!-- Close button -->
+  <div class="d-flex justify-content-end mt-3">
+    <button class="btn btn-light" (click)="closeRequested.emit()">
+      {{ 'COMMON.CLOSE' | translate }}
+    </button>
+  </div>
+</div>
+
+<!-- Substitution Modal -->
+<ng-template #substitutionModal let-modal>
+  <div class="modal-header">
+    <h4 class="modal-title" id="modal-substitution-title">
+      <i class="fas fa-exchange-alt me-2"></i>{{ 'SUBSTITUTION.MAKE_SUBSTITUTION' | translate }}
+    </h4>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <!-- Player Out -->
+    <div class="substitution-player out mb-4">
+      <h6 class="text-danger">
+        <i class="fas fa-arrow-left me-2"></i>{{ 'SUBSTITUTION.PLAYER_OUT' | translate }}
+      </h6>
+      @if (selectedPlayerOut) {
+        <div class="player-card selected">
+          <div class="player-number">{{ selectedPlayerOut.shirtNumber || '-' }}</div>
+          <div class="player-info">
+            <div class="player-name">{{ selectedPlayerOut.playerName }}</div>
+            <div class="player-position text-muted">{{ selectedPlayerOut.positionDisplay || '-' }}</div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Player In Selection -->
+    <div class="substitution-player in mb-4">
+      <h6 class="text-success">
+        <i class="fas fa-arrow-right me-2"></i>{{ 'SUBSTITUTION.PLAYER_IN' | translate }}
+      </h6>
+      <div class="available-players">
+        @for (player of getAvailableSubstitutes(isHomeTeam ? homeTeamLineup : awayTeamLineup); track player.id) {
+          <div
+            class="player-card selectable"
+            [class.selected]="selectedPlayerIn?.id === player.id"
+            (click)="selectPlayerIn(player)"
+          >
+            <div class="player-number">{{ player.shirtNumber || '-' }}</div>
+            <div class="player-info">
+              <div class="player-name">{{ player.playerName }}</div>
+              <div class="player-position text-muted">{{ player.positionDisplay || '-' }}</div>
+            </div>
+            @if (selectedPlayerIn?.id === player.id) {
+              <i class="fas fa-check-circle text-success"></i>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Minute -->
+    <form [formGroup]="substitutionForm">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'SUBSTITUTION.MINUTE' | translate }} <span class="text-danger">*</span></label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="minuteOut"
+            min="1"
+            max="120"
+            placeholder="0'"
+          />
+          @if (substitutionForm.get('minuteOut')?.invalid && substitutionForm.get('minuteOut')?.touched) {
+            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+          }
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'SUBSTITUTION.NOTES' | translate }}</label>
+          <input type="text" class="form-control" formControlName="notes" />
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="onMakeSubstitution()"
+      [disabled]="!selectedPlayerIn || substitutionForm.invalid || saving"
+    >
+      @if (saving) {
+        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+      }
+      <i class="fas fa-exchange-alt me-1"></i>{{ 'SUBSTITUTION.CONFIRM' | translate }}
+    </button>
+    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
+  </div>
+</ng-template>

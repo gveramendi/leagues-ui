@@ -291,7 +291,8 @@
                       <div class="mt-4">
                         <app-tournament-matches
                           [tournamentId]="tournamentId"
-                          [canEdit]="tournament.status === 'IN_PROGRESS'"
+                          [seasonYear]="tournament.seasonYear"
+                          [canEdit]="canEditMatches()"
                         ></app-tournament-matches>
                       </div>
                     </ng-template>

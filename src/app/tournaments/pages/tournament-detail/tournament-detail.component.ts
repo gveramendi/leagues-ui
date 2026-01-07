@@ -638,6 +638,10 @@ export class TournamentDetailComponent implements OnInit {
     return this.tournament?.status === 'REGISTRATION_OPEN' || this.tournament?.status === 'DRAFT';
   }
 
+  canEditMatches(): boolean {
+    return this.tournament?.status === 'SCHEDULED' || this.tournament?.status === 'IN_PROGRESS';
+  }
+
   goBack(): void {
     this.router.navigate(['/tournaments/list']);
   }
