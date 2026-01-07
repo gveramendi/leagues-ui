@@ -170,13 +170,6 @@
                                         <i class="material-icons">add</i>
                                       </button>
                                     }
-                                    <button
-                                      class="btn btn-icon icon-left btn-success rounded-button"
-                                      (click)="approveAllPendingTeams()"
-                                      [title]="'TOURNAMENTS.APPROVE_ALL' | translate"
-                                    >
-                                      <i class="material-icons">done_all</i>
-                                    </button>
                                   </div>
                                 </div>
                               </div>
@@ -331,6 +324,21 @@
                     <ng-template ngbNavContent>
                       <div class="mt-4">
                         <app-tournament-assists [tournamentId]="tournamentId"></app-tournament-assists>
+                      </div>
+                    </ng-template>
+                  </li>
+
+                  <li [ngbNavItem]="6">
+                    <button ngbNavLink>
+                      <i class="fas fa-gavel me-2"></i>{{ 'TOURNAMENTS.SANCTIONS_TAB' | translate }}
+                    </button>
+                    <ng-template ngbNavContent>
+                      <div class="mt-4">
+                        <app-tournament-sanctions
+                          [tournamentId]="tournamentId"
+                          [seasonYear]="tournament.seasonYear"
+                          [canEdit]="tournament.status === 'IN_PROGRESS'"
+                        ></app-tournament-sanctions>
                       </div>
                     </ng-template>
                   </li>
