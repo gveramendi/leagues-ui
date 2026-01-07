@@ -128,9 +128,8 @@ export class TournamentDetailComponent implements OnInit {
     });
 
     this.generateFixtureForm = this.fb.group({
-      startDate: ['', [Validators.required]],
       daysBetweenMatchdays: [7, [Validators.required, Validators.min(1)]],
-      defaultMatchTime: ['15:00', [Validators.required]],
+      defaultMatchTime: ['15:00'],
       defaultVenue: [''],
       homeAndAway: [true],
       randomizeOrder: [true],
@@ -356,9 +355,8 @@ export class TournamentDetailComponent implements OnInit {
     const formValue = this.generateFixtureForm.value;
     const request: GenerateFixtureRequest = {
       tournamentId: this.tournamentId,
-      startDate: formValue.startDate,
       daysBetweenMatchdays: formValue.daysBetweenMatchdays,
-      defaultMatchTime: formValue.defaultMatchTime + ':00',
+      defaultMatchTime: formValue.defaultMatchTime || undefined,
       defaultVenue: formValue.defaultVenue || undefined,
       homeAndAway: formValue.homeAndAway,
       randomizeOrder: formValue.randomizeOrder,
@@ -633,7 +631,7 @@ export class TournamentDetailComponent implements OnInit {
   }
 
   canRegisterTeams(): boolean {
-    return this.tournament?.status === 'REGISTRATION_OPEN' || this.tournament?.status === 'DRAFT';
+    return this.tournament?.status === 'REGISTRATION_OPEN';
   }
 
   canApproveReject(): boolean {

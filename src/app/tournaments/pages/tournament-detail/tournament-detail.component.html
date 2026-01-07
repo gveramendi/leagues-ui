@@ -269,9 +269,11 @@
                                   <i class="fas fa-sign-out-alt"></i>
                                 </button>
                               }
-                              <button class="btn btn-tbl-delete btn-sm" (click)="deleteTeamRegistration(row)" [title]="'COMMON.DELETE' | translate">
-                                <i class="far fa-trash-alt"></i>
-                              </button>
+                              @if (canRegisterTeams()) {
+                                <button class="btn btn-tbl-delete btn-sm" (click)="deleteTeamRegistration(row)" [title]="'COMMON.DELETE' | translate">
+                                  <i class="far fa-trash-alt"></i>
+                                </button>
+                              }
                             </div>
                           </ng-template>
                         </ngx-datatable-column>
@@ -457,28 +459,18 @@
     <form [formGroup]="generateFixtureForm">
       <div class="row">
         <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'TOURNAMENTS.FIXTURE_START_DATE' | translate }} <span class="text-danger">*</span></label>
-          <input type="date" class="form-control" formControlName="startDate" />
-          @if (generateFixtureForm.get('startDate')?.invalid && generateFixtureForm.get('startDate')?.touched) {
-            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
-          }
-        </div>
-        <div class="col-md-6 mb-3">
           <label class="form-label">{{ 'TOURNAMENTS.DAYS_BETWEEN_MATCHDAYS' | translate }} <span class="text-danger">*</span></label>
           <input type="number" class="form-control" formControlName="daysBetweenMatchdays" min="1" />
           @if (generateFixtureForm.get('daysBetweenMatchdays')?.invalid && generateFixtureForm.get('daysBetweenMatchdays')?.touched) {
             <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
           }
         </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">{{ 'TOURNAMENTS.DEFAULT_MATCH_TIME' | translate }}</label>
+          <input type="time" class="form-control" formControlName="defaultMatchTime" />
+        </div>
       </div>
       <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'TOURNAMENTS.DEFAULT_MATCH_TIME' | translate }} <span class="text-danger">*</span></label>
-          <input type="time" class="form-control" formControlName="defaultMatchTime" />
-          @if (generateFixtureForm.get('defaultMatchTime')?.invalid && generateFixtureForm.get('defaultMatchTime')?.touched) {
-            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
-          }
-        </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">{{ 'TOURNAMENTS.DEFAULT_VENUE' | translate }}</label>
           <input type="text" class="form-control" formControlName="defaultVenue" [placeholder]="'TOURNAMENTS.DEFAULT_VENUE_PLACEHOLDER' | translate" />
