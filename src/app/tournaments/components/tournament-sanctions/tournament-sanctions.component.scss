@@ -1,4 +1,4 @@
-// Tournament Sanctions Component Styles
+// Tournament Sanctions (Cards) Component Styles
 
 .table {
   th,
@@ -7,11 +7,58 @@
   }
 }
 
-.badge {
-  font-size: 0.75rem;
+.player-photo {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  object-fit: cover;
 }
 
-.btn-sm {
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
+.player-photo-placeholder {
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #f0f0f0;
+  border-radius: 50%;
+
+  i {
+    font-size: 0.875rem;
+    color: #999;
+  }
+}
+
+.team-logo {
+  width: 24px;
+  height: 24px;
+  object-fit: contain;
+}
+
+.rank-badge {
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  line-height: 28px;
+  text-align: center;
+  border-radius: 50%;
+  font-weight: 600;
+  font-size: 0.875rem;
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.rank-gold {
+  background-color: #ffd700;
+  color: #000;
+}
+
+.rank-silver {
+  background-color: #c0c0c0;
+  color: #000;
+}
+
+.rank-bronze {
+  background-color: #cd7f32;
+  color: #fff;
 }

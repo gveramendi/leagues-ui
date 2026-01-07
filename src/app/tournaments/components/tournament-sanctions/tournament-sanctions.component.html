@@ -1,31 +1,13 @@
 <div class="card">
   <div class="card-header d-flex justify-content-between align-items-center">
-    <h5 class="m-0">{{ 'SANCTIONS.TITLE' | translate }}</h5>
+    <h5 class="m-0">{{ 'SANCTIONS.CARDS_TITLE' | translate }}</h5>
     <div class="d-flex gap-2 align-items-center">
-      <!-- Status filter -->
-      <select class="form-select form-select-sm" [(ngModel)]="selectedStatus" (change)="onStatusChange()" style="width: 150px;">
-        <option [ngValue]="null">{{ 'SANCTIONS.ALL_STATUSES' | translate }}</option>
-        @for (status of statusOptions; track status) {
-          <option [ngValue]="status">{{ getStatusLabel(status) }}</option>
-        }
+      <!-- Filter -->
+      <select class="form-select form-select-sm" [(ngModel)]="selectedFilter" (change)="onFilterChange()" style="width: 180px;">
+        <option value="all">{{ 'SANCTIONS.ALL_CARDS' | translate }}</option>
+        <option value="yellow">{{ 'SANCTIONS.YELLOW_CARDS_ONLY' | translate }}</option>
+        <option value="red">{{ 'SANCTIONS.RED_CARDS_ONLY' | translate }}</option>
       </select>
-      <!-- Type filter -->
-      <select class="form-select form-select-sm" [(ngModel)]="selectedType" (change)="onTypeChange()" style="width: 200px;">
-        <option [ngValue]="null">{{ 'SANCTIONS.ALL_TYPES' | translate }}</option>
-        @for (type of typeOptions; track type) {
-          <option [ngValue]="type">{{ getTypeLabel(type) }}</option>
-        }
-      </select>
-      @if (selectedStatus || selectedType) {
-        <button class="btn btn-outline-secondary btn-sm" (click)="clearFilters()">
-          <i class="fas fa-times me-1"></i>{{ 'SANCTIONS.CLEAR_FILTERS' | translate }}
-        </button>
-      }
-      @if (canEdit) {
-        <button class="btn btn-primary btn-sm" (click)="openAddModal(sanctionModal)">
-          <i class="fas fa-plus me-1"></i>{{ 'SANCTIONS.ADD' | translate }}
-        </button>
-      }
     </div>
   </div>
   <div class="card-body p-0">
@@ -39,123 +21,70 @@
       <div class="alert alert-warning m-3">
         {{ error }}
       </div>
-    } @else if (filteredSanctions.length > 0) {
+    } @else if (filteredCards.length > 0) {
       <div class="table-responsive">
-        <table class="table table-striped table-hover mb-0">
+        <table class="table table-hover mb-0">
           <thead class="table-dark">
             <tr>
-              <th style="width: 200px;">{{ 'SANCTIONS.PLAYER' | translate }}</th>
-              <th style="width: 150px;">{{ 'SANCTIONS.TEAM' | translate }}</th>
-              <th style="width: 180px;">{{ 'SANCTIONS.TYPE' | translate }}</th>
-              <th class="text-center" style="width: 100px;">{{ 'SANCTIONS.STATUS' | translate }}</th>
-              <th class="text-center" style="width: 80px;">{{ 'SANCTIONS.MATCHES' | translate }}</th>
-              <th class="text-center" style="width: 100px;">{{ 'SANCTIONS.FINE' | translate }}</th>
-              <th style="width: 100px;">{{ 'SANCTIONS.DATE' | translate }}</th>
-              <th style="width: 160px;">{{ 'COMMON.ACTIONS' | translate }}</th>
+              <th class="text-center" style="width: 50px;">#</th>
+              <th>{{ 'SANCTIONS.PLAYER' | translate }}</th>
+              <th>{{ 'SANCTIONS.TEAM' | translate }}</th>
+              <th class="text-center" style="width: 100px;">
+                <i class="fas fa-square text-warning me-1"></i>
+                {{ 'SANCTIONS.YELLOW' | translate }}
+              </th>
+              <th class="text-center" style="width: 100px;">
+                <i class="fas fa-square text-danger me-1"></i>
+                {{ 'SANCTIONS.RED' | translate }}
+              </th>
+              <th class="text-center" style="width: 80px;">{{ 'SANCTIONS.TOTAL' | translate }}</th>
+              <th class="text-center" style="width: 80px;">{{ 'STATISTICS.MATCHES' | translate }}</th>
             </tr>
           </thead>
           <tbody>
-            @for (sanction of filteredSanctions; track sanction.id) {
+            @for (card of filteredCards; track card.playerId) {
               <tr>
+                <td class="text-center">
+                  <span class="rank-badge {{ getRankClass(card.rank) }}">{{ card.rank }}</span>
+                </td>
                 <td>
                   <div class="d-flex align-items-center">
-                    @if (sanction.playerPhotoUrl) {
-                      <img [src]="sanction.playerPhotoUrl" [alt]="sanction.playerName" class="rounded-circle me-2" width="32" height="32" />
+                    @if (card.playerPhotoUrl) {
+                      <img [src]="card.playerPhotoUrl" [alt]="card.playerName" class="player-photo me-2" />
                     } @else {
-                      <div class="rounded-circle bg-secondary text-white me-2 d-flex align-items-center justify-content-center" style="width: 32px; height: 32px;">
-                        <i class="fas fa-user fa-sm"></i>
+                      <div class="player-photo-placeholder me-2">
+                        <i class="fas fa-user"></i>
                       </div>
                     }
-                    <div>
-                      <span class="fw-semibold">{{ sanction.playerName || '-' }}</span>
-                    </div>
+                    <span class="fw-semibold">{{ card.playerName }}</span>
                   </div>
                 </td>
                 <td>
                   <div class="d-flex align-items-center">
-                    @if (sanction.teamLogoUrl) {
-                      <img [src]="sanction.teamLogoUrl" [alt]="sanction.teamName" class="me-2" width="24" height="24" />
+                    @if (card.teamLogoUrl) {
+                      <img [src]="card.teamLogoUrl" [alt]="card.teamName" class="team-logo me-2" />
                     }
-                    <span>{{ sanction.teamName || '-' }}</span>
+                    <span>{{ card.teamName }}</span>
                   </div>
                 </td>
-                <td>
-                  <small>{{ sanction.sanctionTypeDisplayName || getTypeLabel(sanction.sanctionType) }}</small>
-                </td>
                 <td class="text-center">
-                  <span class="badge {{ getStatusClass(sanction.status) }}">
-                    {{ sanction.statusDisplayName || getStatusLabel(sanction.status) }}
-                  </span>
-                </td>
-                <td class="text-center">
-                  @if (sanction.matchesSuspended) {
-                    <span class="fw-bold">{{ sanction.matchesServed || 0 }}/{{ sanction.matchesSuspended }}</span>
-                    @if (sanction.fullyServed) {
-                      <i class="fas fa-check-circle text-success ms-1"></i>
-                    }
+                  @if ((card.yellowCards || 0) > 0) {
+                    <span class="badge bg-warning text-dark fs-6">{{ card.yellowCards }}</span>
                   } @else {
-                    <span class="text-muted">-</span>
+                    <span class="text-muted">0</span>
                   }
                 </td>
                 <td class="text-center">
-                  @if (sanction.fineAmount) {
-                    <span [class.text-success]="sanction.finePaid" [class.text-danger]="!sanction.finePaid">
-                      {{ sanction.fineAmount }} {{ sanction.fineCurrency }}
-                    </span>
-                    @if (sanction.finePaid) {
-                      <i class="fas fa-check-circle text-success ms-1"></i>
-                    }
+                  @if ((card.redCards || 0) > 0 || (card.secondYellowCards || 0) > 0) {
+                    <span class="badge bg-danger fs-6">{{ (card.redCards || 0) + (card.secondYellowCards || 0) }}</span>
                   } @else {
-                    <span class="text-muted">-</span>
+                    <span class="text-muted">0</span>
                   }
                 </td>
-                <td>
-                  <small>{{ sanction.infractionDate || sanction.createdAt?.substring(0, 10) }}</small>
+                <td class="text-center">
+                  <span class="badge bg-secondary fs-6">{{ getTotalCards(card) }}</span>
                 </td>
-                <td>
-                  <div class="d-flex gap-1 flex-wrap">
-                    @if (canEdit) {
-                      <!-- Edit button -->
-                      <button class="btn btn-sm btn-outline-primary" (click)="openEditModal(sanctionModal, sanction)" [title]="'COMMON.EDIT' | translate">
-                        <i class="fas fa-edit"></i>
-                      </button>
-                      <!-- Activate button (only for PENDING) -->
-                      @if (sanction.status === 'PENDING') {
-                        <button class="btn btn-sm btn-success" (click)="activateSanction(sanction)" [title]="'SANCTIONS.ACTIVATE' | translate">
-                          <i class="fas fa-check"></i>
-                        </button>
-                      }
-                      <!-- Appeal button (only for ACTIVE) -->
-                      @if (sanction.status === 'ACTIVE') {
-                        <button class="btn btn-sm btn-info" (click)="openAppealModal(appealModal, sanction)" [title]="'SANCTIONS.APPEAL' | translate">
-                          <i class="fas fa-gavel"></i>
-                        </button>
-                      }
-                      <!-- Resolve appeal button (only for APPEALED) -->
-                      @if (sanction.status === 'APPEALED') {
-                        <button class="btn btn-sm btn-primary" (click)="openResolveAppealModal(resolveAppealModal, sanction)" [title]="'SANCTIONS.RESOLVE_APPEAL' | translate">
-                          <i class="fas fa-balance-scale"></i>
-                        </button>
-                      }
-                      <!-- Mark fine paid button -->
-                      @if (sanction.fineAmount && !sanction.finePaid) {
-                        <button class="btn btn-sm btn-warning" (click)="markFinePaid(sanction)" [title]="'SANCTIONS.MARK_FINE_PAID' | translate">
-                          <i class="fas fa-dollar-sign"></i>
-                        </button>
-                      }
-                      <!-- Cancel button (for PENDING, ACTIVE) -->
-                      @if (sanction.status === 'PENDING' || sanction.status === 'ACTIVE') {
-                        <button class="btn btn-sm btn-secondary" (click)="cancelSanction(sanction)" [title]="'SANCTIONS.CANCEL' | translate">
-                          <i class="fas fa-ban"></i>
-                        </button>
-                      }
-                      <!-- Delete button -->
-                      <button class="btn btn-sm btn-danger" (click)="deleteSanction(sanction)" [title]="'COMMON.DELETE' | translate">
-                        <i class="far fa-trash-alt"></i>
-                      </button>
-                    }
-                  </div>
-                </td>
+                <td class="text-center">{{ card.matchesPlayed || 0 }}</td>
               </tr>
             }
           </tbody>
@@ -164,181 +93,8 @@
     } @else {
       <div class="text-center py-5 text-muted">
         <i class="fas fa-gavel fa-3x mb-3"></i>
-        <p>{{ 'SANCTIONS.NO_DATA' | translate }}</p>
+        <p>{{ 'SANCTIONS.NO_CARDS' | translate }}</p>
       </div>
     }
   </div>
 </div>
-
-<!-- Sanction Modal -->
-<ng-template #sanctionModal let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-sanction-title">
-      @if (isEditMode) {
-        {{ 'SANCTIONS.EDIT' | translate }}
-      } @else {
-        {{ 'SANCTIONS.ADD' | translate }}
-      }
-    </h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-  </div>
-  <div class="modal-body">
-    <form [formGroup]="sanctionForm">
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.TEAM' | translate }} <span class="text-danger">*</span></label>
-          <select class="form-select" formControlName="teamId" (change)="onTeamChange($event)" [attr.disabled]="isEditMode ? '' : null">
-            <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
-            @for (team of teams; track team.id) {
-              <option [ngValue]="team.teamId">{{ team.teamName }}</option>
-            }
-          </select>
-          @if (sanctionForm.get('teamId')?.invalid && sanctionForm.get('teamId')?.touched) {
-            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
-          }
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.PLAYER' | translate }}</label>
-          <select class="form-select" formControlName="playerId" [attr.disabled]="isEditMode ? '' : null">
-            <option [ngValue]="null">{{ 'SANCTIONS.NO_PLAYER' | translate }}</option>
-            @for (player of players; track player.id) {
-              <option [ngValue]="player.playerId">{{ player.playerFullName }} (#{{ player.jerseyNumber }})</option>
-            }
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.TYPE' | translate }} <span class="text-danger">*</span></label>
-          <select class="form-select" formControlName="sanctionType" [attr.disabled]="isEditMode ? '' : null">
-            <option [ngValue]="null">{{ 'COMMON.SELECT' | translate }}</option>
-            @for (type of typeOptions; track type) {
-              <option [ngValue]="type">{{ getTypeLabel(type) }}</option>
-            }
-          </select>
-          @if (sanctionForm.get('sanctionType')?.invalid && sanctionForm.get('sanctionType')?.touched) {
-            <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
-          }
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.MATCHES_SUSPENDED' | translate }}</label>
-          <input type="number" class="form-control" formControlName="matchesSuspended" min="0" />
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.FINE_AMOUNT' | translate }}</label>
-          <input type="number" class="form-control" formControlName="fineAmount" min="0" step="0.01" />
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.FINE_CURRENCY' | translate }}</label>
-          <select class="form-select" formControlName="fineCurrency">
-            <option value="USD">USD</option>
-            <option value="EUR">EUR</option>
-            <option value="PEN">PEN</option>
-            <option value="MXN">MXN</option>
-            <option value="ARS">ARS</option>
-            <option value="COP">COP</option>
-            <option value="BRL">BRL</option>
-          </select>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.INFRACTION_DATE' | translate }}</label>
-          <input type="date" class="form-control" formControlName="infractionDate" />
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.EFFECTIVE_DATE' | translate }}</label>
-          <input type="date" class="form-control" formControlName="effectiveDate" />
-        </div>
-      </div>
-      <div class="mb-3">
-        <label class="form-label">{{ 'COMMON.DESCRIPTION' | translate }}</label>
-        <textarea class="form-control" formControlName="description" rows="3" [placeholder]="'SANCTIONS.DESCRIPTION_PLACEHOLDER' | translate"></textarea>
-      </div>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="onSaveSanction()" [disabled]="sanctionForm.invalid">
-      {{ 'COMMON.SAVE' | translate }}
-    </button>
-    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
-  </div>
-</ng-template>
-
-<!-- Appeal Modal -->
-<ng-template #appealModal let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-appeal-title">{{ 'SANCTIONS.APPEAL' | translate }}</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-  </div>
-  <div class="modal-body">
-    @if (appealingSanction) {
-      <div class="alert alert-info mb-3">
-        <strong>{{ 'SANCTIONS.PLAYER' | translate }}:</strong> {{ appealingSanction.playerName || '-' }}<br />
-        <strong>{{ 'SANCTIONS.TEAM' | translate }}:</strong> {{ appealingSanction.teamName }}<br />
-        <strong>{{ 'SANCTIONS.TYPE' | translate }}:</strong> {{ appealingSanction.sanctionTypeDisplayName }}
-      </div>
-    }
-    <form [formGroup]="appealForm">
-      <div class="mb-3">
-        <label class="form-label">{{ 'SANCTIONS.APPEAL_NOTES' | translate }} <span class="text-danger">*</span></label>
-        <textarea class="form-control" formControlName="appealNotes" rows="4" [placeholder]="'SANCTIONS.APPEAL_NOTES_PLACEHOLDER' | translate"></textarea>
-        @if (appealForm.get('appealNotes')?.invalid && appealForm.get('appealNotes')?.touched) {
-          <small class="text-danger">{{ 'VALIDATION.MIN_LENGTH' | translate: { min: 10 } }}</small>
-        }
-      </div>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-info" (click)="onSubmitAppeal()" [disabled]="appealForm.invalid">
-      {{ 'SANCTIONS.SUBMIT_APPEAL' | translate }}
-    </button>
-    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
-  </div>
-</ng-template>
-
-<!-- Resolve Appeal Modal -->
-<ng-template #resolveAppealModal let-modal>
-  <div class="modal-header">
-    <h4 class="modal-title" id="modal-resolve-appeal-title">{{ 'SANCTIONS.RESOLVE_APPEAL' | translate }}</h4>
-    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
-  </div>
-  <div class="modal-body">
-    @if (resolvingSanction) {
-      <div class="alert alert-info mb-3">
-        <strong>{{ 'SANCTIONS.PLAYER' | translate }}:</strong> {{ resolvingSanction.playerName || '-' }}<br />
-        <strong>{{ 'SANCTIONS.TEAM' | translate }}:</strong> {{ resolvingSanction.teamName }}<br />
-        <strong>{{ 'SANCTIONS.TYPE' | translate }}:</strong> {{ resolvingSanction.sanctionTypeDisplayName }}<br />
-        <strong>{{ 'SANCTIONS.APPEAL_NOTES' | translate }}:</strong> {{ resolvingSanction.appealNotes }}
-      </div>
-    }
-    <form [formGroup]="resolveAppealForm">
-      <div class="mb-3">
-        <label class="form-label">{{ 'SANCTIONS.RESOLUTION' | translate }} <span class="text-danger">*</span></label>
-        <textarea class="form-control" formControlName="resolution" rows="4" [placeholder]="'SANCTIONS.RESOLUTION_PLACEHOLDER' | translate"></textarea>
-        @if (resolveAppealForm.get('resolution')?.invalid && resolveAppealForm.get('resolution')?.touched) {
-          <small class="text-danger">{{ 'VALIDATION.MIN_LENGTH' | translate: { min: 10 } }}</small>
-        }
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.NEW_MATCHES_SUSPENDED' | translate }}</label>
-          <input type="number" class="form-control" formControlName="newMatchesSuspended" min="0" />
-          <small class="text-muted">{{ 'SANCTIONS.NEW_MATCHES_HINT' | translate }}</small>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">{{ 'SANCTIONS.RESOLVED_BY' | translate }}</label>
-          <input type="text" class="form-control" formControlName="resolvedBy" [placeholder]="'SANCTIONS.RESOLVED_BY_PLACEHOLDER' | translate" />
-        </div>
-      </div>
-    </form>
-  </div>
-  <div class="modal-footer">
-    <button type="button" class="btn btn-primary" (click)="onResolveAppeal()" [disabled]="resolveAppealForm.invalid">
-      {{ 'SANCTIONS.RESOLVE' | translate }}
-    </button>
-    <button type="button" class="btn btn-light" (click)="modal.dismiss()">{{ 'COMMON.CANCEL' | translate }}</button>
-  </div>
-</ng-template>
