@@ -12,11 +12,13 @@ import {
   MatchSummaryResponse,
   MatchResponse,
   MatchStatus,
+  MatchEventResponse,
   CreateMatchRequest,
   UpdateMatchRequest,
   TournamentTeamResponse,
 } from '@core';
-import { switchMap } from 'rxjs';
+import { forkJoin, of, switchMap } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { MatchLineupComponent } from '../match-lineup/match-lineup.component';
 import { MatchSubstitutionComponent } from '../match-substitution/match-substitution.component';
 import { MatchEventsComponent } from '../match-events/match-events.component';
@@ -131,6 +133,8 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
         this.loading = false;
         // Check lineup status for SCHEDULED matches
         this.checkLineupsForScheduledMatches();
+        // Load events for finished/in-progress matches
+        this.loadMatchEvents();
       },
       error: (err) => {
         console.error('Error loading matches:', err);
@@ -138,6 +142,59 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
         this.loading = false;
       },
     });
+  }
+
+  private loadMatchEvents(): void {
+    const matchesWithEvents = this.matches.filter(
+      (m) => m.status === 'FINISHED' || m.status === 'IN_PROGRESS' || m.status === 'HALF_TIME' || m.status === 'SECOND_HALF'
+    );
+
+    if (matchesWithEvents.length === 0) return;
+
+    // Load events for each match
+    const eventRequests = matchesWithEvents.map((match) =>
+      forkJoin({
+        goals: this.matchService.getGoals(match.id).pipe(catchError(() => of({ body: { data: [] } }))),
+        cards: this.matchService.getCards(match.id).pipe(catchError(() => of({ body: { data: [] } }))),
+      }).pipe(
+        catchError(() => of({ goals: { body: { data: [] } }, cards: { body: { data: [] } } }))
+      )
+    );
+
+    forkJoin(eventRequests).subscribe({
+      next: (results) => {
+        results.forEach((result, index) => {
+          const match = matchesWithEvents[index];
+          const goals = result.goals?.body?.data || [];
+          const cards = result.cards?.body?.data || [];
+
+          this.updateMatchWithEvents(match, goals, cards);
+        });
+        // Re-apply filters to update the view
+        this.applyFilters();
+      },
+      error: (err) => {
+        console.error('Error loading match events:', err);
+      },
+    });
+  }
+
+  private updateMatchWithEvents(match: MatchSummaryResponse, goals: MatchEventResponse[], cards: MatchEventResponse[]): void {
+    // Calculate goal scorers
+    const homeGoals = goals.filter((g) => g.teamId === match.homeTeamId);
+    const awayGoals = goals.filter((g) => g.teamId === match.awayTeamId);
+
+    match.homeGoalScorers = homeGoals.map((g) => g.playerName || '').filter((n) => n);
+    match.awayGoalScorers = awayGoals.map((g) => g.playerName || '').filter((n) => n);
+
+    // Calculate cards
+    const homeCards = cards.filter((c) => c.teamId === match.homeTeamId);
+    const awayCards = cards.filter((c) => c.teamId === match.awayTeamId);
+
+    match.homeYellowCards = homeCards.filter((c) => c.eventType === 'YELLOW_CARD' || c.eventType === 'SECOND_YELLOW').length;
+    match.homeRedCards = homeCards.filter((c) => c.eventType === 'RED_CARD' || c.eventType === 'SECOND_YELLOW').length;
+    match.awayYellowCards = awayCards.filter((c) => c.eventType === 'YELLOW_CARD' || c.eventType === 'SECOND_YELLOW').length;
+    match.awayRedCards = awayCards.filter((c) => c.eventType === 'RED_CARD' || c.eventType === 'SECOND_YELLOW').length;
   }
 
   private checkLineupsForScheduledMatches(): void {

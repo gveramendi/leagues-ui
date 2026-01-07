@@ -1136,6 +1136,14 @@ export interface MatchSummaryResponse {
   statusDisplayName?: string;
   homeScore?: number;
   awayScore?: number;
+  // Goal scorers
+  homeGoalScorers?: string[];
+  awayGoalScorers?: string[];
+  // Cards count
+  homeYellowCards?: number;
+  awayYellowCards?: number;
+  homeRedCards?: number;
+  awayRedCards?: number;
 }
 
 export interface CreateMatchRequest {

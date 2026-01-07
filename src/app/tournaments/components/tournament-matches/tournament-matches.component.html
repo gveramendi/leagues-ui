@@ -95,6 +95,23 @@
                       <div class="team-name" [title]="match.homeTeamName">
                         {{ match.homeTeamShortName || match.homeTeamName }}
                       </div>
+                      <!-- Home team cards -->
+                      @if ((match.homeYellowCards ?? 0) > 0 || (match.homeRedCards ?? 0) > 0) {
+                        <div class="team-cards mt-1">
+                          @if ((match.homeYellowCards ?? 0) > 0) {
+                            <span class="card-indicator yellow me-1" [title]="'SANCTIONS.YELLOW' | translate">
+                              <i class="fas fa-square text-warning"></i>
+                              <small>{{ match.homeYellowCards }}</small>
+                            </span>
+                          }
+                          @if ((match.homeRedCards ?? 0) > 0) {
+                            <span class="card-indicator red" [title]="'SANCTIONS.RED' | translate">
+                              <i class="fas fa-square text-danger"></i>
+                              <small>{{ match.homeRedCards }}</small>
+                            </span>
+                          }
+                        </div>
+                      }
                     </div>
 
                     <div class="score-display text-center mx-3">
@@ -116,8 +133,43 @@
                       <div class="team-name" [title]="match.awayTeamName">
                         {{ match.awayTeamShortName || match.awayTeamName }}
                       </div>
+                      <!-- Away team cards -->
+                      @if ((match.awayYellowCards ?? 0) > 0 || (match.awayRedCards ?? 0) > 0) {
+                        <div class="team-cards mt-1">
+                          @if ((match.awayYellowCards ?? 0) > 0) {
+                            <span class="card-indicator yellow me-1" [title]="'SANCTIONS.YELLOW' | translate">
+                              <i class="fas fa-square text-warning"></i>
+                              <small>{{ match.awayYellowCards }}</small>
+                            </span>
+                          }
+                          @if ((match.awayRedCards ?? 0) > 0) {
+                            <span class="card-indicator red" [title]="'SANCTIONS.RED' | translate">
+                              <i class="fas fa-square text-danger"></i>
+                              <small>{{ match.awayRedCards }}</small>
+                            </span>
+                          }
+                        </div>
+                      }
                     </div>
                   </div>
+
+                  <!-- Goal scorers -->
+                  @if ((match.status === 'FINISHED' || match.status === 'IN_PROGRESS') && (match.homeGoalScorers?.length || match.awayGoalScorers?.length)) {
+                    <div class="goal-scorers d-flex justify-content-between border-top pt-2 mt-2">
+                      <div class="home-scorers text-start small text-muted" style="flex: 1;">
+                        @if (match.homeGoalScorers?.length) {
+                          <i class="fas fa-futbol me-1"></i>
+                          {{ match.homeGoalScorers?.join(', ') }}
+                        }
+                      </div>
+                      <div class="away-scorers text-end small text-muted" style="flex: 1;">
+                        @if (match.awayGoalScorers?.length) {
+                          {{ match.awayGoalScorers?.join(', ') }}
+                          <i class="fas fa-futbol ms-1"></i>
+                        }
+                      </div>
+                    </div>
+                  }
 
                   @if (match.venue) {
                     <div class="venue text-center text-muted mt-2">
