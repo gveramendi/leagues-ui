@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { PlayerStatisticsService } from '@core';
@@ -11,7 +11,7 @@ import { ScorerTableResponse, TopScorerResponse } from '../../../core/models/res
   templateUrl: './tournament-scorers.component.html',
   styleUrls: ['./tournament-scorers.component.scss'],
 })
-export class TournamentScorersComponent implements OnChanges {
+export class TournamentScorersComponent implements OnInit, OnChanges {
   @Input() tournamentId!: number;
 
   scorerTable: ScorerTableResponse | null = null;
@@ -20,8 +20,14 @@ export class TournamentScorersComponent implements OnChanges {
 
   constructor(private playerStatisticsService: PlayerStatisticsService) {}
 
+  ngOnInit(): void {
+    if (this.tournamentId) {
+      this.loadScorers();
+    }
+  }
+
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['tournamentId'] && this.tournamentId) {
+    if (changes['tournamentId'] && this.tournamentId && !changes['tournamentId'].firstChange) {
       this.loadScorers();
     }
   }
