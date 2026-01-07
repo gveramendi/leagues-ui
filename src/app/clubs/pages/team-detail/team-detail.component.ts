@@ -651,6 +651,10 @@ export class TeamDetailComponent implements OnInit {
       'CENTER_FORWARD': this.translate.instant('PLAYERS.POSITION_CENTER_FORWARD'),
       'STRIKER': this.translate.instant('PLAYERS.POSITION_STRIKER'),
       'SECOND_STRIKER': this.translate.instant('PLAYERS.POSITION_SECOND_STRIKER'),
+      'PIVOT': this.translate.instant('PLAYERS.POSITION_PIVOT'),
+      'FIXO': this.translate.instant('PLAYERS.POSITION_FIXO'),
+      'ALA_LEFT': this.translate.instant('PLAYERS.POSITION_ALA_LEFT'),
+      'ALA_RIGHT': this.translate.instant('PLAYERS.POSITION_ALA_RIGHT'),
     };
     return labels[position] || position;
   }

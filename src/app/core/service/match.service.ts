@@ -8,11 +8,16 @@ import {
   MatchSummaryResponse,
   MatchEventResponse,
   MatchRefereeResponse,
+  MatchLineupResponse,
+  TeamLineupResponse,
   CreateMatchRequest,
   UpdateMatchRequest,
   UpdateMatchScoreRequest,
   CreateMatchEventRequest,
   AssignRefereeRequest,
+  AddPlayerToLineupRequest,
+  SetTeamLineupRequest,
+  UpdateMatchLineupRequest,
   GenerateFixtureRequest,
   MatchStatus,
 } from '../models/response';
@@ -307,6 +312,102 @@ export class MatchService {
   removeReferee(matchId: number, refereeId: number): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(
       `${this.apiUrl}/${matchId}/referees/${refereeId}`
+    );
+  }
+
+  // ==================== Match Lineup endpoints ====================
+
+  /**
+   * POST /api/matches/{matchId}/lineups
+   * Add a player to the match lineup
+   */
+  addPlayerToLineup(
+    matchId: number,
+    request: AddPlayerToLineupRequest
+  ): Observable<ApiResponse<MatchLineupResponse>> {
+    return this.http.post<ApiResponse<MatchLineupResponse>>(
+      `${this.apiUrl}/${matchId}/lineups`,
+      request
+    );
+  }
+
+  /**
+   * POST /api/matches/{matchId}/lineups/team/{teamId}
+   * Set complete team lineup
+   */
+  setTeamLineup(
+    matchId: number,
+    teamId: number,
+    request: SetTeamLineupRequest
+  ): Observable<ApiResponse<TeamLineupResponse>> {
+    return this.http.post<ApiResponse<TeamLineupResponse>>(
+      `${this.apiUrl}/${matchId}/lineups/team/${teamId}`,
+      request
+    );
+  }
+
+  /**
+   * GET /api/matches/{matchId}/lineups
+   * Get all match lineups
+   */
+  getMatchLineups(matchId: number): Observable<ApiResponse<MatchLineupResponse[]>> {
+    return this.http.get<ApiResponse<MatchLineupResponse[]>>(
+      `${this.apiUrl}/${matchId}/lineups`
+    );
+  }
+
+  /**
+   * GET /api/matches/{matchId}/lineups/team/{teamId}
+   * Get team lineup
+   */
+  getTeamLineup(matchId: number, teamId: number): Observable<ApiResponse<TeamLineupResponse>> {
+    return this.http.get<ApiResponse<TeamLineupResponse>>(
+      `${this.apiUrl}/${matchId}/lineups/team/${teamId}`
+    );
+  }
+
+  /**
+   * GET /api/matches/{matchId}/lineups/team/{teamId}/starters
+   * Get team starters
+   */
+  getTeamStarters(matchId: number, teamId: number): Observable<ApiResponse<MatchLineupResponse[]>> {
+    return this.http.get<ApiResponse<MatchLineupResponse[]>>(
+      `${this.apiUrl}/${matchId}/lineups/team/${teamId}/starters`
+    );
+  }
+
+  /**
+   * GET /api/matches/{matchId}/lineups/team/{teamId}/substitutes
+   * Get team substitutes
+   */
+  getTeamSubstitutes(matchId: number, teamId: number): Observable<ApiResponse<MatchLineupResponse[]>> {
+    return this.http.get<ApiResponse<MatchLineupResponse[]>>(
+      `${this.apiUrl}/${matchId}/lineups/team/${teamId}/substitutes`
+    );
+  }
+
+  /**
+   * PUT /api/matches/{matchId}/lineups/{lineupId}
+   * Update lineup entry
+   */
+  updateLineupEntry(
+    matchId: number,
+    lineupId: number,
+    request: UpdateMatchLineupRequest
+  ): Observable<ApiResponse<MatchLineupResponse>> {
+    return this.http.put<ApiResponse<MatchLineupResponse>>(
+      `${this.apiUrl}/${matchId}/lineups/${lineupId}`,
+      request
+    );
+  }
+
+  /**
+   * DELETE /api/matches/{matchId}/lineups/{lineupId}
+   * Remove player from lineup
+   */
+  removePlayerFromLineup(matchId: number, lineupId: number): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(
+      `${this.apiUrl}/${matchId}/lineups/${lineupId}`
     );
   }
 }

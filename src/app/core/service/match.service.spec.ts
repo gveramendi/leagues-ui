@@ -8,11 +8,16 @@ import {
   MatchSummaryResponse,
   MatchEventResponse,
   MatchRefereeResponse,
+  MatchLineupResponse,
+  TeamLineupResponse,
   CreateMatchRequest,
   UpdateMatchRequest,
   UpdateMatchScoreRequest,
   CreateMatchEventRequest,
   AssignRefereeRequest,
+  AddPlayerToLineupRequest,
+  SetTeamLineupRequest,
+  UpdateMatchLineupRequest,
 } from '../models/response';
 
 describe('MatchService', () => {
@@ -94,6 +99,51 @@ describe('MatchService', () => {
     refereeCategoryDisplayName: 'FIFA',
     role: 'MAIN',
     roleDisplayName: 'Main Referee',
+  };
+
+  const mockMatchLineup: MatchLineupResponse = {
+    id: 1,
+    matchId: 1,
+    teamId: 10,
+    teamName: 'FC Barcelona',
+    playerId: 100,
+    playerName: 'Lionel Messi',
+    playerPhotoUrl: 'https://example.com/messi.png',
+    isStarter: true,
+    position: 'RIGHT_WINGER',
+    positionDisplay: 'Right Winger',
+    shirtNumber: 10,
+    isCaptain: true,
+    createdAt: '2024-01-15T10:00:00',
+    updatedAt: '2024-01-15T10:00:00',
+  };
+
+  const mockMatchLineupSubstitute: MatchLineupResponse = {
+    id: 2,
+    matchId: 1,
+    teamId: 10,
+    teamName: 'FC Barcelona',
+    playerId: 102,
+    playerName: 'Ansu Fati',
+    playerPhotoUrl: 'https://example.com/fati.png',
+    isStarter: false,
+    position: 'LEFT_WINGER',
+    positionDisplay: 'Left Winger',
+    shirtNumber: 22,
+    isCaptain: false,
+    createdAt: '2024-01-15T10:00:00',
+    updatedAt: '2024-01-15T10:00:00',
+  };
+
+  const mockTeamLineup: TeamLineupResponse = {
+    matchId: 1,
+    teamId: 10,
+    teamName: 'FC Barcelona',
+    teamLogoUrl: 'https://example.com/fcb.png',
+    starters: [mockMatchLineup],
+    substitutes: [mockMatchLineupSubstitute],
+    startersCount: 1,
+    substitutesCount: 1,
   };
 
   const createApiResponse = <T>(data: T): ApiResponse<T> => ({
@@ -443,6 +493,156 @@ describe('MatchService', () => {
       });
 
       const req = httpMock.expectOne(`${apiUrl}/1/referees/50`);
+      expect(req.request.method).toBe('DELETE');
+      req.flush(createApiResponse(null));
+    });
+  });
+
+  // Match Lineup tests
+
+  describe('addPlayerToLineup', () => {
+    it('should add a player to the match lineup', () => {
+      const request: AddPlayerToLineupRequest = {
+        teamId: 10,
+        playerId: 100,
+        isStarter: true,
+        position: 'RIGHT_WINGER',
+        shirtNumber: 10,
+        isCaptain: true,
+      };
+
+      service.addPlayerToLineup(1, request).subscribe((response) => {
+        expect(response.body.data).toEqual(mockMatchLineup);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(createApiResponse(mockMatchLineup));
+    });
+  });
+
+  describe('setTeamLineup', () => {
+    it('should set complete team lineup', () => {
+      const request: SetTeamLineupRequest = {
+        players: [
+          {
+            playerId: 100,
+            isStarter: true,
+            position: 'RIGHT_WINGER',
+            shirtNumber: 10,
+            isCaptain: true,
+          },
+          {
+            playerId: 102,
+            isStarter: false,
+            position: 'LEFT_WINGER',
+            shirtNumber: 22,
+            isCaptain: false,
+          },
+        ],
+        replaceExisting: true,
+      };
+
+      service.setTeamLineup(1, 10, request).subscribe((response) => {
+        expect(response.body.data).toEqual(mockTeamLineup);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups/team/10`);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(request);
+      req.flush(createApiResponse(mockTeamLineup));
+    });
+  });
+
+  describe('getMatchLineups', () => {
+    it('should get all match lineups', () => {
+      service.getMatchLineups(1).subscribe((response) => {
+        expect(response.body.data).toEqual([mockMatchLineup, mockMatchLineupSubstitute]);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups`);
+      expect(req.request.method).toBe('GET');
+      req.flush(createApiResponse([mockMatchLineup, mockMatchLineupSubstitute]));
+    });
+  });
+
+  describe('getTeamLineup', () => {
+    it('should get team lineup', () => {
+      service.getTeamLineup(1, 10).subscribe((response) => {
+        expect(response.body.data).toEqual(mockTeamLineup);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups/team/10`);
+      expect(req.request.method).toBe('GET');
+      req.flush(createApiResponse(mockTeamLineup));
+    });
+  });
+
+  describe('getTeamStarters', () => {
+    it('should get team starters', () => {
+      service.getTeamStarters(1, 10).subscribe((response) => {
+        expect(response.body.data).toEqual([mockMatchLineup]);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups/team/10/starters`);
+      expect(req.request.method).toBe('GET');
+      req.flush(createApiResponse([mockMatchLineup]));
+    });
+  });
+
+  describe('getTeamSubstitutes', () => {
+    it('should get team substitutes', () => {
+      service.getTeamSubstitutes(1, 10).subscribe((response) => {
+        expect(response.body.data).toEqual([mockMatchLineupSubstitute]);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups/team/10/substitutes`);
+      expect(req.request.method).toBe('GET');
+      req.flush(createApiResponse([mockMatchLineupSubstitute]));
+    });
+  });
+
+  describe('updateLineupEntry', () => {
+    it('should update lineup entry', () => {
+      const request: UpdateMatchLineupRequest = {
+        isStarter: false,
+        position: 'STRIKER',
+        shirtNumber: 9,
+        isCaptain: false,
+        minuteIn: 60,
+        notes: 'Substituted in',
+      };
+
+      const updatedLineup: MatchLineupResponse = {
+        ...mockMatchLineup,
+        isStarter: false,
+        position: 'STRIKER',
+        positionDisplay: 'Striker',
+        shirtNumber: 9,
+        isCaptain: false,
+        minuteIn: 60,
+        notes: 'Substituted in',
+      };
+
+      service.updateLineupEntry(1, 1, request).subscribe((response) => {
+        expect(response.body.data).toEqual(updatedLineup);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups/1`);
+      expect(req.request.method).toBe('PUT');
+      expect(req.request.body).toEqual(request);
+      req.flush(createApiResponse(updatedLineup));
+    });
+  });
+
+  describe('removePlayerFromLineup', () => {
+    it('should remove player from lineup', () => {
+      service.removePlayerFromLineup(1, 1).subscribe((response) => {
+        expect(response.header.success).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/lineups/1`);
       expect(req.request.method).toBe('DELETE');
       req.flush(createApiResponse(null));
     });

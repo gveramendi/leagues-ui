@@ -444,7 +444,11 @@ export type Position =
   | 'RIGHT_WINGER'
   | 'CENTER_FORWARD'
   | 'STRIKER'
-  | 'SECOND_STRIKER';
+  | 'SECOND_STRIKER'
+  | 'PIVOT'
+  | 'FIXO'
+  | 'ALA_LEFT'
+  | 'ALA_RIGHT';
 export type PlayerStatus = 'ACTIVE' | 'INJURED' | 'SUSPENDED' | 'ON_LOAN' | 'INACTIVE' | 'TRANSFERRED';
 
 // Player interfaces (personal data)
@@ -1185,6 +1189,72 @@ export interface CreateMatchEventRequest {
 export interface AssignRefereeRequest {
   refereeId: number;
   role: RefereeRole;
+}
+
+// ==================== Match Lineup Types ====================
+
+export interface MatchLineupResponse {
+  id: number;
+  matchId: number;
+  teamId: number;
+  teamName?: string;
+  playerId: number;
+  playerName?: string;
+  playerPhotoUrl?: string;
+  isStarter: boolean;
+  position?: Position;
+  positionDisplay?: string;
+  shirtNumber?: number;
+  isCaptain: boolean;
+  minuteIn?: number;
+  minuteOut?: number;
+  notes?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface TeamLineupResponse {
+  matchId: number;
+  teamId: number;
+  teamName?: string;
+  teamLogoUrl?: string;
+  starters: MatchLineupResponse[];
+  substitutes: MatchLineupResponse[];
+  startersCount: number;
+  substitutesCount: number;
+}
+
+export interface AddPlayerToLineupRequest {
+  teamId: number;
+  playerId: number;
+  isStarter?: boolean;
+  position?: Position;
+  shirtNumber?: number;
+  isCaptain?: boolean;
+  notes?: string;
+}
+
+export interface LineupPlayerRequest {
+  playerId: number;
+  isStarter?: boolean;
+  position?: Position;
+  shirtNumber?: number;
+  isCaptain?: boolean;
+}
+
+export interface SetTeamLineupRequest {
+  players: LineupPlayerRequest[];
+  replaceExisting?: boolean;
+}
+
+export interface UpdateMatchLineupRequest {
+  isStarter?: boolean;
+  position?: Position;
+  shirtNumber?: number;
+  isCaptain?: boolean;
+  minuteIn?: number;
+  minuteOut?: number;
+  notes?: string;
 }
 
 // ==================== Referee Types ====================
