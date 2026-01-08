@@ -536,7 +536,19 @@
     "SCORERS_TAB": "Scorers",
     "ASSISTS_TAB": "Assists",
     "MATCHES_TAB": "Matches",
-    "SANCTIONS_TAB": "Sanctions"
+    "SANCTIONS_TAB": "Sanctions",
+    "PHASE_STATUS": "Phase Status",
+    "CURRENT_PHASE": "Current Phase",
+    "PHASE_PROGRESS": "Progress",
+    "PENDING_MATCHES": "Pending Matches",
+    "NEXT_PHASE": "Next Phase",
+    "IN_PROGRESS_MATCHES": "In Progress Matches",
+    "CHAMPION": "Champion",
+    "ADVANCE_TO": "Advance to",
+    "ADVANCE_PHASE_CONFIRM": "Are you sure you want to advance from <strong>{{currentPhase}}</strong> to <strong>{{nextPhase}}</strong>?",
+    "PHASE_ADVANCED_SUCCESS": "Phase Advanced Successfully",
+    "QUALIFIED_TEAMS": "Qualified Teams",
+    "MATCHES_GENERATED": "Matches Generated"
   },
   "MATCHES": {
     "TITLE": "Matches",

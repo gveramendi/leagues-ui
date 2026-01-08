@@ -57,9 +57,14 @@
                   </button>
                 }
                 @if (tournament.status === 'IN_PROGRESS') {
-                  @if (canAdvancePhase) {
-                    <button class="btn btn-primary btn-sm me-2" (click)="advancePhase()">
-                      <i class="fas fa-forward me-1"></i> {{ 'TOURNAMENTS.ADVANCE_PHASE' | translate }}
+                  @if (isGroupStageFormat() && canAdvancePhase && !phaseStatus?.tournamentComplete && phaseStatus?.nextPhaseName) {
+                    <button class="btn btn-primary btn-sm me-2" (click)="advancePhase()" [disabled]="checkingCanAdvance">
+                      @if (checkingCanAdvance) {
+                        <span class="spinner-border spinner-border-sm me-1" role="status"></span>
+                      } @else {
+                        <i class="fas fa-forward me-1"></i>
+                      }
+                      {{ 'TOURNAMENTS.ADVANCE_TO' | translate }} {{ phaseStatus?.nextPhaseName }}
                     </button>
                   }
                   <button class="btn btn-dark btn-sm" (click)="finishTournament()">
@@ -121,6 +126,65 @@
                   </div>
                 }
               </div>
+
+              <!-- Phase Status for GROUP_STAGE tournaments -->
+              @if (isGroupStageFormat() && tournament.status === 'IN_PROGRESS' && phaseStatus) {
+                <hr class="my-3" />
+                <div class="row">
+                  <div class="col-12">
+                    <h6 class="mb-3">
+                      <i class="fas fa-layer-group me-2"></i>{{ 'TOURNAMENTS.PHASE_STATUS' | translate }}
+                    </h6>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-md-3">
+                    <p><strong>{{ 'TOURNAMENTS.CURRENT_PHASE' | translate }}:</strong>
+                      <span class="badge bg-info ms-2">{{ phaseStatus.currentPhaseName }}</span>
+                    </p>
+                  </div>
+                  <div class="col-md-3">
+                    <p><strong>{{ 'TOURNAMENTS.PHASE_PROGRESS' | translate }}:</strong>
+                      <span class="badge bg-secondary ms-2">
+                        {{ phaseStatus.finishedMatches }} / {{ phaseStatus.totalMatches }}
+                      </span>
+                    </p>
+                  </div>
+                  <div class="col-md-3">
+                    <p><strong>{{ 'TOURNAMENTS.PENDING_MATCHES' | translate }}:</strong>
+                      <span class="badge {{ phaseStatus.pendingMatches > 0 ? 'bg-warning' : 'bg-success' }} ms-2">
+                        {{ phaseStatus.pendingMatches }}
+                      </span>
+                    </p>
+                  </div>
+                  @if (phaseStatus.nextPhaseName) {
+                    <div class="col-md-3">
+                      <p><strong>{{ 'TOURNAMENTS.NEXT_PHASE' | translate }}:</strong>
+                        <span class="badge bg-outline-primary ms-2">{{ phaseStatus.nextPhaseName }}</span>
+                      </p>
+                    </div>
+                  }
+                </div>
+                @if (phaseStatus.inProgressMatches > 0) {
+                  <div class="row">
+                    <div class="col-md-3">
+                      <p><strong>{{ 'TOURNAMENTS.IN_PROGRESS_MATCHES' | translate }}:</strong>
+                        <span class="badge bg-primary ms-2">{{ phaseStatus.inProgressMatches }}</span>
+                      </p>
+                    </div>
+                  </div>
+                }
+                @if (phaseStatus.tournamentComplete && phaseStatus.championTeamName) {
+                  <div class="row">
+                    <div class="col-12">
+                      <div class="alert alert-success mb-0">
+                        <i class="fas fa-trophy me-2"></i>
+                        <strong>{{ 'TOURNAMENTS.CHAMPION' | translate }}:</strong> {{ phaseStatus.championTeamName }}
+                      </div>
+                    </div>
+                  </div>
+                }
+              }
             </div>
           </div>
         </div>
@@ -299,6 +363,8 @@
                           [seasonYear]="tournament.seasonYear"
                           [canEdit]="canEditMatches()"
                           [tournamentFormat]="tournament.format"
+                          [currentPhaseId]="phaseStatus?.currentPhaseId"
+                          (matchFinished)="onMatchFinished()"
                         ></app-tournament-matches>
                       </div>
                     </ng-template>

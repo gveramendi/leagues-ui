@@ -536,7 +536,19 @@
     "SCORERS_TAB": "Goleadores",
     "ASSISTS_TAB": "Asistencias",
     "MATCHES_TAB": "Partidos",
-    "SANCTIONS_TAB": "Sanciones"
+    "SANCTIONS_TAB": "Sanciones",
+    "PHASE_STATUS": "Estado de Fase",
+    "CURRENT_PHASE": "Fase Actual",
+    "PHASE_PROGRESS": "Progreso",
+    "PENDING_MATCHES": "Partidos Pendientes",
+    "NEXT_PHASE": "Próxima Fase",
+    "IN_PROGRESS_MATCHES": "Partidos en Curso",
+    "CHAMPION": "Campeón",
+    "ADVANCE_TO": "Avanzar a",
+    "ADVANCE_PHASE_CONFIRM": "¿Está seguro que desea avanzar de <strong>{{currentPhase}}</strong> a <strong>{{nextPhase}}</strong>?",
+    "PHASE_ADVANCED_SUCCESS": "Fase Avanzada Exitosamente",
+    "QUALIFIED_TEAMS": "Equipos Clasificados",
+    "MATCHES_GENERATED": "Partidos Generados"
   },
   "MATCHES": {
     "TITLE": "Partidos",

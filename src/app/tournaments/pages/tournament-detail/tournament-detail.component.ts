@@ -26,6 +26,8 @@ import {
   RejectTeamRequest,
   GenerateFixtureRequest,
   GroupDistribution,
+  PhaseStatusResponse,
+  PhaseAdvancementResponse,
 } from '@core';
 import { debounceTime, distinctUntilChanged, forkJoin, of, Subject, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -96,6 +98,8 @@ export class TournamentDetailComponent implements OnInit {
   // Phase advancement (for GROUP_STAGE tournaments)
   canAdvancePhase = false;
   checkingCanAdvance = false;
+  phaseStatus: PhaseStatusResponse | null = null;
+  loadingPhaseStatus = false;
 
   constructor(
     private route: ActivatedRoute,
@@ -160,12 +164,15 @@ export class TournamentDetailComponent implements OnInit {
   loadTournament(): void {
     this.loading = true;
     this.canAdvancePhase = false;
+    this.phaseStatus = null;
     this.tournamentService.getById(this.tournamentId).subscribe({
       next: (response) => {
         this.tournament = response.body.data;
         this.loading = false;
-        // Check if can advance for GROUP_STAGE tournaments
-        this.checkCanAdvance();
+        // Load phase status and check if can advance for GROUP_STAGE tournaments
+        if (this.isGroupStageFormat() && this.tournament?.status === 'IN_PROGRESS') {
+          this.loadPhaseStatus();
+        }
       },
       error: (error) => {
         console.error('Error loading tournament:', error);
@@ -175,7 +182,57 @@ export class TournamentDetailComponent implements OnInit {
     });
   }
 
+  private loadPhaseStatus(): void {
+    if (!this.tournament) return;
+
+    this.loadingPhaseStatus = true;
+    this.tournamentService.getPhaseStatus(this.tournamentId).subscribe({
+      next: (response) => {
+        this.phaseStatus = response.body.data;
+        this.loadingPhaseStatus = false;
+        // Check if can advance based on phase status
+        this.checkCanAdvance();
+      },
+      error: (error) => {
+        console.error('Error loading phase status:', error);
+        this.loadingPhaseStatus = false;
+        // Fallback to generic check
+        this.checkCanAdvanceFallback();
+      },
+    });
+  }
+
   private checkCanAdvance(): void {
+    if (!this.tournament || this.tournament.status !== 'IN_PROGRESS' || !this.isGroupStageFormat()) {
+      this.canAdvancePhase = false;
+      return;
+    }
+
+    // If we have phase status, use its canAdvance flag
+    if (this.phaseStatus) {
+      this.canAdvancePhase = this.phaseStatus.canAdvance;
+      return;
+    }
+
+    // Otherwise check using specific endpoints
+    this.checkingCanAdvance = true;
+    const checkService$ = this.isInGroupStage()
+      ? this.tournamentService.canAdvanceGroupStage(this.tournamentId)
+      : this.tournamentService.canAdvanceKnockout(this.tournamentId);
+
+    checkService$.subscribe({
+      next: (response) => {
+        this.canAdvancePhase = response.body.data;
+        this.checkingCanAdvance = false;
+      },
+      error: () => {
+        this.canAdvancePhase = false;
+        this.checkingCanAdvance = false;
+      },
+    });
+  }
+
+  private checkCanAdvanceFallback(): void {
     if (!this.tournament || this.tournament.status !== 'IN_PROGRESS' || !this.isGroupStageFormat()) {
       this.canAdvancePhase = false;
       return;
@@ -192,6 +249,15 @@ export class TournamentDetailComponent implements OnInit {
         this.checkingCanAdvance = false;
       },
     });
+  }
+
+  isInGroupStage(): boolean {
+    return this.phaseStatus?.currentPhaseType === 'GROUP_STAGE';
+  }
+
+  isInKnockout(): boolean {
+    const knockoutPhases = ['ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL', 'KNOCKOUT'];
+    return this.phaseStatus?.currentPhaseType ? knockoutPhases.includes(this.phaseStatus.currentPhaseType) : false;
   }
 
   loadTeams(): void {
@@ -480,9 +546,15 @@ export class TournamentDetailComponent implements OnInit {
   }
 
   advancePhase(): void {
+    const nextPhaseName = this.phaseStatus?.nextPhaseName || this.translate.instant('TOURNAMENTS.NEXT_PHASE');
+    const currentPhaseName = this.phaseStatus?.currentPhaseName || this.translate.instant('TOURNAMENTS.CURRENT_PHASE');
+
     Swal.fire({
       title: this.translate.instant('TOURNAMENTS.ADVANCE_PHASE_TITLE'),
-      text: this.translate.instant('TOURNAMENTS.ADVANCE_PHASE_MESSAGE'),
+      html: this.translate.instant('TOURNAMENTS.ADVANCE_PHASE_CONFIRM', {
+        currentPhase: currentPhaseName,
+        nextPhase: nextPhaseName,
+      }),
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#8963ff',
@@ -491,9 +563,15 @@ export class TournamentDetailComponent implements OnInit {
       cancelButtonText: this.translate.instant('COMMON.NO'),
     }).then((result) => {
       if (result.isConfirmed) {
-        this.tournamentService.advancePhase(this.tournamentId).subscribe({
+        // Use specific endpoint based on current phase
+        const advanceService$ = this.isInGroupStage()
+          ? this.tournamentService.advanceFromGroupStage(this.tournamentId)
+          : this.tournamentService.advanceKnockout(this.tournamentId);
+
+        advanceService$.subscribe({
           next: (response) => {
-            this.toastr.success(response.header.message);
+            const advancementData = response.body.data;
+            this.showAdvancementSuccess(advancementData);
             this.loadTournament();
             this.loadTeams();
           },
@@ -503,6 +581,24 @@ export class TournamentDetailComponent implements OnInit {
           },
         });
       }
+    });
+  }
+
+  private showAdvancementSuccess(data: PhaseAdvancementResponse): void {
+    const qualifiedTeamsHtml = data.qualifiedTeams
+      .map((team) => `<li>${team.teamName} ${team.fromGroup ? `(${team.fromGroup})` : ''}</li>`)
+      .join('');
+
+    Swal.fire({
+      title: this.translate.instant('TOURNAMENTS.PHASE_ADVANCED_SUCCESS'),
+      html: `
+        <p><strong>${data.previousPhaseName}</strong> → <strong>${data.newPhaseName}</strong></p>
+        <p>${this.translate.instant('TOURNAMENTS.QUALIFIED_TEAMS')}: ${data.totalQualifiedTeams}</p>
+        <ul class="text-start">${qualifiedTeamsHtml}</ul>
+        <p>${this.translate.instant('TOURNAMENTS.MATCHES_GENERATED')}: ${data.totalMatchesGenerated}</p>
+      `,
+      icon: 'success',
+      confirmButtonColor: '#8963ff',
     });
   }
 
@@ -714,6 +810,13 @@ export class TournamentDetailComponent implements OnInit {
 
   canEditMatches(): boolean {
     return this.tournament?.status === 'SCHEDULED' || this.tournament?.status === 'IN_PROGRESS';
+  }
+
+  onMatchFinished(): void {
+    // Reload phase status to check if we can advance to next phase
+    if (this.isGroupStageFormat() && this.tournament?.status === 'IN_PROGRESS') {
+      this.loadPhaseStatus();
+    }
   }
 
   goBack(): void {

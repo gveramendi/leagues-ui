@@ -1,4 +1,4 @@
-import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
+import { Component, EventEmitter, Input, OnChanges, OnInit, Output, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule, ReactiveFormsModule, UntypedFormBuilder, UntypedFormGroup, Validators } from '@angular/forms';
 import { TranslateModule, TranslateService } from '@ngx-translate/core';
@@ -44,6 +44,9 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
   @Input() seasonYear!: number;
   @Input() canEdit = false;
   @Input() tournamentFormat?: TournamentFormat;
+  @Input() currentPhaseId?: number;
+
+  @Output() matchFinished = new EventEmitter<void>();
 
   matches: MatchSummaryResponse[] = [];
   filteredMatches: MatchSummaryResponse[] = [];
@@ -109,6 +112,10 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
     if (changes['tournamentId'] && this.tournamentId && !changes['tournamentId'].firstChange) {
       this.loadMatches();
       this.loadTeams();
+    }
+    // Re-apply filters when phase changes (including first change from undefined to value)
+    if (changes['currentPhaseId'] && this.matches.length > 0) {
+      this.applyFilters();
     }
   }
 
@@ -262,7 +269,15 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
     this.filteredMatches = this.matches.filter((match) => {
       const matchdayFilter = this.selectedMatchday === null || match.matchday === this.selectedMatchday;
       const statusFilter = this.selectedStatus === null || match.status === this.selectedStatus;
-      return matchdayFilter && statusFilter;
+
+      // Phase filter for GROUP_STAGE tournaments
+      // Only apply if both currentPhaseId and match.phaseId are available
+      let phaseFilter = true;
+      if (this.isGroupStageFormat() && this.currentPhaseId && match.phaseId) {
+        phaseFilter = match.phaseId === this.currentPhaseId;
+      }
+
+      return matchdayFilter && statusFilter && phaseFilter;
     });
   }
 
@@ -464,6 +479,7 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
         ).subscribe({
           next: () => {
             this.loadMatches();
+            this.matchFinished.emit();
           },
           error: (error) => {
             const errorMessage = typeof error === 'string' ? error : error?.message || 'Error';

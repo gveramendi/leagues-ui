@@ -1122,6 +1122,9 @@ export interface MatchResponse {
   tournamentId: number;
   tournamentName?: string;
   tournamentCode?: string;
+  phaseId?: number;
+  phaseName?: string;
+  round?: string;
   groupId?: number;
   groupCode?: string;
   groupName?: string;
@@ -1157,6 +1160,9 @@ export interface MatchSummaryResponse {
   id: number;
   tournamentId: number;
   tournamentName?: string;
+  phaseId?: number;
+  phaseName?: string;
+  round?: string;
   groupId?: number;
   groupCode?: string;
   groupName?: string;
@@ -1474,4 +1480,68 @@ export interface ResolveAppealRequest {
   resolution: string;
   newMatchesSuspended?: number;
   resolvedBy?: string;
+}
+
+// ==================== Phase Advancement Types ====================
+
+export type PhaseType =
+  | 'GROUP_STAGE'
+  | 'ROUND_OF_16'
+  | 'QUARTER_FINALS'
+  | 'SEMI_FINALS'
+  | 'THIRD_PLACE'
+  | 'FINAL'
+  | 'KNOCKOUT';
+
+export type PhaseStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
+
+export interface PhaseStatusResponse {
+  tournamentId: number;
+  tournamentName?: string;
+  currentPhaseId?: number;
+  currentPhaseName?: string;
+  currentPhaseType?: PhaseType;
+  currentPhaseStatus?: PhaseStatus;
+  totalMatches: number;
+  finishedMatches: number;
+  pendingMatches: number;
+  inProgressMatches: number;
+  canAdvance: boolean;
+  nextPhaseType?: PhaseType;
+  nextPhaseName?: string;
+  tournamentComplete: boolean;
+  championTeamName?: string;
+}
+
+export interface QualifiedTeamResponse {
+  teamId: number;
+  teamName?: string;
+  teamCode?: string;
+  fromGroup?: string;
+  groupPosition?: number;
+  points?: number;
+  goalDifference?: number;
+}
+
+export interface GeneratedMatchResponse {
+  matchId: number;
+  matchNumber?: number;
+  homeTeamName?: string;
+  awayTeamName?: string;
+  round?: string;
+}
+
+export interface PhaseAdvancementResponse {
+  tournamentId: number;
+  tournamentName?: string;
+  previousPhaseId?: number;
+  previousPhaseName?: string;
+  previousPhaseType?: PhaseType;
+  newPhaseId?: number;
+  newPhaseName?: string;
+  newPhaseType?: PhaseType;
+  qualifiedTeams: QualifiedTeamResponse[];
+  totalQualifiedTeams: number;
+  generatedMatches: GeneratedMatchResponse[];
+  totalMatchesGenerated: number;
 }

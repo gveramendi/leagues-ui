@@ -13,10 +13,14 @@ import {
   TournamentService,
   TournamentTeamService,
   TeamService,
+  StandingService,
   ApiResponse,
   TournamentResponse,
   TournamentTeamResponse,
   TeamResponse,
+  PhaseStatusResponse,
+  PhaseAdvancementResponse,
+  StandingTableResponse,
 } from '@core';
 
 describe('TournamentDetailComponent', () => {
@@ -25,6 +29,7 @@ describe('TournamentDetailComponent', () => {
   let tournamentServiceSpy: jasmine.SpyObj<TournamentService>;
   let tournamentTeamServiceSpy: jasmine.SpyObj<TournamentTeamService>;
   let teamServiceSpy: jasmine.SpyObj<TeamService>;
+  let standingServiceSpy: jasmine.SpyObj<StandingService>;
   let modalServiceSpy: jasmine.SpyObj<NgbModal>;
   let toastrSpy: jasmine.SpyObj<ToastrService>;
   let router: Router;
@@ -256,6 +261,53 @@ describe('TournamentDetailComponent', () => {
     },
   };
 
+  const mockPhaseStatus: PhaseStatusResponse = {
+    tournamentId: 1,
+    tournamentName: 'Liga 2024',
+    currentPhaseId: 5,
+    currentPhaseName: 'Fase de Grupos',
+    currentPhaseType: 'GROUP_STAGE',
+    currentPhaseStatus: 'IN_PROGRESS',
+    totalMatches: 24,
+    finishedMatches: 24,
+    pendingMatches: 0,
+    inProgressMatches: 0,
+    canAdvance: true,
+    nextPhaseType: 'QUARTER_FINALS',
+    nextPhaseName: 'Cuartos de Final',
+    tournamentComplete: false,
+  };
+
+  const mockPhaseStatusResponse: ApiResponse<PhaseStatusResponse> = {
+    header: { success: true, statusCode: 200, message: 'Success' },
+    body: { data: mockPhaseStatus },
+  };
+
+  const mockPhaseAdvancement: PhaseAdvancementResponse = {
+    tournamentId: 1,
+    tournamentName: 'Liga 2024',
+    previousPhaseId: 5,
+    previousPhaseName: 'Fase de Grupos',
+    previousPhaseType: 'GROUP_STAGE',
+    newPhaseId: 6,
+    newPhaseName: 'Cuartos de Final',
+    newPhaseType: 'QUARTER_FINALS',
+    qualifiedTeams: [
+      { teamId: 10, teamName: 'Equipo A', fromGroup: 'Grupo A', groupPosition: 1, points: 9, goalDifference: 5 },
+      { teamId: 12, teamName: 'Equipo B', fromGroup: 'Grupo A', groupPosition: 2, points: 6, goalDifference: 2 },
+    ],
+    totalQualifiedTeams: 8,
+    generatedMatches: [
+      { matchId: 101, matchNumber: 1, homeTeamName: 'Equipo A', awayTeamName: 'Equipo D', round: 'QUARTER_FINALS' },
+    ],
+    totalMatchesGenerated: 4,
+  };
+
+  const mockPhaseAdvancementResponse: ApiResponse<PhaseAdvancementResponse> = {
+    header: { success: true, statusCode: 200, message: 'Fase avanzada exitosamente' },
+    body: { data: mockPhaseAdvancement },
+  };
+
   beforeEach(waitForAsync(() => {
     routeParamsSubject = new Subject();
 
@@ -265,12 +317,24 @@ describe('TournamentDetailComponent', () => {
       'closeRegistration',
       'start',
       'finish',
+      'getPhaseStatus',
+      'canAdvance',
+      'canAdvanceGroupStage',
+      'canAdvanceKnockout',
+      'advanceFromGroupStage',
+      'advanceKnockout',
     ]);
     tournamentServiceMock.getById.and.returnValue(of(mockTournamentResponse));
     tournamentServiceMock.openRegistration.and.returnValue(of(mockOpenRegistrationResponse));
     tournamentServiceMock.closeRegistration.and.returnValue(of(mockCloseRegistrationResponse));
     tournamentServiceMock.start.and.returnValue(of(mockStartResponse));
     tournamentServiceMock.finish.and.returnValue(of(mockFinishResponse));
+    tournamentServiceMock.getPhaseStatus.and.returnValue(of(mockPhaseStatusResponse));
+    tournamentServiceMock.canAdvance.and.returnValue(of({ body: { data: true } }));
+    tournamentServiceMock.canAdvanceGroupStage.and.returnValue(of({ body: { data: true } }));
+    tournamentServiceMock.canAdvanceKnockout.and.returnValue(of({ body: { data: true } }));
+    tournamentServiceMock.advanceFromGroupStage.and.returnValue(of(mockPhaseAdvancementResponse));
+    tournamentServiceMock.advanceKnockout.and.returnValue(of(mockPhaseAdvancementResponse));
 
     const tournamentTeamServiceMock = jasmine.createSpyObj('TournamentTeamService', [
       'getAll',
@@ -290,6 +354,12 @@ describe('TournamentDetailComponent', () => {
     const teamServiceMock = jasmine.createSpyObj('TeamService', ['searchTeams']);
     teamServiceMock.searchTeams.and.returnValue(of(mockSearchTeamsResponse));
 
+    const standingServiceMock = jasmine.createSpyObj('StandingService', ['getByTournament']);
+    standingServiceMock.getByTournament.and.returnValue(of({
+      header: { success: true, statusCode: 200, message: 'Success' },
+      body: { data: { tournamentId: 1, standings: [] } as StandingTableResponse },
+    }));
+
     const modalMock = jasmine.createSpyObj('NgbModal', ['open', 'dismissAll']);
     const toastrMock = jasmine.createSpyObj('ToastrService', ['success', 'error']);
 
@@ -306,6 +376,7 @@ describe('TournamentDetailComponent', () => {
         { provide: TournamentService, useValue: tournamentServiceMock },
         { provide: TournamentTeamService, useValue: tournamentTeamServiceMock },
         { provide: TeamService, useValue: teamServiceMock },
+        { provide: StandingService, useValue: standingServiceMock },
         { provide: NgbModal, useValue: modalMock },
         { provide: ToastrService, useValue: toastrMock },
         {
@@ -320,6 +391,7 @@ describe('TournamentDetailComponent', () => {
     tournamentServiceSpy = TestBed.inject(TournamentService) as jasmine.SpyObj<TournamentService>;
     tournamentTeamServiceSpy = TestBed.inject(TournamentTeamService) as jasmine.SpyObj<TournamentTeamService>;
     teamServiceSpy = TestBed.inject(TeamService) as jasmine.SpyObj<TeamService>;
+    standingServiceSpy = TestBed.inject(StandingService) as jasmine.SpyObj<StandingService>;
     modalServiceSpy = TestBed.inject(NgbModal) as jasmine.SpyObj<NgbModal>;
     toastrSpy = TestBed.inject(ToastrService) as jasmine.SpyObj<ToastrService>;
     router = TestBed.inject(Router);
@@ -339,7 +411,7 @@ describe('TournamentDetailComponent', () => {
   describe('ngOnInit', () => {
     it('should load tournament and teams when route params change', () => {
       expect(tournamentServiceSpy.getById).toHaveBeenCalledWith(1);
-      expect(tournamentTeamServiceSpy.getAll).toHaveBeenCalledWith(1);
+      expect(tournamentTeamServiceSpy.getAll).toHaveBeenCalledWith(1, 0, 10);
     });
 
     it('should set tournamentId from route params', () => {
@@ -908,9 +980,9 @@ describe('TournamentDetailComponent', () => {
       expect(component.canRegisterTeams()).toBeTrue();
     });
 
-    it('should return true when status is DRAFT', () => {
+    it('should return false when status is DRAFT', () => {
       component.tournament = { ...mockTournament, status: 'DRAFT' };
-      expect(component.canRegisterTeams()).toBeTrue();
+      expect(component.canRegisterTeams()).toBeFalse();
     });
 
     it('should return false when status is IN_PROGRESS', () => {
@@ -996,6 +1068,229 @@ describe('TournamentDetailComponent', () => {
       expect(component.registrationStatuses.some(s => s.value === 'REJECTED')).toBeTrue();
       expect(component.registrationStatuses.some(s => s.value === 'WITHDRAWN')).toBeTrue();
       expect(component.registrationStatuses.some(s => s.value === 'DISQUALIFIED')).toBeTrue();
+    });
+  });
+
+  describe('Phase Status and Advancement', () => {
+    const mockGroupStageTournament: TournamentResponse = {
+      ...mockTournament,
+      format: 'GROUP_STAGE',
+      status: 'IN_PROGRESS',
+    };
+
+    describe('isGroupStageFormat', () => {
+      it('should return true for GROUP_STAGE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE' };
+        expect(component.isGroupStageFormat()).toBeTrue();
+      });
+
+      it('should return true for GROUP_STAGE_SINGLE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE_SINGLE' };
+        expect(component.isGroupStageFormat()).toBeTrue();
+      });
+
+      it('should return true for GROUP_STAGE_DOUBLE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE_DOUBLE' };
+        expect(component.isGroupStageFormat()).toBeTrue();
+      });
+
+      it('should return false for LEAGUE format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE' };
+        expect(component.isGroupStageFormat()).toBeFalse();
+      });
+
+      it('should return false when tournament is null', () => {
+        component.tournament = null;
+        expect(component.isGroupStageFormat()).toBeFalse();
+      });
+    });
+
+    describe('isInGroupStage', () => {
+      it('should return true when current phase type is GROUP_STAGE', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'GROUP_STAGE' };
+        expect(component.isInGroupStage()).toBeTrue();
+      });
+
+      it('should return false when current phase type is QUARTER_FINALS', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'QUARTER_FINALS' };
+        expect(component.isInGroupStage()).toBeFalse();
+      });
+
+      it('should return false when phaseStatus is null', () => {
+        component.phaseStatus = null;
+        expect(component.isInGroupStage()).toBeFalse();
+      });
+    });
+
+    describe('isInKnockout', () => {
+      it('should return true for QUARTER_FINALS phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'QUARTER_FINALS' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for SEMI_FINALS phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'SEMI_FINALS' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for FINAL phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'FINAL' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return false for GROUP_STAGE phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'GROUP_STAGE' };
+        expect(component.isInKnockout()).toBeFalse();
+      });
+
+      it('should return false when phaseStatus is null', () => {
+        component.phaseStatus = null;
+        expect(component.isInKnockout()).toBeFalse();
+      });
+    });
+
+    describe('loadPhaseStatus', () => {
+      it('should load phase status for GROUP_STAGE tournament', () => {
+        component.tournament = mockGroupStageTournament;
+        component.tournamentId = 1;
+
+        component['loadPhaseStatus']();
+
+        expect(tournamentServiceSpy.getPhaseStatus).toHaveBeenCalledWith(1);
+        expect(component.phaseStatus).toEqual(mockPhaseStatus);
+        expect(component.loadingPhaseStatus).toBeFalse();
+      });
+
+      it('should set canAdvancePhase from phaseStatus', () => {
+        component.tournament = mockGroupStageTournament;
+        component.tournamentId = 1;
+
+        component['loadPhaseStatus']();
+
+        expect(component.canAdvancePhase).toBeTrue();
+      });
+
+      it('should handle error and call fallback', () => {
+        component.tournament = mockGroupStageTournament;
+        component.tournamentId = 1;
+        tournamentServiceSpy.getPhaseStatus.and.returnValue(throwError(() => new Error('Error')));
+        spyOn(console, 'error');
+
+        component['loadPhaseStatus']();
+
+        expect(console.error).toHaveBeenCalled();
+        expect(component.loadingPhaseStatus).toBeFalse();
+      });
+    });
+
+    describe('onMatchFinished', () => {
+      it('should reload phase status for GROUP_STAGE tournament in progress', () => {
+        component.tournament = mockGroupStageTournament;
+        component.tournamentId = 1;
+        tournamentServiceSpy.getPhaseStatus.calls.reset();
+
+        component.onMatchFinished();
+
+        expect(tournamentServiceSpy.getPhaseStatus).toHaveBeenCalledWith(1);
+      });
+
+      it('should not reload phase status for non GROUP_STAGE tournament', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE', status: 'IN_PROGRESS' };
+        tournamentServiceSpy.getPhaseStatus.calls.reset();
+
+        component.onMatchFinished();
+
+        expect(tournamentServiceSpy.getPhaseStatus).not.toHaveBeenCalled();
+      });
+
+      it('should not reload phase status when tournament is not IN_PROGRESS', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE', status: 'FINISHED' };
+        tournamentServiceSpy.getPhaseStatus.calls.reset();
+
+        component.onMatchFinished();
+
+        expect(tournamentServiceSpy.getPhaseStatus).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('advancePhase', () => {
+      it('should call advanceFromGroupStage when in group stage', fakeAsync(() => {
+        component.tournament = mockGroupStageTournament;
+        component.tournamentId = 1;
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'GROUP_STAGE' };
+        spyOn(Swal, 'fire').and.returnValues(
+          Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult),
+          Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+        );
+
+        component.advancePhase();
+        tick();
+
+        expect(tournamentServiceSpy.advanceFromGroupStage).toHaveBeenCalledWith(1);
+      }));
+
+      it('should call advanceKnockout when in knockout phase', fakeAsync(() => {
+        component.tournament = mockGroupStageTournament;
+        component.tournamentId = 1;
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'QUARTER_FINALS' };
+        spyOn(Swal, 'fire').and.returnValues(
+          Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult),
+          Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+        );
+
+        component.advancePhase();
+        tick();
+
+        expect(tournamentServiceSpy.advanceKnockout).toHaveBeenCalledWith(1);
+      }));
+
+      it('should not advance when cancelled', fakeAsync(() => {
+        component.tournament = mockGroupStageTournament;
+        component.phaseStatus = mockPhaseStatus;
+        spyOn(Swal, 'fire').and.returnValue(
+          Promise.resolve({ isConfirmed: false, isDenied: false, isDismissed: true } as SweetAlertResult)
+        );
+
+        component.advancePhase();
+        tick();
+
+        expect(tournamentServiceSpy.advanceFromGroupStage).not.toHaveBeenCalled();
+        expect(tournamentServiceSpy.advanceKnockout).not.toHaveBeenCalled();
+      }));
+
+      it('should handle error when advancing phase', fakeAsync(() => {
+        component.tournament = mockGroupStageTournament;
+        component.tournamentId = 1;
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'GROUP_STAGE' };
+        tournamentServiceSpy.advanceFromGroupStage.and.returnValue(
+          throwError(() => ({ message: 'Advance failed' }))
+        );
+        spyOn(Swal, 'fire').and.returnValue(
+          Promise.resolve({ isConfirmed: true, isDenied: false, isDismissed: false } as SweetAlertResult)
+        );
+
+        component.advancePhase();
+        tick();
+
+        expect(toastrSpy.error).toHaveBeenCalledWith('Advance failed');
+      }));
+    });
+
+    describe('canEditMatches', () => {
+      it('should return true when status is SCHEDULED', () => {
+        component.tournament = { ...mockTournament, status: 'SCHEDULED' };
+        expect(component.canEditMatches()).toBeTrue();
+      });
+
+      it('should return true when status is IN_PROGRESS', () => {
+        component.tournament = { ...mockTournament, status: 'IN_PROGRESS' };
+        expect(component.canEditMatches()).toBeTrue();
+      });
+
+      it('should return false when status is FINISHED', () => {
+        component.tournament = { ...mockTournament, status: 'FINISHED' };
+        expect(component.canEditMatches()).toBeFalse();
+      });
     });
   });
 });

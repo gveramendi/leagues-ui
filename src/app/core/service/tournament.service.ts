@@ -13,6 +13,8 @@ import {
   Category,
   Gender,
   FootballType,
+  PhaseStatusResponse,
+  PhaseAdvancementResponse,
 } from '../models/response';
 
 @Injectable({
@@ -376,6 +378,58 @@ export class TournamentService {
   advancePhase(id: number): Observable<ApiResponse<TournamentResponse>> {
     return this.http.post<ApiResponse<TournamentResponse>>(
       `${this.apiUrl}/${id}/advance-phase`,
+      {}
+    );
+  }
+
+  /**
+   * GET /api/tournaments/{id}/phase-status
+   * Get current phase status with statistics
+   */
+  getPhaseStatus(id: number): Observable<ApiResponse<PhaseStatusResponse>> {
+    return this.http.get<ApiResponse<PhaseStatusResponse>>(
+      `${this.apiUrl}/${id}/phase-status`
+    );
+  }
+
+  /**
+   * GET /api/tournaments/{id}/can-advance-group-stage
+   * Check if tournament can advance from group stage
+   */
+  canAdvanceGroupStage(id: number): Observable<ApiResponse<boolean>> {
+    return this.http.get<ApiResponse<boolean>>(
+      `${this.apiUrl}/${id}/can-advance-group-stage`
+    );
+  }
+
+  /**
+   * GET /api/tournaments/{id}/can-advance-knockout
+   * Check if tournament can advance the current knockout phase
+   */
+  canAdvanceKnockout(id: number): Observable<ApiResponse<boolean>> {
+    return this.http.get<ApiResponse<boolean>>(
+      `${this.apiUrl}/${id}/can-advance-knockout`
+    );
+  }
+
+  /**
+   * POST /api/tournaments/{id}/advance-from-group-stage
+   * Advance from group stage to first knockout round
+   */
+  advanceFromGroupStage(id: number): Observable<ApiResponse<PhaseAdvancementResponse>> {
+    return this.http.post<ApiResponse<PhaseAdvancementResponse>>(
+      `${this.apiUrl}/${id}/advance-from-group-stage`,
+      {}
+    );
+  }
+
+  /**
+   * POST /api/tournaments/{id}/advance-knockout
+   * Advance between knockout phases (QF→SF→FINAL)
+   */
+  advanceKnockout(id: number): Observable<ApiResponse<PhaseAdvancementResponse>> {
+    return this.http.post<ApiResponse<PhaseAdvancementResponse>>(
+      `${this.apiUrl}/${id}/advance-knockout`,
       {}
     );
   }

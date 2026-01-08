@@ -11,6 +11,8 @@ import {
   TournamentResponse,
   TournamentSummaryResponse,
   UpdateTournamentRequest,
+  PhaseStatusResponse,
+  PhaseAdvancementResponse,
 } from '../models/response';
 
 describe('TournamentService', () => {
@@ -599,6 +601,202 @@ describe('TournamentService', () => {
 
       const req = httpMock.expectOne(`${apiUrl}/1`);
       expect(req.request.method).toBe('DELETE');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('getPhaseStatus', () => {
+    it('should return phase status for a tournament', () => {
+      const mockPhaseStatus: PhaseStatusResponse = {
+        tournamentId: 1,
+        tournamentName: 'Liga 2024',
+        currentPhaseId: 5,
+        currentPhaseName: 'Fase de Grupos',
+        currentPhaseType: 'GROUP_STAGE',
+        currentPhaseStatus: 'IN_PROGRESS',
+        totalMatches: 24,
+        finishedMatches: 18,
+        pendingMatches: 4,
+        inProgressMatches: 2,
+        canAdvance: false,
+        nextPhaseType: 'QUARTER_FINALS',
+        nextPhaseName: 'Cuartos de Final',
+        tournamentComplete: false,
+      };
+      const mockResponse: ApiResponse<PhaseStatusResponse> = {
+        header: { success: true, statusCode: 200, message: 'Success' },
+        body: { data: mockPhaseStatus },
+      };
+
+      service.getPhaseStatus(1).subscribe((response) => {
+        expect(response.body.data.currentPhaseType).toBe('GROUP_STAGE');
+        expect(response.body.data.canAdvance).toBeFalse();
+        expect(response.body.data.nextPhaseName).toBe('Cuartos de Final');
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/phase-status`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('canAdvanceGroupStage', () => {
+    it('should check if tournament can advance from group stage', () => {
+      const mockResponse: ApiResponse<boolean> = {
+        header: { success: true, statusCode: 200, message: 'Verificación completada' },
+        body: { data: true },
+      };
+
+      service.canAdvanceGroupStage(1).subscribe((response) => {
+        expect(response.body.data).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/can-advance-group-stage`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+
+    it('should return false when group stage is not complete', () => {
+      const mockResponse: ApiResponse<boolean> = {
+        header: { success: true, statusCode: 200, message: 'Verificación completada' },
+        body: { data: false },
+      };
+
+      service.canAdvanceGroupStage(1).subscribe((response) => {
+        expect(response.body.data).toBeFalse();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/can-advance-group-stage`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('canAdvanceKnockout', () => {
+    it('should check if tournament can advance knockout phase', () => {
+      const mockResponse: ApiResponse<boolean> = {
+        header: { success: true, statusCode: 200, message: 'Verificación completada' },
+        body: { data: true },
+      };
+
+      service.canAdvanceKnockout(1).subscribe((response) => {
+        expect(response.body.data).toBeTrue();
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/can-advance-knockout`);
+      expect(req.request.method).toBe('GET');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('advanceFromGroupStage', () => {
+    it('should advance tournament from group stage to knockout', () => {
+      const mockAdvancement: PhaseAdvancementResponse = {
+        tournamentId: 1,
+        tournamentName: 'Liga 2024',
+        previousPhaseId: 5,
+        previousPhaseName: 'Fase de Grupos',
+        previousPhaseType: 'GROUP_STAGE',
+        newPhaseId: 6,
+        newPhaseName: 'Cuartos de Final',
+        newPhaseType: 'QUARTER_FINALS',
+        qualifiedTeams: [
+          { teamId: 10, teamName: 'Equipo A', fromGroup: 'Grupo A', groupPosition: 1, points: 9, goalDifference: 5 },
+          { teamId: 12, teamName: 'Equipo B', fromGroup: 'Grupo A', groupPosition: 2, points: 6, goalDifference: 2 },
+        ],
+        totalQualifiedTeams: 8,
+        generatedMatches: [
+          { matchId: 101, matchNumber: 1, homeTeamName: 'Equipo A', awayTeamName: 'Equipo D', round: 'QUARTER_FINALS' },
+        ],
+        totalMatchesGenerated: 4,
+      };
+      const mockResponse: ApiResponse<PhaseAdvancementResponse> = {
+        header: { success: true, statusCode: 200, message: 'Fase avanzada exitosamente' },
+        body: { data: mockAdvancement },
+      };
+
+      service.advanceFromGroupStage(1).subscribe((response) => {
+        expect(response.body.data.previousPhaseType).toBe('GROUP_STAGE');
+        expect(response.body.data.newPhaseType).toBe('QUARTER_FINALS');
+        expect(response.body.data.totalQualifiedTeams).toBe(8);
+        expect(response.body.data.totalMatchesGenerated).toBe(4);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/advance-from-group-stage`);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('advanceKnockout', () => {
+    it('should advance tournament between knockout phases', () => {
+      const mockAdvancement: PhaseAdvancementResponse = {
+        tournamentId: 1,
+        tournamentName: 'Liga 2024',
+        previousPhaseId: 6,
+        previousPhaseName: 'Cuartos de Final',
+        previousPhaseType: 'QUARTER_FINALS',
+        newPhaseId: 7,
+        newPhaseName: 'Semifinales',
+        newPhaseType: 'SEMI_FINALS',
+        qualifiedTeams: [
+          { teamId: 10, teamName: 'Equipo A', groupPosition: 1 },
+          { teamId: 15, teamName: 'Equipo C', groupPosition: 1 },
+        ],
+        totalQualifiedTeams: 4,
+        generatedMatches: [
+          { matchId: 105, matchNumber: 1, homeTeamName: 'Equipo A', awayTeamName: 'Equipo C', round: 'SEMI_FINALS' },
+        ],
+        totalMatchesGenerated: 2,
+      };
+      const mockResponse: ApiResponse<PhaseAdvancementResponse> = {
+        header: { success: true, statusCode: 200, message: 'Fase avanzada exitosamente' },
+        body: { data: mockAdvancement },
+      };
+
+      service.advanceKnockout(1).subscribe((response) => {
+        expect(response.body.data.previousPhaseType).toBe('QUARTER_FINALS');
+        expect(response.body.data.newPhaseType).toBe('SEMI_FINALS');
+        expect(response.body.data.totalQualifiedTeams).toBe(4);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/advance-knockout`);
+      expect(req.request.method).toBe('POST');
+      req.flush(mockResponse);
+    });
+
+    it('should advance from semi finals to final', () => {
+      const mockAdvancement: PhaseAdvancementResponse = {
+        tournamentId: 1,
+        tournamentName: 'Liga 2024',
+        previousPhaseId: 7,
+        previousPhaseName: 'Semifinales',
+        previousPhaseType: 'SEMI_FINALS',
+        newPhaseId: 8,
+        newPhaseName: 'Final',
+        newPhaseType: 'FINAL',
+        qualifiedTeams: [
+          { teamId: 10, teamName: 'Equipo A' },
+          { teamId: 20, teamName: 'Equipo F' },
+        ],
+        totalQualifiedTeams: 2,
+        generatedMatches: [
+          { matchId: 107, matchNumber: 1, homeTeamName: 'Equipo A', awayTeamName: 'Equipo F', round: 'FINAL' },
+        ],
+        totalMatchesGenerated: 1,
+      };
+      const mockResponse: ApiResponse<PhaseAdvancementResponse> = {
+        header: { success: true, statusCode: 200, message: 'Final generada exitosamente' },
+        body: { data: mockAdvancement },
+      };
+
+      service.advanceKnockout(1).subscribe((response) => {
+        expect(response.body.data.newPhaseType).toBe('FINAL');
+        expect(response.body.data.totalMatchesGenerated).toBe(1);
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/1/advance-knockout`);
+      expect(req.request.method).toBe('POST');
       req.flush(mockResponse);
     });
   });
