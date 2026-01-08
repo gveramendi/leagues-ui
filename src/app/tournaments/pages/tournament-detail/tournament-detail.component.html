@@ -493,6 +493,33 @@
           <small class="text-muted">{{ 'TOURNAMENTS.RANDOMIZE_ORDER_HINT' | translate }}</small>
         </div>
       </div>
+
+      <!-- GROUP_STAGE specific fields -->
+      @if (isGroupStageFormat()) {
+        <hr class="my-3" />
+        <h6 class="mb-3"><i class="fas fa-layer-group me-2"></i>{{ 'TOURNAMENTS.GROUP_STAGE_CONFIG' | translate }}</h6>
+        <div class="row">
+          <div class="col-md-4 mb-3">
+            <label class="form-label">{{ 'TOURNAMENTS.NUMBER_OF_GROUPS' | translate }} <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" formControlName="numberOfGroups" min="2" />
+            <small class="text-muted">{{ 'TOURNAMENTS.NUMBER_OF_GROUPS_HINT' | translate }}</small>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">{{ 'TOURNAMENTS.TEAMS_ADVANCING' | translate }} <span class="text-danger">*</span></label>
+            <input type="number" class="form-control" formControlName="teamsAdvancingPerGroup" min="1" />
+            <small class="text-muted">{{ 'TOURNAMENTS.TEAMS_ADVANCING_HINT' | translate }}</small>
+          </div>
+          <div class="col-md-4 mb-3">
+            <label class="form-label">{{ 'TOURNAMENTS.GROUP_DISTRIBUTION' | translate }}</label>
+            <select class="form-select" formControlName="groupDistribution">
+              <option value="SERPENTINE">{{ 'TOURNAMENTS.DISTRIBUTION_SERPENTINE' | translate }}</option>
+              <option value="RANDOM">{{ 'TOURNAMENTS.DISTRIBUTION_RANDOM' | translate }}</option>
+              <option value="SEEDED">{{ 'TOURNAMENTS.DISTRIBUTION_SEEDED' | translate }}</option>
+            </select>
+            <small class="text-muted">{{ 'TOURNAMENTS.GROUP_DISTRIBUTION_HINT' | translate }}</small>
+          </div>
+        </div>
+      }
     </form>
   </div>
   <div class="modal-footer">

@@ -25,6 +25,7 @@ import {
   RegisterTeamRequest,
   RejectTeamRequest,
   GenerateFixtureRequest,
+  GroupDistribution,
 } from '@core';
 import { debounceTime, distinctUntilChanged, forkJoin, of, Subject, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -133,6 +134,10 @@ export class TournamentDetailComponent implements OnInit {
       defaultVenue: [''],
       homeAndAway: [true],
       randomizeOrder: [true],
+      // GROUP_STAGE fields
+      numberOfGroups: [2, [Validators.min(2)]],
+      teamsAdvancingPerGroup: [2, [Validators.min(1)]],
+      groupDistribution: ['SERPENTINE'],
     });
   }
 
@@ -339,11 +344,20 @@ export class TournamentDetailComponent implements OnInit {
       defaultMatchTime: '15:00',
       homeAndAway: true,
       randomizeOrder: true,
+      numberOfGroups: 2,
+      teamsAdvancingPerGroup: 2,
+      groupDistribution: 'SERPENTINE',
     });
     this.modalService.open(content, {
       ariaLabelledBy: 'modal-generate-fixture-title',
       size: 'lg',
     });
+  }
+
+  isGroupStageFormat(): boolean {
+    return this.tournament?.format === 'GROUP_STAGE' ||
+           this.tournament?.format === 'GROUP_STAGE_SINGLE' ||
+           this.tournament?.format === 'GROUP_STAGE_DOUBLE';
   }
 
   onGenerateFixture(): void {
@@ -361,6 +375,13 @@ export class TournamentDetailComponent implements OnInit {
       homeAndAway: formValue.homeAndAway,
       randomizeOrder: formValue.randomizeOrder,
     };
+
+    // Add GROUP_STAGE fields if applicable
+    if (this.isGroupStageFormat()) {
+      request.numberOfGroups = formValue.numberOfGroups;
+      request.teamsAdvancingPerGroup = formValue.teamsAdvancingPerGroup;
+      request.groupDistribution = formValue.groupDistribution as GroupDistribution;
+    }
 
     this.matchService.generateFixture(request).subscribe({
       next: (response) => {
