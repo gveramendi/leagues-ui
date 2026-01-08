@@ -16,6 +16,7 @@ import {
   CreateMatchRequest,
   UpdateMatchRequest,
   TournamentTeamResponse,
+  TournamentFormat,
 } from '@core';
 import { forkJoin, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -42,6 +43,7 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
   @Input() tournamentId!: number;
   @Input() seasonYear!: number;
   @Input() canEdit = false;
+  @Input() tournamentFormat?: TournamentFormat;
 
   matches: MatchSummaryResponse[] = [];
   filteredMatches: MatchSummaryResponse[] = [];
@@ -299,6 +301,14 @@ export class TournamentMatchesComponent implements OnInit, OnChanges {
   getStatusLabel(status: MatchStatus): string {
     const key = `MATCHES.STATUS_${status}`;
     return this.translate.instant(key);
+  }
+
+  isGroupStageFormat(): boolean {
+    return (
+      this.tournamentFormat === 'GROUP_STAGE' ||
+      this.tournamentFormat === 'GROUP_STAGE_SINGLE' ||
+      this.tournamentFormat === 'GROUP_STAGE_DOUBLE'
+    );
   }
 
   // Match CRUD operations

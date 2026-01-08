@@ -2,7 +2,13 @@ import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
 import { StandingService } from '@core';
-import { StandingTableResponse, StandingSummaryResponse } from '../../../core/models/response';
+import {
+  StandingTableResponse,
+  StandingSummaryResponse,
+  TournamentFormat,
+  GroupStandingsResponse,
+  GroupTeamStandingResponse,
+} from '../../../core/models/response';
 
 @Component({
   selector: 'app-tournament-standings',
@@ -13,8 +19,10 @@ import { StandingTableResponse, StandingSummaryResponse } from '../../../core/mo
 })
 export class TournamentStandingsComponent implements OnChanges {
   @Input() tournamentId!: number;
+  @Input() tournamentFormat?: TournamentFormat;
 
   standingTable: StandingTableResponse | null = null;
+  groupStandings: GroupStandingsResponse | null = null;
   loading = false;
   error: string | null = null;
 
@@ -26,10 +34,28 @@ export class TournamentStandingsComponent implements OnChanges {
     }
   }
 
+  isGroupStageFormat(): boolean {
+    return (
+      this.tournamentFormat === 'GROUP_STAGE' ||
+      this.tournamentFormat === 'GROUP_STAGE_SINGLE' ||
+      this.tournamentFormat === 'GROUP_STAGE_DOUBLE'
+    );
+  }
+
   loadStandings(): void {
     this.loading = true;
     this.error = null;
+    this.standingTable = null;
+    this.groupStandings = null;
 
+    if (this.isGroupStageFormat()) {
+      this.loadGroupStandings();
+    } else {
+      this.loadLeagueStandings();
+    }
+  }
+
+  private loadLeagueStandings(): void {
     this.standingService.getByTournament(this.tournamentId).subscribe({
       next: (response) => {
         this.standingTable = response.body.data;
@@ -43,12 +69,33 @@ export class TournamentStandingsComponent implements OnChanges {
     });
   }
 
+  private loadGroupStandings(): void {
+    this.standingService.getGroupStandings(this.tournamentId).subscribe({
+      next: (response) => {
+        this.groupStandings = response.body.data;
+        this.loading = false;
+      },
+      error: (err) => {
+        console.error('Error loading group standings:', err);
+        this.error = 'Error loading group standings';
+        this.loading = false;
+      },
+    });
+  }
+
   getPositionClass(standing: StandingSummaryResponse): string {
     if (standing.qualified) {
       return 'table-success';
     }
     if (standing.relegated) {
       return 'table-danger';
+    }
+    return '';
+  }
+
+  getGroupPositionClass(standing: GroupTeamStandingResponse): string {
+    if (standing.isQualified) {
+      return 'table-success';
     }
     return '';
   }

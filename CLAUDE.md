@@ -176,3 +176,7 @@ Navigation sidebar is dynamically built from:
 ### Testing
 
 Tests use Jasmine + Karma. Spec files exist for most components and services. The project uses Angular's default testing setup with zone.js/testing polyfill.
+
+## Project related
+Backend Spring Boot en: ../leagues-api
+API Base: http://localhost:8080/api

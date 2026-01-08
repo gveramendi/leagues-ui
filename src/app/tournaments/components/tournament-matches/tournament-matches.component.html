@@ -69,9 +69,16 @@
               <div class="card match-card h-100">
                 <div class="card-body">
                   <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="badge {{ getStatusClass(match.status) }}">
-                      {{ getStatusLabel(match.status) }}
-                    </span>
+                    <div class="d-flex gap-2">
+                      <span class="badge {{ getStatusClass(match.status) }}">
+                        {{ getStatusLabel(match.status) }}
+                      </span>
+                      @if (isGroupStageFormat() && match.groupName) {
+                        <span class="badge bg-primary">
+                          <i class="fas fa-layer-group me-1"></i>{{ match.groupName }}
+                        </span>
+                      }
+                    </div>
                     @if (match.matchDate) {
                       <small class="text-muted">
                         <i class="far fa-calendar me-1"></i>{{ match.matchDate }}

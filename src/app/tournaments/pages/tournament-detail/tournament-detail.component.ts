@@ -93,6 +93,10 @@ export class TournamentDetailComponent implements OnInit {
     { value: 'DISQUALIFIED', label: 'Descalificado', class: 'bg-dark' },
   ];
 
+  // Phase advancement (for GROUP_STAGE tournaments)
+  canAdvancePhase = false;
+  checkingCanAdvance = false;
+
   constructor(
     private route: ActivatedRoute,
     private router: Router,
@@ -155,15 +159,37 @@ export class TournamentDetailComponent implements OnInit {
 
   loadTournament(): void {
     this.loading = true;
+    this.canAdvancePhase = false;
     this.tournamentService.getById(this.tournamentId).subscribe({
       next: (response) => {
         this.tournament = response.body.data;
         this.loading = false;
+        // Check if can advance for GROUP_STAGE tournaments
+        this.checkCanAdvance();
       },
       error: (error) => {
         console.error('Error loading tournament:', error);
         this.loading = false;
         this.router.navigate(['/tournaments/list']);
+      },
+    });
+  }
+
+  private checkCanAdvance(): void {
+    if (!this.tournament || this.tournament.status !== 'IN_PROGRESS' || !this.isGroupStageFormat()) {
+      this.canAdvancePhase = false;
+      return;
+    }
+
+    this.checkingCanAdvance = true;
+    this.tournamentService.canAdvance(this.tournamentId).subscribe({
+      next: (response) => {
+        this.canAdvancePhase = response.body.data;
+        this.checkingCanAdvance = false;
+      },
+      error: () => {
+        this.canAdvancePhase = false;
+        this.checkingCanAdvance = false;
       },
     });
   }
@@ -443,6 +469,33 @@ export class TournamentDetailComponent implements OnInit {
           next: (response) => {
             this.toastr.success(response.header.message);
             this.loadTournament();
+          },
+          error: (error) => {
+            const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');
+            this.toastr.error(errorMessage);
+          },
+        });
+      }
+    });
+  }
+
+  advancePhase(): void {
+    Swal.fire({
+      title: this.translate.instant('TOURNAMENTS.ADVANCE_PHASE_TITLE'),
+      text: this.translate.instant('TOURNAMENTS.ADVANCE_PHASE_MESSAGE'),
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#8963ff',
+      cancelButtonColor: '#fb7823',
+      confirmButtonText: this.translate.instant('COMMON.YES'),
+      cancelButtonText: this.translate.instant('COMMON.NO'),
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.tournamentService.advancePhase(this.tournamentId).subscribe({
+          next: (response) => {
+            this.toastr.success(response.header.message);
+            this.loadTournament();
+            this.loadTeams();
           },
           error: (error) => {
             const errorMessage = typeof error === 'string' ? error : (error?.message || 'Error');

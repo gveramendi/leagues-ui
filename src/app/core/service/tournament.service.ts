@@ -360,4 +360,23 @@ export class TournamentService {
   delete(id: number): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.apiUrl}/${id}`);
   }
+
+  /**
+   * GET /api/tournaments/{id}/can-advance
+   * Check if tournament can advance to next phase
+   */
+  canAdvance(id: number): Observable<ApiResponse<boolean>> {
+    return this.http.get<ApiResponse<boolean>>(`${this.apiUrl}/${id}/can-advance`);
+  }
+
+  /**
+   * POST /api/tournaments/{id}/advance-phase
+   * Advance tournament to next phase
+   */
+  advancePhase(id: number): Observable<ApiResponse<TournamentResponse>> {
+    return this.http.post<ApiResponse<TournamentResponse>>(
+      `${this.apiUrl}/${id}/advance-phase`,
+      {}
+    );
+  }
 }

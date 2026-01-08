@@ -887,6 +887,40 @@ export interface StandingTableResponse {
   lastUpdated?: string;
 }
 
+// Group standings for GROUP_STAGE tournaments
+export interface GroupTeamStandingResponse {
+  position?: number;
+  isQualified?: boolean;
+  teamId: number;
+  teamName?: string;
+  teamCode?: string;
+  teamLogoUrl?: string;
+  played?: number;
+  won?: number;
+  drawn?: number;
+  lost?: number;
+  goalsFor?: number;
+  goalsAgainst?: number;
+  goalDifference?: number;
+  points?: number;
+  form?: string;
+}
+
+export interface GroupStandingEntryResponse {
+  groupId: number;
+  groupCode: string;
+  groupName: string;
+  standings: GroupTeamStandingResponse[];
+  teamsAdvancing?: number;
+}
+
+export interface GroupStandingsResponse {
+  tournamentId: number;
+  tournamentName?: string;
+  groups: GroupStandingEntryResponse[];
+  lastUpdated?: string;
+}
+
 // ==================== Player Statistics Types ====================
 
 export interface PlayerStatisticsResponse {
@@ -1088,6 +1122,9 @@ export interface MatchResponse {
   tournamentId: number;
   tournamentName?: string;
   tournamentCode?: string;
+  groupId?: number;
+  groupCode?: string;
+  groupName?: string;
   homeTeamId: number;
   homeTeamName?: string;
   homeTeamShortName?: string;
@@ -1120,6 +1157,9 @@ export interface MatchSummaryResponse {
   id: number;
   tournamentId: number;
   tournamentName?: string;
+  groupId?: number;
+  groupCode?: string;
+  groupName?: string;
   homeTeamId: number;
   homeTeamName?: string;
   homeTeamShortName?: string;

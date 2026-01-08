@@ -506,6 +506,9 @@
     "START_MESSAGE": "¿Está seguro que desea iniciar este torneo?",
     "FINISH_TITLE": "Finalizar Torneo",
     "FINISH_MESSAGE": "¿Está seguro que desea finalizar este torneo?",
+    "ADVANCE_PHASE": "Avanzar Fase",
+    "ADVANCE_PHASE_TITLE": "Avanzar a la Siguiente Fase",
+    "ADVANCE_PHASE_MESSAGE": "¿Está seguro que desea avanzar a la siguiente fase? Los equipos clasificados pasarán a la fase eliminatoria.",
     "GENERATE_FIXTURE": "Generar Fixture",
     "GENERATE_FIXTURE_TITLE": "Generar Fixture del Torneo",
     "FIXTURE_START_DATE": "Fecha de Inicio",
@@ -669,7 +672,8 @@
     "POINTS_SHORT": "Pts",
     "FORM": "Forma",
     "LAST_UPDATED": "Última actualización",
-    "NO_DATA": "No hay datos de posiciones disponibles"
+    "NO_DATA": "No hay datos de posiciones disponibles",
+    "TEAMS_ADVANCING": "Equipos que avanzan"
   },
   "SANCTIONS": {
     "TITLE": "Sanciones",

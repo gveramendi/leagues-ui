@@ -57,6 +57,11 @@
                   </button>
                 }
                 @if (tournament.status === 'IN_PROGRESS') {
+                  @if (canAdvancePhase) {
+                    <button class="btn btn-primary btn-sm me-2" (click)="advancePhase()">
+                      <i class="fas fa-forward me-1"></i> {{ 'TOURNAMENTS.ADVANCE_PHASE' | translate }}
+                    </button>
+                  }
                   <button class="btn btn-dark btn-sm" (click)="finishTournament()">
                     <i class="fas fa-flag-checkered me-1"></i> {{ 'TOURNAMENTS.FINISH' | translate }}
                   </button>
@@ -293,6 +298,7 @@
                           [tournamentId]="tournamentId"
                           [seasonYear]="tournament.seasonYear"
                           [canEdit]="canEditMatches()"
+                          [tournamentFormat]="tournament.format"
                         ></app-tournament-matches>
                       </div>
                     </ng-template>
@@ -304,7 +310,7 @@
                     </button>
                     <ng-template ngbNavContent>
                       <div class="mt-4">
-                        <app-tournament-standings [tournamentId]="tournamentId"></app-tournament-standings>
+                        <app-tournament-standings [tournamentId]="tournamentId" [tournamentFormat]="tournament.format"></app-tournament-standings>
                       </div>
                     </ng-template>
                   </li>

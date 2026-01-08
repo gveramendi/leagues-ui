@@ -7,6 +7,8 @@ import {
   StandingResponse,
   StandingSummaryResponse,
   StandingTableResponse,
+  GroupStandingsResponse,
+  GroupStandingEntryResponse,
 } from '../models/response';
 
 @Injectable({
@@ -167,6 +169,29 @@ export class StandingService {
     return this.http.post<ApiResponse<void>>(
       `${this.apiUrl}/tournament/${tournamentId}/recalculate`,
       {}
+    );
+  }
+
+  /**
+   * GET /api/standings/tournament/{tournamentId}/groups
+   * Get all group standings for a GROUP_STAGE tournament
+   */
+  getGroupStandings(tournamentId: number): Observable<ApiResponse<GroupStandingsResponse>> {
+    return this.http.get<ApiResponse<GroupStandingsResponse>>(
+      `${this.apiUrl}/tournament/${tournamentId}/groups`
+    );
+  }
+
+  /**
+   * GET /api/standings/tournament/{tournamentId}/groups/{groupCode}
+   * Get standings for a specific group in a GROUP_STAGE tournament
+   */
+  getGroupStandingsByCode(
+    tournamentId: number,
+    groupCode: string
+  ): Observable<ApiResponse<GroupStandingEntryResponse>> {
+    return this.http.get<ApiResponse<GroupStandingEntryResponse>>(
+      `${this.apiUrl}/tournament/${tournamentId}/groups/${groupCode}`
     );
   }
 }
