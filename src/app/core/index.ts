@@ -113,6 +113,7 @@ export {
   UpdateMatchRequest,
   UpdateMatchScoreRequest,
   GenerateFixtureRequest,
+  GroupDistribution,
   CreateMatchEventRequest,
   AssignRefereeRequest,
   MatchLineupResponse,

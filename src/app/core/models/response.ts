@@ -1174,6 +1174,8 @@ export interface UpdateMatchScoreRequest {
   awayPenalties?: number;
 }
 
+export type GroupDistribution = 'SERPENTINE' | 'RANDOM' | 'SEEDED';
+
 export interface GenerateFixtureRequest {
   tournamentId: number;
   daysBetweenMatchdays?: number;
@@ -1181,6 +1183,10 @@ export interface GenerateFixtureRequest {
   defaultVenue?: string;
   homeAndAway?: boolean;
   randomizeOrder?: boolean;
+  // GROUP_STAGE fields
+  numberOfGroups?: number;
+  teamsAdvancingPerGroup?: number;
+  groupDistribution?: GroupDistribution;
 }
 
 export interface CreateMatchEventRequest {
