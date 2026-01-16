@@ -1,15 +1,14 @@
 # Frontend - Angular
 
 ## Proyecto relacionado
-Backend en: ../backend
+Backend Spring Boot en: ../leagues-api
 
 ## Stack
 - Angular + TypeScript
 - Jasmine para testing
 
 ## API Base
-http://localhost:8080/api (Spring Boot)
-http://localhost:3000/api (NestJS)
+http://localhost:8080/api
 
 ## Integración con Backend
 Los models en src/app/core/models/ corresponden a los DTOs del backend.
