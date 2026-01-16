@@ -245,6 +245,16 @@
                                         <i class="material-icons">add</i>
                                       </button>
                                     }
+                                    @if (canApproveReject() && hasPendingTeams()) {
+                                      <button
+                                        class="btn btn-success rounded-button"
+                                        (click)="approveAllPendingTeams()"
+                                        [title]="'TOURNAMENTS.APPROVE_ALL' | translate"
+                                      >
+                                        <i class="fas fa-check-double me-1"></i>
+                                        {{ 'TOURNAMENTS.APPROVE_ALL' | translate }}
+                                      </button>
+                                    }
                                   </div>
                                 </div>
                               </div>

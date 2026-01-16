@@ -864,6 +864,10 @@ export class TournamentDetailComponent implements OnInit {
     return this.tournament?.status === 'SCHEDULED' || this.tournament?.status === 'IN_PROGRESS';
   }
 
+  hasPendingTeams(): boolean {
+    return this.teams.some((team) => team.status === 'PENDING');
+  }
+
   onMatchFinished(): void {
     // Reload phase status to check if we can advance to next phase
     if (this.tournament?.status === 'IN_PROGRESS') {
