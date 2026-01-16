@@ -8,6 +8,7 @@ import { environment } from '../../../environments/environment';
 import {
   ApiResponse,
   CreateTournamentRequest,
+  CreateTournamentWithPhasesRequest,
   TournamentResponse,
   TournamentSummaryResponse,
   UpdateTournamentRequest,
@@ -108,6 +109,65 @@ describe('TournamentService', () => {
       });
 
       const req = httpMock.expectOne(apiUrl);
+      expect(req.request.method).toBe('POST');
+      expect(req.request.body).toEqual(createRequest);
+      req.flush(mockResponse);
+    });
+  });
+
+  describe('createWithPhases', () => {
+    it('should create a tournament with pre-configured phases', () => {
+      const createRequest: CreateTournamentWithPhasesRequest = {
+        name: 'Torneo Oficial 2024',
+        code: 'OFICIAL_2024',
+        format: 'LEAGUE',
+        category: 'PRIMERA',
+        gender: 'MALE',
+        footballType: 'FOOTBALL_11',
+        seasonYear: 2024,
+        maxTeams: 10,
+        phases: [
+          {
+            phaseOrder: 1,
+            phaseMode: 'ROUND_ROBIN',
+            customName: 'Fase Regular',
+            isHomeAndAway: true,
+            qualificationRules: [
+              {
+                ruleOrder: 1,
+                ruleType: 'POSITION_RANGE_TO_GROUP',
+                positionStart: 1,
+                positionEnd: 5,
+                targetGroupCode: 'CAMPEONATO',
+              },
+            ],
+          },
+          {
+            phaseOrder: 2,
+            phaseMode: 'SPLIT_BY_POSITION',
+            customName: 'Liguillas',
+            numberOfGroups: 2,
+            isHomeAndAway: true,
+          },
+        ],
+      };
+      const mockResponse: ApiResponse<TournamentResponse> = {
+        header: {
+          success: true,
+          statusCode: 201,
+          message: 'Tournament with phases created successfully',
+        },
+        body: {
+          data: { ...mockTournament, name: 'Torneo Oficial 2024', code: 'OFICIAL_2024' },
+        },
+      };
+
+      service.createWithPhases(createRequest).subscribe((response) => {
+        expect(response.body.data.name).toBe('Torneo Oficial 2024');
+        expect(response.header.message).toBe('Tournament with phases created successfully');
+      });
+
+      const req = httpMock.expectOne(`${apiUrl}/with-phases`);
       expect(req.request.method).toBe('POST');
       expect(req.request.body).toEqual(createRequest);
       req.flush(mockResponse);

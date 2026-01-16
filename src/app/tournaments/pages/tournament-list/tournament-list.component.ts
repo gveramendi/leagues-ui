@@ -146,7 +146,6 @@ export class TournamentListComponent implements OnInit {
       shortName: ['', [Validators.maxLength(50)]],
       description: ['', [Validators.maxLength(500)]],
       // Classification
-      format: ['LEAGUE', [Validators.required]],
       category: ['PRIMERA', [Validators.required]],
       gender: ['MALE', [Validators.required]],
       footballType: ['FOOTBALL_11', [Validators.required]],
@@ -284,7 +283,6 @@ export class TournamentListComponent implements OnInit {
   // Open modal to add new tournament
   openAddModal(content: any): void {
     this.tournamentForm.reset({
-      format: 'LEAGUE',
       category: 'PRIMERA',
       gender: 'MALE',
       footballType: 'FOOTBALL_11',
@@ -349,7 +347,7 @@ export class TournamentListComponent implements OnInit {
       name: formValue.name,
       shortName: formValue.shortName || undefined,
       description: formValue.description || undefined,
-      format: formValue.format,
+      format: 'LEAGUE', // Default format, will be configured in format-config page
       category: formValue.category,
       gender: formValue.gender,
       footballType: formValue.footballType,
@@ -372,7 +370,8 @@ export class TournamentListComponent implements OnInit {
         this.toastr.success(response.header.message);
         this.modalService.dismissAll();
         this.tournamentForm.reset();
-        this.loadTournaments();
+        // Redirect to format configuration page
+        this.router.navigate(['/tournaments', response.body.data.id, 'format-config']);
       },
       error: (error) => {
         const errorMessage = typeof error === 'string' ? error : (error.message || 'Error creating tournament');
@@ -383,49 +382,59 @@ export class TournamentListComponent implements OnInit {
 
   // Open modal to edit tournament
   openEditModal(content: any, row: TournamentResponse): void {
-    this.editingTournament = row;
-    this.editTournamentForm.patchValue({
-      name: row.name || '',
-      shortName: row.shortName || '',
-      description: row.description || '',
-      format: row.format || 'LEAGUE',
-      category: row.category || 'PRIMERA',
-      gender: row.gender || 'MALE',
-      footballType: row.footballType || 'FOOTBALL_11',
-      seasonYear: row.seasonYear || new Date().getFullYear(),
-      startDate: row.startDate || '',
-      endDate: row.endDate || '',
-      registrationStart: row.registrationStart || '',
-      registrationEnd: row.registrationEnd || '',
-      minTeams: row.minTeams || 2,
-      maxTeams: row.maxTeams || 32,
-      logoUrl: row.logoUrl || '',
-      organizer: row.organizer || '',
-      location: row.location || '',
-      prizeDescription: row.prizeDescription || '',
-      // Rules
-      pointsForWin: row.rules?.pointsForWin ?? 3,
-      pointsForDraw: row.rules?.pointsForDraw ?? 1,
-      pointsForLoss: row.rules?.pointsForLoss ?? 0,
-      matchDurationMinutes: row.rules?.matchDurationMinutes ?? 90,
-      halfTimeDurationMinutes: row.rules?.halfTimeDurationMinutes ?? 15,
-      allowsExtraTime: row.rules?.allowsExtraTime ?? false,
-      extraTimeDurationMinutes: row.rules?.extraTimeDurationMinutes ?? 30,
-      allowsPenalties: row.rules?.allowsPenalties ?? true,
-      homeAndAway: row.rules?.homeAndAway ?? true,
-      yellowCardsForSuspension: row.rules?.yellowCardsForSuspension ?? 5,
-      redCardSuspensionMatches: row.rules?.redCardSuspensionMatches ?? 1,
-      maxPlayersPerTeam: row.rules?.maxPlayersPerTeam ?? 25,
-      minPlayersPerTeam: row.rules?.minPlayersPerTeam ?? 11,
-      maxForeignPlayers: row.rules?.maxForeignPlayers ?? 5,
-      substitutionsAllowed: row.rules?.substitutionsAllowed ?? 5,
-      firstTiebreaker: row.rules?.firstTiebreaker || 'GOAL_DIFFERENCE',
-      secondTiebreaker: row.rules?.secondTiebreaker || 'GOALS_SCORED',
-      thirdTiebreaker: row.rules?.thirdTiebreaker || 'HEAD_TO_HEAD',
-    });
-    this.modalService.open(content, {
-      ariaLabelledBy: 'modal-edit-title',
-      size: 'xl',
+    // Load complete tournament data before opening modal
+    this.tournamentService.getById(row.id).subscribe({
+      next: (response) => {
+        const tournament = response.body.data;
+        this.editingTournament = tournament;
+        this.editTournamentForm.patchValue({
+          name: tournament.name || '',
+          shortName: tournament.shortName || '',
+          description: tournament.description || '',
+          format: tournament.format || 'LEAGUE',
+          category: tournament.category || 'PRIMERA',
+          gender: tournament.gender || 'MALE',
+          footballType: tournament.footballType || 'FOOTBALL_11',
+          seasonYear: tournament.seasonYear || new Date().getFullYear(),
+          startDate: tournament.startDate || '',
+          endDate: tournament.endDate || '',
+          registrationStart: tournament.registrationStart || '',
+          registrationEnd: tournament.registrationEnd || '',
+          minTeams: tournament.minTeams || 2,
+          maxTeams: tournament.maxTeams || 32,
+          logoUrl: tournament.logoUrl || '',
+          organizer: tournament.organizer || '',
+          location: tournament.location || '',
+          prizeDescription: tournament.prizeDescription || '',
+          // Rules
+          pointsForWin: tournament.rules?.pointsForWin ?? 3,
+          pointsForDraw: tournament.rules?.pointsForDraw ?? 1,
+          pointsForLoss: tournament.rules?.pointsForLoss ?? 0,
+          matchDurationMinutes: tournament.rules?.matchDurationMinutes ?? 90,
+          halfTimeDurationMinutes: tournament.rules?.halfTimeDurationMinutes ?? 15,
+          allowsExtraTime: tournament.rules?.allowsExtraTime ?? false,
+          extraTimeDurationMinutes: tournament.rules?.extraTimeDurationMinutes ?? 30,
+          allowsPenalties: tournament.rules?.allowsPenalties ?? true,
+          homeAndAway: tournament.rules?.homeAndAway ?? true,
+          yellowCardsForSuspension: tournament.rules?.yellowCardsForSuspension ?? 5,
+          redCardSuspensionMatches: tournament.rules?.redCardSuspensionMatches ?? 1,
+          maxPlayersPerTeam: tournament.rules?.maxPlayersPerTeam ?? 25,
+          minPlayersPerTeam: tournament.rules?.minPlayersPerTeam ?? 11,
+          maxForeignPlayers: tournament.rules?.maxForeignPlayers ?? 5,
+          substitutionsAllowed: tournament.rules?.substitutionsAllowed ?? 5,
+          firstTiebreaker: tournament.rules?.firstTiebreaker || 'GOAL_DIFFERENCE',
+          secondTiebreaker: tournament.rules?.secondTiebreaker || 'GOALS_SCORED',
+          thirdTiebreaker: tournament.rules?.thirdTiebreaker || 'HEAD_TO_HEAD',
+        });
+        this.modalService.open(content, {
+          ariaLabelledBy: 'modal-edit-title',
+          size: 'xl',
+        });
+      },
+      error: (error) => {
+        const errorMessage = typeof error === 'string' ? error : (error.message || 'Error loading tournament');
+        this.toastr.error(errorMessage);
+      },
     });
   }
 

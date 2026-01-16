@@ -1,0 +1,43 @@
+.format-card {
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  border: 2px solid transparent;
+  position: relative;
+
+  &:hover {
+    border-color: var(--bs-primary);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  &.selected {
+    border-color: var(--bs-primary);
+    background-color: rgba(var(--bs-primary-rgb), 0.05);
+  }
+
+  .selected-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    color: var(--bs-primary);
+    font-size: 1.25rem;
+  }
+
+  .card-body {
+    padding: 1.5rem 1rem;
+
+    i {
+      opacity: 0.8;
+    }
+  }
+}
+
+.phase-card {
+  border-left: 4px solid var(--bs-primary);
+}
+
+.phases-container {
+  .card-header {
+    font-size: 0.9rem;
+  }
+}

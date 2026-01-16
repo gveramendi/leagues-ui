@@ -1495,6 +1495,20 @@ export type PhaseType =
 
 export type PhaseStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
+export type PhaseMode =
+  | 'ROUND_ROBIN'
+  | 'GROUP_STAGE'
+  | 'KNOCKOUT'
+  | 'SPLIT_BY_POSITION';
+
+export type QualificationRuleType =
+  | 'TOP_N_ADVANCE'
+  | 'POSITION_RANGE_TO_GROUP'
+  | 'KNOCKOUT_CROSS'
+  | 'DIRECT_TO_FINAL'
+  | 'TO_THIRD_PLACE'
+  | 'WINNERS_ADVANCE';
+
 export interface PhaseStatusResponse {
   tournamentId: number;
   tournamentName?: string;
@@ -1544,4 +1558,57 @@ export interface PhaseAdvancementResponse {
   totalQualifiedTeams: number;
   generatedMatches: GeneratedMatchResponse[];
   totalMatchesGenerated: number;
+}
+
+// ==================== Tournament With Phases Types ====================
+
+export interface QualificationRuleRequest {
+  ruleOrder: number;
+  ruleType: QualificationRuleType;
+  positionStart?: number;
+  positionEnd?: number;
+  sourceGroupCode?: string;
+  targetGroupCode?: string;
+  targetPhaseOrder?: number;
+  matchHomePosition?: number;
+  matchAwayPosition?: number;
+  matchHomeGroupCode?: string;
+  matchAwayGroupCode?: string;
+}
+
+export interface PhaseConfigRequest {
+  phaseOrder: number;
+  phaseMode: PhaseMode;
+  phaseType?: PhaseType;
+  customName?: string;
+  numberOfGroups?: number;
+  teamsPerGroup?: number;
+  teamsAdvancingPerGroup?: number;
+  isHomeAndAway?: boolean;
+  isSingleRound?: boolean;
+  qualificationRules?: QualificationRuleRequest[];
+}
+
+export interface CreateTournamentWithPhasesRequest {
+  name: string;
+  code: string;
+  shortName?: string;
+  description?: string;
+  format: TournamentFormat;
+  category: Category;
+  gender: Gender;
+  footballType: FootballType;
+  seasonYear: number;
+  startDate?: string;
+  endDate?: string;
+  registrationStart?: string;
+  registrationEnd?: string;
+  maxTeams?: number;
+  minTeams?: number;
+  logoUrl?: string;
+  organizer?: string;
+  location?: string;
+  prizeDescription?: string;
+  rules?: TournamentRulesDto;
+  phases: PhaseConfigRequest[];
 }

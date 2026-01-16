@@ -137,8 +137,13 @@ export {
   ResolveAppealRequest,
   PhaseType,
   PhaseStatus,
+  PhaseMode,
+  QualificationRuleType,
   PhaseStatusResponse,
   QualifiedTeamResponse,
   GeneratedMatchResponse,
   PhaseAdvancementResponse,
+  QualificationRuleRequest,
+  PhaseConfigRequest,
+  CreateTournamentWithPhasesRequest,
 } from './models/response';

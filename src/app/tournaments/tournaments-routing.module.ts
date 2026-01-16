@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { TournamentHomeComponent } from './pages/tournament-home/tournament-home.component';
 import { TournamentListComponent } from './pages/tournament-list/tournament-list.component';
 import { TournamentDetailComponent } from './pages/tournament-detail/tournament-detail.component';
+import { TournamentFormatConfigComponent } from './pages/tournament-format-config/tournament-format-config.component';
 
 const routes: Routes = [
   {
@@ -10,6 +11,7 @@ const routes: Routes = [
     component: TournamentHomeComponent,
     children: [
       { path: 'list', component: TournamentListComponent },
+      { path: ':tournamentId/format-config', component: TournamentFormatConfigComponent },
       { path: ':tournamentId', component: TournamentDetailComponent },
       { path: '', redirectTo: 'list', pathMatch: 'full' },
       { path: '**', redirectTo: 'list' },

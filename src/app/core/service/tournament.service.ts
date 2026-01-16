@@ -8,6 +8,7 @@ import {
   TournamentSummaryResponse,
   CreateTournamentRequest,
   UpdateTournamentRequest,
+  CreateTournamentWithPhasesRequest,
   TournamentStatus,
   TournamentFormat,
   Category,
@@ -31,6 +32,17 @@ export class TournamentService {
    */
   create(request: CreateTournamentRequest): Observable<ApiResponse<TournamentResponse>> {
     return this.http.post<ApiResponse<TournamentResponse>>(this.apiUrl, request);
+  }
+
+  /**
+   * POST /api/tournaments/with-phases
+   * Create a tournament with pre-configured phases, configurations and qualification rules
+   */
+  createWithPhases(request: CreateTournamentWithPhasesRequest): Observable<ApiResponse<TournamentResponse>> {
+    return this.http.post<ApiResponse<TournamentResponse>>(
+      `${this.apiUrl}/with-phases`,
+      request
+    );
   }
 
   /**
