@@ -68,9 +68,25 @@ describe('TournamentAssistsComponent', () => {
   });
 
   describe('ngOnChanges', () => {
-    it('should load assists when tournamentId changes', () => {
+    it('should load assists when tournamentId changes (not first change)', () => {
       playerStatisticsService.getTopAssists.and.returnValue(of(mockApiResponse));
 
+      component.tournamentId = 2;
+      component.ngOnChanges({
+        tournamentId: {
+          currentValue: 2,
+          previousValue: 1,
+          firstChange: false,
+          isFirstChange: () => false,
+        },
+      });
+
+      expect(playerStatisticsService.getTopAssists).toHaveBeenCalledWith(2, 50);
+      expect(component.assistTable).toEqual(mockAssistTable);
+      expect(component.loading).toBeFalse();
+    });
+
+    it('should not load assists on first change (ngOnInit handles it)', () => {
       component.tournamentId = 1;
       component.ngOnChanges({
         tournamentId: {
@@ -81,9 +97,7 @@ describe('TournamentAssistsComponent', () => {
         },
       });
 
-      expect(playerStatisticsService.getTopAssists).toHaveBeenCalledWith(1, 50);
-      expect(component.assistTable).toEqual(mockAssistTable);
-      expect(component.loading).toBeFalse();
+      expect(playerStatisticsService.getTopAssists).not.toHaveBeenCalled();
     });
 
     it('should not load assists when tournamentId is not provided', () => {

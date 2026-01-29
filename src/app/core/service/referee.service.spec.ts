@@ -107,7 +107,7 @@ describe('RefereeService', () => {
         expect(response.body.data).toEqual([mockReferee]);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}?page=0&size=20&sort=lastName,asc`);
       expect(req.request.method).toBe('GET');
       req.flush(createApiResponse([mockReferee]));
     });
@@ -117,7 +117,7 @@ describe('RefereeService', () => {
         expect(response.body.data).toEqual([mockReferee]);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}?page=0&size=20&sort=lastName,asc`);
       expect(req.request.method).toBe('GET');
       req.flush(createApiResponse([mockReferee]));
     });
@@ -129,7 +129,7 @@ describe('RefereeService', () => {
         expect(response.body.data).toEqual([mockReferee]);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/search?query=Webb&page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/search?query=Webb&page=0&size=20&sort=lastName,asc`);
       expect(req.request.method).toBe('GET');
       req.flush(createApiResponse([mockReferee]));
     });
@@ -139,7 +139,7 @@ describe('RefereeService', () => {
         expect(response.body.data).toEqual([mockReferee]);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/search?query=Howard&page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/search?query=Howard&page=0&size=20&sort=lastName,asc`);
       expect(req.request.method).toBe('GET');
       req.flush(createApiResponse([mockReferee]));
     });
@@ -151,7 +151,7 @@ describe('RefereeService', () => {
         expect(response.body.data).toEqual([mockReferee]);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/category/FIFA?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/category/FIFA?page=0&size=20&sort=lastName,asc`);
       expect(req.request.method).toBe('GET');
       req.flush(createApiResponse([mockReferee]));
     });
@@ -161,7 +161,7 @@ describe('RefereeService', () => {
         expect(response.body.data).toEqual([mockReferee]);
       });
 
-      const req = httpMock.expectOne(`${apiUrl}/category/NATIONAL?page=0&size=20`);
+      const req = httpMock.expectOne(`${apiUrl}/category/NATIONAL?page=0&size=20&sort=lastName,asc`);
       expect(req.request.method).toBe('GET');
       req.flush(createApiResponse([mockReferee]));
     });

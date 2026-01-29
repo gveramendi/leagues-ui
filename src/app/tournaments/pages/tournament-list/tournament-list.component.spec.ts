@@ -142,14 +142,27 @@ describe('TournamentListComponent', () => {
     },
   };
 
+  const mockGetByIdResponse: ApiResponse<TournamentResponse> = {
+    header: {
+      success: true,
+      statusCode: 200,
+      message: 'Tournament retrieved successfully',
+    },
+    body: {
+      data: mockTournament,
+    },
+  };
+
   beforeEach(waitForAsync(() => {
     const tournamentServiceMock = jasmine.createSpyObj('TournamentService', [
       'search',
+      'getById',
       'create',
       'update',
       'delete',
     ]);
     tournamentServiceMock.search.and.returnValue(of(mockSearchResponse));
+    tournamentServiceMock.getById.and.returnValue(of(mockGetByIdResponse));
     tournamentServiceMock.create.and.returnValue(of(mockCreateResponse));
     tournamentServiceMock.update.and.returnValue(of(mockUpdateResponse));
     tournamentServiceMock.delete.and.returnValue(of(mockDeleteResponse));
@@ -361,7 +374,6 @@ describe('TournamentListComponent', () => {
         ariaLabelledBy: 'modal-basic-title',
         size: 'xl',
       });
-      expect(component.tournamentForm.value.format).toBe('LEAGUE');
       expect(component.tournamentForm.value.category).toBe('PRIMERA');
       expect(component.tournamentForm.value.gender).toBe('MALE');
       expect(component.tournamentForm.value.footballType).toBe('FOOTBALL_11');
@@ -743,7 +755,6 @@ describe('TournamentListComponent', () => {
     it('should have valid form when required fields are filled correctly', () => {
       component.tournamentForm.controls['code'].setValue('VALID');
       component.tournamentForm.controls['name'].setValue('Valid Tournament Name');
-      component.tournamentForm.controls['format'].setValue('LEAGUE');
       component.tournamentForm.controls['category'].setValue('PRIMERA');
       component.tournamentForm.controls['gender'].setValue('MALE');
       component.tournamentForm.controls['footballType'].setValue('FOOTBALL_11');

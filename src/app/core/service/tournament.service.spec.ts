@@ -144,7 +144,7 @@ describe('TournamentService', () => {
           },
           {
             phaseOrder: 2,
-            phaseMode: 'SPLIT_BY_POSITION',
+            phaseMode: 'GROUP_STAGE',
             customName: 'Liguillas',
             numberOfGroups: 2,
             isHomeAndAway: true,

@@ -622,9 +622,7 @@ export type TournamentFormat =
   | 'GROUP_STAGE'
   | 'GROUP_STAGE_SINGLE'
   | 'GROUP_STAGE_DOUBLE'
-  | 'ROUND_ROBIN'
-  | 'SWISS'
-  | 'PLAYOFF';
+  | 'SWISS';
 
 export type RegistrationStatus =
   | 'PENDING'
@@ -1485,21 +1483,22 @@ export interface ResolveAppealRequest {
 // ==================== Phase Advancement Types ====================
 
 export type PhaseType =
+  | 'REGULAR_PHASE'
   | 'GROUP_STAGE'
+  | 'SPLIT_PHASE'
+  | 'ROUND_OF_32'
   | 'ROUND_OF_16'
   | 'QUARTER_FINALS'
   | 'SEMI_FINALS'
   | 'THIRD_PLACE'
-  | 'FINAL'
-  | 'KNOCKOUT';
+  | 'FINAL';
 
 export type PhaseStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 
 export type PhaseMode =
-  | 'ROUND_ROBIN'
-  | 'GROUP_STAGE'
   | 'KNOCKOUT'
-  | 'SPLIT_BY_POSITION';
+  | 'ROUND_ROBIN'
+  | 'GROUP_STAGE';
 
 export type QualificationRuleType =
   | 'TOP_N_ADVANCE'
@@ -1611,4 +1610,59 @@ export interface CreateTournamentWithPhasesRequest {
   prizeDescription?: string;
   rules?: TournamentRulesDto;
   phases: PhaseConfigRequest[];
+}
+
+// =====================
+// Tournament Phase CRUD
+// =====================
+
+export interface PhaseConfigDto {
+  phaseMode: PhaseMode;
+  isSingleRound?: boolean;
+  isHomeAndAway?: boolean;
+  numberOfGroups?: number;
+  teamsPerGroup?: number;
+  teamsAdvancingPerGroup?: number;
+}
+
+export interface CreateTournamentPhaseRequest {
+  name: string;
+  phaseOrder: number;
+  phaseType: PhaseType;
+  config: PhaseConfigDto;
+}
+
+export interface UpdateTournamentPhaseRequest {
+  name?: string;
+  phaseOrder?: number;
+  phaseType?: PhaseType;
+  config?: PhaseConfigDto;
+}
+
+export interface AssignMatchesToPhaseRequest {
+  matchIds: number[];
+}
+
+export interface TournamentPhaseResponse {
+  id: number;
+  tournamentId: number;
+  name: string;
+  phaseOrder: number;
+  phaseMode: PhaseMode;
+  phaseType?: PhaseType;
+  status: PhaseStatus;
+  matchCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export interface PhaseConfigResponse {
+  id: number;
+  phaseId: number;
+  numberOfGroups?: number;
+  teamsPerGroup?: number;
+  teamsAdvancingPerGroup?: number;
+  homeAndAway?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
 }

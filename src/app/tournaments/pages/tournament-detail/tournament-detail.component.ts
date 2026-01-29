@@ -36,6 +36,7 @@ import { TournamentScorersComponent } from '../../components/tournament-scorers/
 import { TournamentAssistsComponent } from '../../components/tournament-assists/tournament-assists.component';
 import { TournamentMatchesComponent } from '../../components/tournament-matches/tournament-matches.component';
 import { TournamentSanctionsComponent } from '../../components/tournament-sanctions/tournament-sanctions.component';
+import { TournamentPhasesComponent } from '../../components/tournament-phases/tournament-phases.component';
 
 @Component({
   selector: 'app-tournament-detail',
@@ -53,6 +54,7 @@ import { TournamentSanctionsComponent } from '../../components/tournament-sancti
     TournamentAssistsComponent,
     TournamentMatchesComponent,
     TournamentSanctionsComponent,
+    TournamentPhasesComponent,
   ],
   templateUrl: './tournament-detail.component.html',
   styleUrls: ['./tournament-detail.component.scss'],
@@ -95,7 +97,7 @@ export class TournamentDetailComponent implements OnInit {
     { value: 'DISQUALIFIED', label: 'Descalificado', class: 'bg-dark' },
   ];
 
-  // Phase advancement (for GROUP_STAGE and PLAYOFF tournaments)
+  // Phase advancement (for GROUP_STAGE tournaments)
   canAdvancePhase = false;
   checkingCanAdvance = false;
   phaseStatus: PhaseStatusResponse | null = null;
@@ -174,9 +176,6 @@ export class TournamentDetailComponent implements OnInit {
           if (this.isGroupStageFormat()) {
             // For GROUP_STAGE: load phase status which includes canAdvance
             this.loadPhaseStatus();
-          } else if (this.isPlayoffFormat()) {
-            // For PLAYOFF: directly check if can advance knockout
-            this.checkCanAdvanceKnockout();
           }
         }
       },
@@ -227,7 +226,7 @@ export class TournamentDetailComponent implements OnInit {
     if (this.isInGroupStage()) {
       checkService$ = this.tournamentService.canAdvanceGroupStage(this.tournamentId);
     } else {
-      // For PLAYOFF and knockout phases within GROUP_STAGE tournaments
+      // For knockout phases within GROUP_STAGE tournaments
       checkService$ = this.tournamentService.canAdvanceKnockout(this.tournamentId);
     }
 
@@ -251,31 +250,9 @@ export class TournamentDetailComponent implements OnInit {
 
     this.checkingCanAdvance = true;
 
-    // Use specific endpoint for PLAYOFF tournaments
-    const checkService$ = this.isPlayoffFormat()
-      ? this.tournamentService.canAdvanceKnockout(this.tournamentId)
-      : this.tournamentService.canAdvance(this.tournamentId);
+    const checkService$ = this.tournamentService.canAdvance(this.tournamentId);
 
     checkService$.subscribe({
-      next: (response) => {
-        this.canAdvancePhase = response.body.data;
-        this.checkingCanAdvance = false;
-      },
-      error: () => {
-        this.canAdvancePhase = false;
-        this.checkingCanAdvance = false;
-      },
-    });
-  }
-
-  private checkCanAdvanceKnockout(): void {
-    if (!this.tournament || this.tournament.status !== 'IN_PROGRESS') {
-      this.canAdvancePhase = false;
-      return;
-    }
-
-    this.checkingCanAdvance = true;
-    this.tournamentService.canAdvanceKnockout(this.tournamentId).subscribe({
       next: (response) => {
         this.canAdvancePhase = response.body.data;
         this.checkingCanAdvance = false;
@@ -300,7 +277,6 @@ export class TournamentDetailComponent implements OnInit {
     if (this.phaseStatus?.nextPhaseName) {
       return this.phaseStatus.nextPhaseName;
     }
-    // Default text for PLAYOFF tournaments when phaseStatus is not available
     return this.translate.instant('TOURNAMENTS.NEXT_ROUND');
   }
 
@@ -496,12 +472,8 @@ export class TournamentDetailComponent implements OnInit {
            this.tournament?.format === 'GROUP_STAGE_DOUBLE';
   }
 
-  isPlayoffFormat(): boolean {
-    return this.tournament?.format === 'PLAYOFF';
-  }
-
   supportsPhaseAdvancement(): boolean {
-    return this.isGroupStageFormat() || this.isPlayoffFormat();
+    return this.isGroupStageFormat();
   }
 
   onGenerateFixture(): void {
@@ -870,12 +842,8 @@ export class TournamentDetailComponent implements OnInit {
 
   onMatchFinished(): void {
     // Reload phase status to check if we can advance to next phase
-    if (this.tournament?.status === 'IN_PROGRESS') {
-      if (this.isGroupStageFormat()) {
-        this.loadPhaseStatus();
-      } else if (this.isPlayoffFormat()) {
-        this.checkCanAdvanceKnockout();
-      }
+    if (this.tournament?.status === 'IN_PROGRESS' && this.isGroupStageFormat()) {
+      this.loadPhaseStatus();
     }
   }
 

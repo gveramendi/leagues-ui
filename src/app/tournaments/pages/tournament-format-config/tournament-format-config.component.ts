@@ -46,27 +46,26 @@ export class TournamentFormatConfigComponent implements OnInit {
     { value: 'GROUP_STAGE', label: 'Fase de Grupos', icon: 'fa-th', description: 'Grupos clasificatorios' },
     { value: 'GROUP_STAGE_SINGLE', label: 'Grupos + Eliminacion Simple', icon: 'fa-layer-group', description: 'Grupos y luego eliminacion directa' },
     { value: 'GROUP_STAGE_DOUBLE', label: 'Grupos + Eliminacion Doble', icon: 'fa-project-diagram', description: 'Grupos y luego doble eliminacion' },
-    { value: 'ROUND_ROBIN', label: 'Todos contra Todos', icon: 'fa-sync', description: 'Cada equipo juega contra todos' },
     { value: 'SWISS', label: 'Sistema Suizo', icon: 'fa-chess', description: 'Emparejamiento por rendimiento' },
-    { value: 'PLAYOFF', label: 'Playoff', icon: 'fa-trophy', description: 'Rondas eliminatorias' },
   ];
 
   // Phase configuration options
   phaseModes: { value: PhaseMode; label: string }[] = [
+    { value: 'KNOCKOUT', label: 'Eliminacion Directa' },
     { value: 'ROUND_ROBIN', label: 'Todos contra Todos' },
     { value: 'GROUP_STAGE', label: 'Fase de Grupos' },
-    { value: 'KNOCKOUT', label: 'Eliminacion Directa' },
-    { value: 'SPLIT_BY_POSITION', label: 'Division por Posicion' },
   ];
 
   phaseTypes: { value: PhaseType; label: string }[] = [
     { value: 'GROUP_STAGE', label: 'Fase de Grupos' },
+    { value: 'ROUND_OF_32', label: 'Dieciseisavos de Final' },
     { value: 'ROUND_OF_16', label: 'Octavos de Final' },
     { value: 'QUARTER_FINALS', label: 'Cuartos de Final' },
     { value: 'SEMI_FINALS', label: 'Semifinales' },
     { value: 'THIRD_PLACE', label: 'Tercer Puesto' },
     { value: 'FINAL', label: 'Final' },
-    { value: 'KNOCKOUT', label: 'Eliminatoria' },
+    { value: 'REGULAR_PHASE', label: 'Fase Regular' },
+    { value: 'SPLIT_PHASE', label: 'Fase de Division' },
   ];
 
   qualificationRuleTypes: { value: QualificationRuleType; label: string }[] = [
@@ -188,7 +187,7 @@ export class TournamentFormatConfigComponent implements OnInit {
 
   // Check if phase mode requires groups configuration
   requiresGroupConfig(phaseMode: PhaseMode): boolean {
-    return phaseMode === 'GROUP_STAGE' || phaseMode === 'SPLIT_BY_POSITION';
+    return phaseMode === 'GROUP_STAGE';
   }
 
   // Check if rule type requires position range

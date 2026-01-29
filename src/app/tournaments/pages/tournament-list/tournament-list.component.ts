@@ -62,9 +62,7 @@ export class TournamentListComponent implements OnInit {
     { value: 'GROUP_STAGE', label: 'Fase de Grupos' },
     { value: 'GROUP_STAGE_SINGLE', label: 'Fase de Grupos + Eliminacion Simple' },
     { value: 'GROUP_STAGE_DOUBLE', label: 'Fase de Grupos + Eliminacion Doble' },
-    { value: 'ROUND_ROBIN', label: 'Todos contra Todos' },
     { value: 'SWISS', label: 'Sistema Suizo' },
-    { value: 'PLAYOFF', label: 'Playoff' },
   ];
 
   statuses = [
