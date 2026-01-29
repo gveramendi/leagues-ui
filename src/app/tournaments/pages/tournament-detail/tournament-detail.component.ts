@@ -95,7 +95,7 @@ export class TournamentDetailComponent implements OnInit {
     { value: 'DISQUALIFIED', label: 'Descalificado', class: 'bg-dark' },
   ];
 
-  // Phase advancement (for GROUP_STAGE tournaments)
+  // Phase advancement (for GROUP_STAGE and ELIMINATION tournaments)
   canAdvancePhase = false;
   checkingCanAdvance = false;
   phaseStatus: PhaseStatusResponse | null = null;
@@ -174,6 +174,9 @@ export class TournamentDetailComponent implements OnInit {
           if (this.isGroupStageFormat()) {
             // For GROUP_STAGE: load phase status which includes canAdvance
             this.loadPhaseStatus();
+          } else if (this.isEliminationFormat()) {
+            // For SINGLE_ELIMINATION/DOUBLE_ELIMINATION: check can advance knockout
+            this.checkCanAdvanceKnockout();
           }
         }
       },
@@ -470,8 +473,32 @@ export class TournamentDetailComponent implements OnInit {
            this.tournament?.format === 'GROUP_STAGE_DOUBLE';
   }
 
+  isEliminationFormat(): boolean {
+    return this.tournament?.format === 'SINGLE_ELIMINATION' ||
+           this.tournament?.format === 'DOUBLE_ELIMINATION';
+  }
+
   supportsPhaseAdvancement(): boolean {
-    return this.isGroupStageFormat();
+    return this.isGroupStageFormat() || this.isEliminationFormat();
+  }
+
+  private checkCanAdvanceKnockout(): void {
+    if (!this.tournament || this.tournament.status !== 'IN_PROGRESS') {
+      this.canAdvancePhase = false;
+      return;
+    }
+
+    this.checkingCanAdvance = true;
+    this.tournamentService.canAdvanceKnockout(this.tournamentId).subscribe({
+      next: (response) => {
+        this.canAdvancePhase = response.body.data;
+        this.checkingCanAdvance = false;
+      },
+      error: () => {
+        this.canAdvancePhase = false;
+        this.checkingCanAdvance = false;
+      },
+    });
   }
 
   onGenerateFixture(): void {
@@ -585,10 +612,18 @@ export class TournamentDetailComponent implements OnInit {
       cancelButtonText: this.translate.instant('COMMON.NO'),
     }).then((result) => {
       if (result.isConfirmed) {
-        // Use specific endpoint based on current phase
-        const advanceService$ = this.isInGroupStage()
-          ? this.tournamentService.advanceFromGroupStage(this.tournamentId)
-          : this.tournamentService.advanceKnockout(this.tournamentId);
+        // Use specific endpoint based on tournament format and current phase
+        let advanceService$;
+        if (this.isEliminationFormat()) {
+          // For SINGLE_ELIMINATION/DOUBLE_ELIMINATION: always use knockout endpoint
+          advanceService$ = this.tournamentService.advanceKnockout(this.tournamentId);
+        } else if (this.isInGroupStage()) {
+          // For GROUP_STAGE in group phase
+          advanceService$ = this.tournamentService.advanceFromGroupStage(this.tournamentId);
+        } else {
+          // For GROUP_STAGE in knockout phase
+          advanceService$ = this.tournamentService.advanceKnockout(this.tournamentId);
+        }
 
         advanceService$.subscribe({
           next: (response) => {
@@ -840,8 +875,12 @@ export class TournamentDetailComponent implements OnInit {
 
   onMatchFinished(): void {
     // Reload phase status to check if we can advance to next phase
-    if (this.tournament?.status === 'IN_PROGRESS' && this.isGroupStageFormat()) {
-      this.loadPhaseStatus();
+    if (this.tournament?.status === 'IN_PROGRESS') {
+      if (this.isGroupStageFormat()) {
+        this.loadPhaseStatus();
+      } else if (this.isEliminationFormat()) {
+        this.checkCanAdvanceKnockout();
+      }
     }
   }
 
