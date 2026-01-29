@@ -25,7 +25,9 @@
     "STATUS": "Estado",
     "SELECT": "Seleccionar...",
     "LOADING": "Cargando",
-    "NOTES": "Notas"
+    "NOTES": "Notas",
+    "SELECT_ALL": "Seleccionar Todo",
+    "DESELECT_ALL": "Deseleccionar Todo"
   },
   "VALIDATION": {
     "REQUIRED": "Este campo es obligatorio",
@@ -572,7 +574,28 @@
     "FORMAT_CONFIG": "Configuración de Formato",
     "CONFIGURE_FORMAT": "Configurar Formato",
     "SAVE_AND_CONTINUE": "Guardar y Continuar",
-    "SELECT_FORMAT": "Seleccione el formato del torneo"
+    "SELECT_FORMAT": "Seleccione el formato del torneo",
+    "PHASES": "Fases",
+    "PHASE_ORDER": "Orden",
+    "EDIT_PHASE": "Editar Fase",
+    "DELETE_PHASE": "Eliminar Fase",
+    "DELETE_PHASE_TITLE": "Eliminar Fase",
+    "DELETE_PHASE_CONFIRM": "¿Está seguro que desea eliminar la fase '{{name}}'?",
+    "NO_PHASES": "No hay fases configuradas",
+    "MATCHES": "Partidos",
+    "PHASE_CONFIG": "Configuración de la Fase",
+    "SINGLE_ROUND_HINT": "Solo una ronda de partidos",
+    "ASSIGN_MATCHES": "Asignar Partidos",
+    "ASSIGNED_MATCHES": "Partidos Asignados",
+    "AVAILABLE_MATCHES": "Partidos Disponibles",
+    "NO_AVAILABLE_MATCHES": "No hay partidos disponibles para asignar",
+    "MATCH": "Partido",
+    "ASSIGN": "Asignar",
+    "MATCHES_ASSIGNED_SUCCESS": "{{count}} partidos asignados exitosamente",
+    "REMOVE_MATCH": "Quitar Partido",
+    "REMOVE_MATCH_TITLE": "Quitar Partido",
+    "REMOVE_MATCH_CONFIRM": "¿Está seguro que desea quitar el partido {{home}} vs {{away}} de esta fase?",
+    "MATCH_REMOVED_SUCCESS": "Partido quitado exitosamente"
   },
   "MATCHES": {
     "TITLE": "Partidos",

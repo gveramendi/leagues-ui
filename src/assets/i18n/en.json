@@ -25,7 +25,9 @@
     "STATUS": "Status",
     "SELECT": "Select...",
     "LOADING": "Loading",
-    "NOTES": "Notes"
+    "NOTES": "Notes",
+    "SELECT_ALL": "Select All",
+    "DESELECT_ALL": "Deselect All"
   },
   "VALIDATION": {
     "REQUIRED": "This field is required",
@@ -572,7 +574,28 @@
     "FORMAT_CONFIG": "Format Configuration",
     "CONFIGURE_FORMAT": "Configure Format",
     "SAVE_AND_CONTINUE": "Save and Continue",
-    "SELECT_FORMAT": "Select tournament format"
+    "SELECT_FORMAT": "Select tournament format",
+    "PHASES": "Phases",
+    "PHASE_ORDER": "Order",
+    "EDIT_PHASE": "Edit Phase",
+    "DELETE_PHASE": "Delete Phase",
+    "DELETE_PHASE_TITLE": "Delete Phase",
+    "DELETE_PHASE_CONFIRM": "Are you sure you want to delete the phase '{{name}}'?",
+    "NO_PHASES": "No phases configured",
+    "MATCHES": "Matches",
+    "PHASE_CONFIG": "Phase Configuration",
+    "SINGLE_ROUND_HINT": "Single round of matches only",
+    "ASSIGN_MATCHES": "Assign Matches",
+    "ASSIGNED_MATCHES": "Assigned Matches",
+    "AVAILABLE_MATCHES": "Available Matches",
+    "NO_AVAILABLE_MATCHES": "No matches available to assign",
+    "MATCH": "Match",
+    "ASSIGN": "Assign",
+    "MATCHES_ASSIGNED_SUCCESS": "{{count}} matches assigned successfully",
+    "REMOVE_MATCH": "Remove Match",
+    "REMOVE_MATCH_TITLE": "Remove Match",
+    "REMOVE_MATCH_CONFIRM": "Are you sure you want to remove the match {{home}} vs {{away}} from this phase?",
+    "MATCH_REMOVED_SUCCESS": "Match removed successfully"
   },
   "MATCHES": {
     "TITLE": "Matches",

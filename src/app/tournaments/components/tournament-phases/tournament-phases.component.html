@@ -1,0 +1,401 @@
+<div class="phases-container">
+  <!-- Header -->
+  <div class="row mb-3">
+    <div class="col-lg-4">
+      <div class="searchbox">
+        <label for="phases-search-input"><i class="material-icons search-icon">search</i></label>
+        <input
+          id="phases-search-input"
+          [placeholder]="'COMMON.SEARCH' | translate"
+          type="text"
+          class="browser-default search-field"
+          (keyup)="filterPhases($event)"
+          [attr.aria-label]="'COMMON.SEARCH' | translate"
+        />
+      </div>
+    </div>
+    <div class="col-lg-8 text-end">
+      @if (canEdit) {
+        <button
+          class="btn btn-primary"
+          (click)="openAddModal(phaseModal)"
+          [title]="'TOURNAMENTS.ADD_PHASE' | translate"
+        >
+          <i class="fas fa-plus me-1"></i>
+          {{ 'TOURNAMENTS.ADD_PHASE' | translate }}
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Table -->
+  <ngx-datatable
+    class="material"
+    [rows]="filteredPhases"
+    [loadingIndicator]="loading"
+    columnMode="force"
+    [headerHeight]="50"
+    [footerHeight]="50"
+    rowHeight="auto"
+    [limit]="10"
+    [sorts]="[{ prop: 'phaseOrder', dir: 'asc' }]"
+  >
+    <ngx-datatable-column prop="phaseOrder" [width]="80" [minWidth]="60">
+      <ng-template ngx-datatable-header-template>
+        {{ 'TOURNAMENTS.PHASE_ORDER' | translate }}
+      </ng-template>
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        <span class="badge bg-dark">{{ row.phaseOrder }}</span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="name" [width]="200" [minWidth]="150">
+      <ng-template ngx-datatable-header-template>
+        {{ 'TOURNAMENTS.PHASE_NAME' | translate }}
+      </ng-template>
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        <strong>{{ row.name }}</strong>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="phaseMode" [width]="150" [minWidth]="120">
+      <ng-template ngx-datatable-header-template>
+        {{ 'TOURNAMENTS.PHASE_MODE' | translate }}
+      </ng-template>
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        {{ getPhaseModeLabel(row.phaseMode) }}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="phaseType" [width]="150" [minWidth]="120">
+      <ng-template ngx-datatable-header-template>
+        {{ 'TOURNAMENTS.PHASE_TYPE' | translate }}
+      </ng-template>
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        {{ getPhaseTypeLabel(row.phaseType) }}
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="status" [width]="120" [minWidth]="100">
+      <ng-template ngx-datatable-header-template>
+        {{ 'TOURNAMENTS.STATUS' | translate }}
+      </ng-template>
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        <span class="badge {{ getStatusClass(row.status) }}">
+          {{ getStatusLabel(row.status) }}
+        </span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    <ngx-datatable-column prop="matchCount" [width]="100" [minWidth]="80">
+      <ng-template ngx-datatable-header-template>
+        {{ 'TOURNAMENTS.MATCHES' | translate }}
+      </ng-template>
+      <ng-template let-row="row" ngx-datatable-cell-template>
+        <span class="badge bg-info">{{ row.matchCount || 0 }}</span>
+      </ng-template>
+    </ngx-datatable-column>
+
+    @if (canEdit) {
+      <ngx-datatable-column name="Actions" [sortable]="false" [width]="100" [minWidth]="80">
+        <ng-template ngx-datatable-header-template>
+          {{ 'COMMON.ACTIONS' | translate }}
+        </ng-template>
+        <ng-template let-row="row" ngx-datatable-cell-template>
+          <div class="d-flex gap-1">
+            <button
+              class="btn btn-sm btn-info"
+              (click)="openAssignMatchesModal(assignMatchesModal, row)"
+              [title]="'TOURNAMENTS.ASSIGN_MATCHES' | translate"
+            >
+              <i class="fas fa-futbol"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-primary"
+              (click)="openEditModal(phaseModal, row)"
+              [title]="'TOURNAMENTS.EDIT_PHASE' | translate"
+            >
+              <i class="fas fa-edit"></i>
+            </button>
+            <button
+              class="btn btn-sm btn-danger"
+              (click)="deletePhase(row)"
+              [title]="'TOURNAMENTS.DELETE_PHASE' | translate"
+            >
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </ng-template>
+      </ngx-datatable-column>
+    }
+  </ngx-datatable>
+
+  <!-- Empty state -->
+  @if (!loading && filteredPhases.length === 0) {
+    <div class="text-center py-4 text-muted">
+      <i class="fas fa-layer-group fa-3x mb-3"></i>
+      <p>{{ 'TOURNAMENTS.NO_PHASES' | translate }}</p>
+    </div>
+  }
+</div>
+
+<!-- Phase Modal -->
+<ng-template #phaseModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title" id="modal-phase-title">
+      @if (isEditMode) {
+        {{ 'TOURNAMENTS.EDIT_PHASE' | translate }}
+      } @else {
+        {{ 'TOURNAMENTS.ADD_PHASE' | translate }}
+      }
+    </h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    <form [formGroup]="phaseForm">
+      <div class="mb-3">
+        <label class="form-label">
+          {{ 'TOURNAMENTS.PHASE_NAME' | translate }} <span class="text-danger">*</span>
+        </label>
+        <input
+          type="text"
+          class="form-control"
+          formControlName="name"
+          [placeholder]="'TOURNAMENTS.PHASE_NAME' | translate"
+        />
+        @if (phaseForm.get('name')?.invalid && phaseForm.get('name')?.touched) {
+          <small class="text-danger">{{ 'VALIDATION.REQUIRED' | translate }}</small>
+        }
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'TOURNAMENTS.PHASE_ORDER' | translate }} <span class="text-danger">*</span>
+          </label>
+          <input
+            type="number"
+            class="form-control"
+            formControlName="phaseOrder"
+            min="1"
+          />
+        </div>
+
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'TOURNAMENTS.PHASE_TYPE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" formControlName="phaseType">
+            @for (type of phaseTypes; track type.value) {
+              <option [value]="type.value">{{ type.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <hr class="my-3" />
+      <h6 class="mb-3"><i class="fas fa-cog me-2"></i>{{ 'TOURNAMENTS.PHASE_CONFIG' | translate }}</h6>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">
+            {{ 'TOURNAMENTS.PHASE_MODE' | translate }} <span class="text-danger">*</span>
+          </label>
+          <select class="form-select" formControlName="phaseMode">
+            @for (mode of phaseModes; track mode.value) {
+              <option [value]="mode.value">{{ mode.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="isSingleRound" formControlName="isSingleRound" />
+            <label class="form-check-label" for="isSingleRound">{{ 'TOURNAMENTS.SINGLE_ROUND' | translate }}</label>
+          </div>
+          <small class="text-muted">{{ 'TOURNAMENTS.SINGLE_ROUND_HINT' | translate }}</small>
+        </div>
+        <div class="col-md-6 mb-3">
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="isHomeAndAway" formControlName="isHomeAndAway" />
+            <label class="form-check-label" for="isHomeAndAway">{{ 'TOURNAMENTS.HOME_AND_AWAY' | translate }}</label>
+          </div>
+          <small class="text-muted">{{ 'TOURNAMENTS.HOME_AND_AWAY_HINT' | translate }}</small>
+        </div>
+      </div>
+    </form>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      {{ 'COMMON.CANCEL' | translate }}
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="onSavePhase()"
+      [disabled]="phaseForm.invalid"
+    >
+      {{ 'COMMON.SAVE' | translate }}
+    </button>
+  </div>
+</ng-template>
+
+<!-- Assign Matches Modal -->
+<ng-template #assignMatchesModal let-modal>
+  <div class="modal-header">
+    <h5 class="modal-title" id="modal-assign-matches-title">
+      <i class="fas fa-futbol me-2"></i>
+      {{ 'TOURNAMENTS.ASSIGN_MATCHES' | translate }}: {{ selectedPhaseForMatches?.name }}
+    </h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="modal.dismiss()"></button>
+  </div>
+  <div class="modal-body">
+    @if (loadingMatches) {
+      <div class="text-center py-4">
+        <div class="spinner-border text-primary" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    } @else {
+      <!-- Matches already assigned to this phase -->
+      @if (phaseMatches.length > 0) {
+        <div class="mb-4">
+          <h6 class="mb-3">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            {{ 'TOURNAMENTS.ASSIGNED_MATCHES' | translate }} ({{ phaseMatches.length }})
+          </h6>
+          <div class="table-responsive">
+            <table class="table table-sm table-hover">
+              <thead class="table-light">
+                <tr>
+                  <th>{{ 'MATCHES.MATCHDAY' | translate }}</th>
+                  <th>{{ 'TOURNAMENTS.MATCH' | translate }}</th>
+                  <th>{{ 'TOURNAMENTS.STATUS' | translate }}</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (match of phaseMatches; track match.id) {
+                  <tr>
+                    <td><span class="badge bg-dark">{{ match.matchday }}</span></td>
+                    <td>
+                      <strong>{{ match.homeTeamName }}</strong>
+                      <span class="text-muted mx-1">vs</span>
+                      <strong>{{ match.awayTeamName }}</strong>
+                    </td>
+                    <td>
+                      <span class="badge {{ getMatchStatusClass(match.status) }}">
+                        {{ match.status }}
+                      </span>
+                    </td>
+                    <td class="text-end">
+                      @if (canEdit) {
+                        <button
+                          class="btn btn-sm btn-outline-danger"
+                          (click)="removeMatchFromPhase(match)"
+                          [title]="'TOURNAMENTS.REMOVE_MATCH' | translate"
+                        >
+                          <i class="fas fa-times"></i>
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <hr />
+      }
+
+      <!-- Available matches to assign -->
+      <div>
+        <div class="d-flex justify-content-between align-items-center mb-3">
+          <h6 class="mb-0">
+            <i class="fas fa-list me-2"></i>
+            {{ 'TOURNAMENTS.AVAILABLE_MATCHES' | translate }} ({{ availableMatches.length }})
+          </h6>
+          @if (canEdit && availableMatches.length > 0) {
+            <div class="btn-group btn-group-sm">
+              <button class="btn btn-outline-primary" (click)="selectAllMatches()">
+                {{ 'COMMON.SELECT_ALL' | translate }}
+              </button>
+              <button class="btn btn-outline-secondary" (click)="deselectAllMatches()">
+                {{ 'COMMON.DESELECT_ALL' | translate }}
+              </button>
+            </div>
+          }
+        </div>
+
+        @if (availableMatches.length === 0) {
+          <div class="text-center py-3 text-muted">
+            <i class="fas fa-info-circle me-2"></i>
+            {{ 'TOURNAMENTS.NO_AVAILABLE_MATCHES' | translate }}
+          </div>
+        } @else {
+          <div class="table-responsive" style="max-height: 300px; overflow-y: auto;">
+            <table class="table table-sm table-hover">
+              <thead class="table-light sticky-top">
+                <tr>
+                  @if (canEdit) {
+                    <th style="width: 40px;"></th>
+                  }
+                  <th>{{ 'MATCHES.MATCHDAY' | translate }}</th>
+                  <th>{{ 'TOURNAMENTS.MATCH' | translate }}</th>
+                  <th>{{ 'MATCHES.DATE' | translate }}</th>
+                  <th>{{ 'TOURNAMENTS.STATUS' | translate }}</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (match of availableMatches; track match.id) {
+                  <tr
+                    [class.table-primary]="isMatchSelected(match.id)"
+                    (click)="canEdit && toggleMatchSelection(match.id)"
+                    [style.cursor]="canEdit ? 'pointer' : 'default'"
+                  >
+                    @if (canEdit) {
+                      <td>
+                        <input
+                          type="checkbox"
+                          class="form-check-input"
+                          [checked]="isMatchSelected(match.id)"
+                          (click)="$event.stopPropagation()"
+                          (change)="toggleMatchSelection(match.id)"
+                        />
+                      </td>
+                    }
+                    <td><span class="badge bg-dark">{{ match.matchday }}</span></td>
+                    <td>
+                      <strong>{{ match.homeTeamName }}</strong>
+                      <span class="text-muted mx-1">vs</span>
+                      <strong>{{ match.awayTeamName }}</strong>
+                    </td>
+                    <td>{{ match.matchDate || '-' }}</td>
+                    <td>
+                      <span class="badge {{ getMatchStatusClass(match.status) }}">
+                        {{ match.status }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-secondary" (click)="modal.dismiss()">
+      {{ 'COMMON.CLOSE' | translate }}
+    </button>
+    @if (canEdit && selectedMatchIds.size > 0) {
+      <button type="button" class="btn btn-primary" (click)="assignSelectedMatches()">
+        <i class="fas fa-plus me-1"></i>
+        {{ 'TOURNAMENTS.ASSIGN' | translate }} ({{ selectedMatchIds.size }})
+      </button>
+    }
+  </div>
+</ng-template>

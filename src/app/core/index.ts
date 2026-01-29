@@ -21,6 +21,7 @@ export { PlayerStatisticsService } from './service/player-statistics.service';
 export { MatchService } from './service/match.service';
 export { RefereeService } from './service/referee.service';
 export { SanctionService } from './service/sanction.service';
+export { TournamentPhaseService } from './service/tournament-phase.service';
 
 // models
 export { User, AuthResponse, AuthData } from './models/user';
@@ -146,4 +147,10 @@ export {
   QualificationRuleRequest,
   PhaseConfigRequest,
   CreateTournamentWithPhasesRequest,
+  PhaseConfigDto,
+  CreateTournamentPhaseRequest,
+  UpdateTournamentPhaseRequest,
+  AssignMatchesToPhaseRequest,
+  TournamentPhaseResponse,
+  PhaseConfigResponse,
 } from './models/response';
