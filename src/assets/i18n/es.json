@@ -539,6 +539,8 @@
     "ASSISTS_TAB": "Asistencias",
     "MATCHES_TAB": "Partidos",
     "SANCTIONS_TAB": "Sanciones",
+    "BRACKET_TAB": "Llaves",
+    "NO_MATCHES": "No hay partidos disponibles",
     "PHASE_STATUS": "Estado de Fase",
     "CURRENT_PHASE": "Fase Actual",
     "PHASE_PROGRESS": "Progreso",

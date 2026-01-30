@@ -385,16 +385,31 @@
                     </ng-template>
                   </li>
 
-                  <li [ngbNavItem]="3">
-                    <button ngbNavLink>
-                      <i class="fas fa-table me-2"></i>{{ 'TOURNAMENTS.STANDINGS_TAB' | translate }}
-                    </button>
-                    <ng-template ngbNavContent>
-                      <div class="mt-4">
-                        <app-tournament-standings [tournamentId]="tournamentId" [tournamentFormat]="tournament.format"></app-tournament-standings>
-                      </div>
-                    </ng-template>
-                  </li>
+                  @if (isEliminationFormat()) {
+                    <li [ngbNavItem]="7">
+                      <button ngbNavLink>
+                        <i class="fas fa-sitemap me-2"></i>{{ 'TOURNAMENTS.BRACKET_TAB' | translate }}
+                      </button>
+                      <ng-template ngbNavContent>
+                        <div class="mt-4">
+                          <app-tournament-bracket [tournamentId]="tournamentId"></app-tournament-bracket>
+                        </div>
+                      </ng-template>
+                    </li>
+                  }
+
+                  @if (!isEliminationFormat()) {
+                    <li [ngbNavItem]="3">
+                      <button ngbNavLink>
+                        <i class="fas fa-table me-2"></i>{{ 'TOURNAMENTS.STANDINGS_TAB' | translate }}
+                      </button>
+                      <ng-template ngbNavContent>
+                        <div class="mt-4">
+                          <app-tournament-standings [tournamentId]="tournamentId" [tournamentFormat]="tournament.format"></app-tournament-standings>
+                        </div>
+                      </ng-template>
+                    </li>
+                  }
 
                   <li [ngbNavItem]="4">
                     <button ngbNavLink>

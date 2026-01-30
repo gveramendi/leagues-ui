@@ -36,6 +36,7 @@ import { TournamentScorersComponent } from '../../components/tournament-scorers/
 import { TournamentAssistsComponent } from '../../components/tournament-assists/tournament-assists.component';
 import { TournamentMatchesComponent } from '../../components/tournament-matches/tournament-matches.component';
 import { TournamentSanctionsComponent } from '../../components/tournament-sanctions/tournament-sanctions.component';
+import { TournamentBracketComponent } from '../../components/tournament-bracket/tournament-bracket.component';
 
 @Component({
   selector: 'app-tournament-detail',
@@ -53,6 +54,7 @@ import { TournamentSanctionsComponent } from '../../components/tournament-sancti
     TournamentAssistsComponent,
     TournamentMatchesComponent,
     TournamentSanctionsComponent,
+    TournamentBracketComponent,
   ],
   templateUrl: './tournament-detail.component.html',
   styleUrls: ['./tournament-detail.component.scss'],

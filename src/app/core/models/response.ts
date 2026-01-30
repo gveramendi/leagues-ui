@@ -1180,6 +1180,8 @@ export interface MatchSummaryResponse {
   statusDisplayName?: string;
   homeScore?: number;
   awayScore?: number;
+  homePenalties?: number;
+  awayPenalties?: number;
   // Goal scorers
   homeGoalScorers?: string[];
   awayGoalScorers?: string[];

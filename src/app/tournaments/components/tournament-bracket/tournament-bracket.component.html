@@ -1,0 +1,93 @@
+<div class="bracket-container">
+  @if (loading) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  } @else if (error) {
+    <div class="alert alert-danger">
+      {{ error }}
+    </div>
+  } @else if (rounds.length === 0) {
+    <div class="alert alert-info">
+      <i class="fas fa-info-circle me-2"></i>
+      {{ 'TOURNAMENTS.NO_MATCHES' | translate }}
+    </div>
+  } @else {
+    <div class="bracket-wrapper">
+      <div class="bracket">
+        @for (round of rounds; track round.name) {
+          <div class="bracket-round">
+            <div class="round-header">
+              <h5 class="round-title">{{ round.name }}</h5>
+              <span class="match-count">{{ round.matches.length }} {{ round.matches.length === 1 ? 'partido' : 'partidos' }}</span>
+            </div>
+            <div class="round-matches">
+              @for (match of round.matches; track match.id) {
+                <div class="bracket-match" [class]="getMatchStatusClass(match.status)">
+                  <div class="match-teams">
+                    <div class="team home-team" [class.winner]="isWinner(match, 'home')" [class.loser]="match.status === 'FINISHED' && !isWinner(match, 'home')">
+                      <span class="team-name">{{ match.homeTeam ?? 'TBD' }}</span>
+                      @if (match.status !== 'SCHEDULED' && match.homeScore !== null) {
+                        <span class="team-score">{{ match.homeScore }}</span>
+                        @if (match.homePenalties !== null) {
+                          <span class="team-penalties">({{ match.homePenalties }})</span>
+                        }
+                      }
+                    </div>
+                    <div class="team away-team" [class.winner]="isWinner(match, 'away')" [class.loser]="match.status === 'FINISHED' && !isWinner(match, 'away')">
+                      <span class="team-name">{{ match.awayTeam ?? 'TBD' }}</span>
+                      @if (match.status !== 'SCHEDULED' && match.awayScore !== null) {
+                        <span class="team-score">{{ match.awayScore }}</span>
+                        @if (match.awayPenalties !== null) {
+                          <span class="team-penalties">({{ match.awayPenalties }})</span>
+                        }
+                      }
+                    </div>
+                  </div>
+                  @if (match.status === 'IN_PROGRESS') {
+                    <div class="match-status live">
+                      <span class="live-indicator"></span> EN VIVO
+                    </div>
+                  } @else if (match.status === 'SCHEDULED' && match.matchDate) {
+                    <div class="match-status scheduled">
+                      {{ match.matchDate }}
+                    </div>
+                  } @else if (match.status === 'FINISHED') {
+                    <div class="match-status finished">
+                      <i class="fas fa-check-circle"></i>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Champion display if Final is finished -->
+    @if (rounds.length > 0) {
+      @for (round of rounds; track round.name) {
+        @if (round.name === 'Final' && round.matches.length > 0 && round.matches[0].status === 'FINISHED') {
+          <div class="champion-banner">
+            <div class="champion-content">
+              <i class="fas fa-trophy trophy-icon"></i>
+              <div class="champion-info">
+                <span class="champion-label">{{ 'TOURNAMENTS.CHAMPION' | translate }}</span>
+                <span class="champion-name">
+                  @if (isWinner(round.matches[0], 'home')) {
+                    {{ round.matches[0].homeTeam }}
+                  } @else {
+                    {{ round.matches[0].awayTeam }}
+                  }
+                </span>
+              </div>
+            </div>
+          </div>
+        }
+      }
+    }
+  }
+</div>
