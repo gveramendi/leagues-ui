@@ -1292,5 +1292,290 @@ describe('TournamentDetailComponent', () => {
         expect(component.canEditMatches()).toBeFalse();
       });
     });
+
+    describe('isSwissFormat', () => {
+      it('should return true for SWISS format', () => {
+        component.tournament = { ...mockTournament, format: 'SWISS' };
+        expect(component.isSwissFormat()).toBeTrue();
+      });
+
+      it('should return false for LEAGUE format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE' };
+        expect(component.isSwissFormat()).toBeFalse();
+      });
+
+      it('should return false for GROUP_STAGE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE' };
+        expect(component.isSwissFormat()).toBeFalse();
+      });
+
+      it('should return false when tournament is null', () => {
+        component.tournament = null;
+        expect(component.isSwissFormat()).toBeFalse();
+      });
+    });
+
+    describe('isLeagueSplitFormat', () => {
+      it('should return true for LEAGUE_SPLIT format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE_SPLIT' };
+        expect(component.isLeagueSplitFormat()).toBeTrue();
+      });
+
+      it('should return false for LEAGUE format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE' };
+        expect(component.isLeagueSplitFormat()).toBeFalse();
+      });
+
+      it('should return false for GROUP_STAGE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE' };
+        expect(component.isLeagueSplitFormat()).toBeFalse();
+      });
+
+      it('should return false when tournament is null', () => {
+        component.tournament = null;
+        expect(component.isLeagueSplitFormat()).toBeFalse();
+      });
+    });
+
+    describe('isEliminationFormat', () => {
+      it('should return true for SINGLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'SINGLE_ELIMINATION' };
+        expect(component.isEliminationFormat()).toBeTrue();
+      });
+
+      it('should return true for DOUBLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'DOUBLE_ELIMINATION' };
+        expect(component.isEliminationFormat()).toBeTrue();
+      });
+
+      it('should return false for LEAGUE format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE' };
+        expect(component.isEliminationFormat()).toBeFalse();
+      });
+
+      it('should return false for GROUP_STAGE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE' };
+        expect(component.isEliminationFormat()).toBeFalse();
+      });
+
+      it('should return false when tournament is null', () => {
+        component.tournament = null;
+        expect(component.isEliminationFormat()).toBeFalse();
+      });
+    });
+
+    describe('isInSplitPhase', () => {
+      it('should return true when current phase type is SPLIT_PHASE', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'SPLIT_PHASE' };
+        expect(component.isInSplitPhase()).toBeTrue();
+      });
+
+      it('should return false when current phase type is GROUP_STAGE', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'GROUP_STAGE' };
+        expect(component.isInSplitPhase()).toBeFalse();
+      });
+
+      it('should return false when phaseStatus is null', () => {
+        component.phaseStatus = null;
+        expect(component.isInSplitPhase()).toBeFalse();
+      });
+    });
+
+    describe('isInPlayoff', () => {
+      it('should return true when current phase type is PLAYOFF', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'PLAYOFF' };
+        expect(component.isInPlayoff()).toBeTrue();
+      });
+
+      it('should return true when current phase type is PLAYOFF_ROUND', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'PLAYOFF_ROUND' };
+        expect(component.isInPlayoff()).toBeTrue();
+      });
+
+      it('should return false when current phase type is QUARTER_FINALS', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'QUARTER_FINALS' };
+        expect(component.isInPlayoff()).toBeFalse();
+      });
+
+      it('should return false when phaseStatus is null', () => {
+        component.phaseStatus = null;
+        expect(component.isInPlayoff()).toBeFalse();
+      });
+    });
+
+    describe('isInSwissPhase', () => {
+      it('should return true when current phase type is SWISS', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'SWISS' };
+        expect(component.isInSwissPhase()).toBeTrue();
+      });
+
+      it('should return true when current phase type is SWISS_ROUND', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'SWISS_ROUND' };
+        expect(component.isInSwissPhase()).toBeTrue();
+      });
+
+      it('should return false when current phase type is PLAYOFF', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'PLAYOFF' };
+        expect(component.isInSwissPhase()).toBeFalse();
+      });
+
+      it('should return false when phaseStatus is null', () => {
+        component.phaseStatus = null;
+        expect(component.isInSwissPhase()).toBeFalse();
+      });
+    });
+
+    describe('shouldShowBracket', () => {
+      it('should return true for SINGLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'SINGLE_ELIMINATION' };
+        expect(component.shouldShowBracket()).toBeTrue();
+      });
+
+      it('should return true for DOUBLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'DOUBLE_ELIMINATION' };
+        expect(component.shouldShowBracket()).toBeTrue();
+      });
+
+      it('should return true for GROUP_STAGE_SINGLE when in knockout phase', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE_SINGLE' };
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'QUARTER_FINALS' };
+        expect(component.shouldShowBracket()).toBeTrue();
+      });
+
+      it('should return false for GROUP_STAGE_SINGLE when in group stage', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE_SINGLE' };
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'GROUP_STAGE' };
+        expect(component.shouldShowBracket()).toBeFalse();
+      });
+
+      it('should return true for SWISS when in playoff phase', () => {
+        component.tournament = { ...mockTournament, format: 'SWISS' };
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'PLAYOFF' };
+        expect(component.shouldShowBracket()).toBeTrue();
+      });
+
+      it('should return true for SWISS when in knockout phase', () => {
+        component.tournament = { ...mockTournament, format: 'SWISS' };
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'SEMI_FINALS' };
+        expect(component.shouldShowBracket()).toBeTrue();
+      });
+
+      it('should return false for SWISS when in swiss phase', () => {
+        component.tournament = { ...mockTournament, format: 'SWISS' };
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'SWISS' };
+        expect(component.shouldShowBracket()).toBeFalse();
+      });
+
+      it('should return false for LEAGUE format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE' };
+        expect(component.shouldShowBracket()).toBeFalse();
+      });
+    });
+
+    describe('shouldShowStandings', () => {
+      it('should return true for LEAGUE format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE' };
+        expect(component.shouldShowStandings()).toBeTrue();
+      });
+
+      it('should return true for GROUP_STAGE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE' };
+        expect(component.shouldShowStandings()).toBeTrue();
+      });
+
+      it('should return true for SWISS format', () => {
+        component.tournament = { ...mockTournament, format: 'SWISS' };
+        expect(component.shouldShowStandings()).toBeTrue();
+      });
+
+      it('should return true for LEAGUE_SPLIT format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE_SPLIT' };
+        expect(component.shouldShowStandings()).toBeTrue();
+      });
+
+      it('should return false for SINGLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'SINGLE_ELIMINATION' };
+        expect(component.shouldShowStandings()).toBeFalse();
+      });
+
+      it('should return false for DOUBLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'DOUBLE_ELIMINATION' };
+        expect(component.shouldShowStandings()).toBeFalse();
+      });
+    });
+
+    describe('supportsPhaseAdvancement', () => {
+      it('should return true for GROUP_STAGE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE' };
+        expect(component.supportsPhaseAdvancement()).toBeTrue();
+      });
+
+      it('should return true for GROUP_STAGE_SINGLE format', () => {
+        component.tournament = { ...mockTournament, format: 'GROUP_STAGE_SINGLE' };
+        expect(component.supportsPhaseAdvancement()).toBeTrue();
+      });
+
+      it('should return true for SINGLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'SINGLE_ELIMINATION' };
+        expect(component.supportsPhaseAdvancement()).toBeTrue();
+      });
+
+      it('should return true for DOUBLE_ELIMINATION format', () => {
+        component.tournament = { ...mockTournament, format: 'DOUBLE_ELIMINATION' };
+        expect(component.supportsPhaseAdvancement()).toBeTrue();
+      });
+
+      it('should return true for SWISS format', () => {
+        component.tournament = { ...mockTournament, format: 'SWISS' };
+        expect(component.supportsPhaseAdvancement()).toBeTrue();
+      });
+
+      it('should return true for LEAGUE_SPLIT format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE_SPLIT' };
+        expect(component.supportsPhaseAdvancement()).toBeTrue();
+      });
+
+      it('should return false for LEAGUE format', () => {
+        component.tournament = { ...mockTournament, format: 'LEAGUE' };
+        expect(component.supportsPhaseAdvancement()).toBeFalse();
+      });
+    });
+
+    describe('isInKnockout extended', () => {
+      it('should return true for PLAYOFF phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'PLAYOFF' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for PLAYOFF_ROUND phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'PLAYOFF_ROUND' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for ROUND_OF_64 phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'ROUND_OF_64' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for ROUND_OF_32 phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'ROUND_OF_32' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for ROUND_OF_16 phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'ROUND_OF_16' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for THIRD_PLACE phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'THIRD_PLACE' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+
+      it('should return true for KNOCKOUT phase', () => {
+        component.phaseStatus = { ...mockPhaseStatus, currentPhaseType: 'KNOCKOUT' };
+        expect(component.isInKnockout()).toBeTrue();
+      });
+    });
   });
 });
