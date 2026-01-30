@@ -480,6 +480,31 @@ export class TournamentDetailComponent implements OnInit {
            this.tournament?.format === 'DOUBLE_ELIMINATION';
   }
 
+  /**
+   * Determines if the bracket tab should be shown.
+   * Shows for:
+   * - Pure elimination formats (SINGLE_ELIMINATION, DOUBLE_ELIMINATION)
+   * - GROUP_STAGE formats when in knockout phase
+   */
+  shouldShowBracket(): boolean {
+    if (this.isEliminationFormat()) {
+      return true;
+    }
+    // For GROUP_STAGE formats, show bracket when in knockout phase
+    if (this.isGroupStageFormat() && this.isInKnockout()) {
+      return true;
+    }
+    return false;
+  }
+
+  /**
+   * Determines if the standings tab should be shown.
+   * Shows for LEAGUE and GROUP_STAGE formats.
+   */
+  shouldShowStandings(): boolean {
+    return !this.isEliminationFormat();
+  }
+
   supportsPhaseAdvancement(): boolean {
     return this.isGroupStageFormat() || this.isEliminationFormat();
   }

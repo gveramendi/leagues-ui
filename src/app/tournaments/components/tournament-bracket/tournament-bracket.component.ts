@@ -131,8 +131,21 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
   }
 
   get isDoubleElimination(): boolean {
-    return this.tournamentFormat === 'DOUBLE_ELIMINATION';
+    return this.tournamentFormat === 'DOUBLE_ELIMINATION' ||
+           this.tournamentFormat === 'GROUP_STAGE_DOUBLE';
   }
+
+  get isGroupStageFormat(): boolean {
+    return this.tournamentFormat === 'GROUP_STAGE' ||
+           this.tournamentFormat === 'GROUP_STAGE_SINGLE' ||
+           this.tournamentFormat === 'GROUP_STAGE_DOUBLE';
+  }
+
+  // Knockout round identifiers
+  private knockoutRounds = [
+    'ROUND_OF_64', 'ROUND_OF_32', 'ROUND_OF_16',
+    'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL'
+  ];
 
   loadBracket(): void {
     this.loading = true;
@@ -143,7 +156,11 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
         const matches = response.body.data;
         if (this.isDoubleElimination) {
           this.organizeDoubleEliminationBracket(matches);
+        } else if (this.tournamentFormat === 'GROUP_STAGE_DOUBLE') {
+          // GROUP_STAGE_DOUBLE advances to double elimination knockout
+          this.organizeDoubleEliminationBracket(matches);
         } else {
+          // SINGLE_ELIMINATION, GROUP_STAGE, GROUP_STAGE_SINGLE use single elimination bracket
           this.rounds = this.organizeMatchesIntoRounds(matches);
         }
         this.loading = false;
@@ -161,6 +178,11 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
 
     matches.forEach((match) => {
       const roundKey = match.phaseName || match.round || 'Unknown';
+
+      // For GROUP_STAGE formats, only include knockout rounds in bracket
+      if (this.isGroupStageFormat && !this.isKnockoutRound(roundKey)) {
+        return; // Skip group stage matches
+      }
 
       if (!roundsMap.has(roundKey)) {
         roundsMap.set(roundKey, []);
@@ -193,6 +215,16 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
     });
 
     return rounds.sort((a, b) => a.order - b.order);
+  }
+
+  /**
+   * Checks if a round is a knockout round
+   */
+  private isKnockoutRound(roundKey: string): boolean {
+    return this.knockoutRounds.includes(roundKey) ||
+           roundKey.startsWith('WB_') ||
+           roundKey.startsWith('LB_') ||
+           roundKey.startsWith('GRAND_FINAL');
   }
 
   private organizeDoubleEliminationBracket(matches: MatchSummaryResponse[]): void {
