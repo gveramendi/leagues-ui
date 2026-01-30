@@ -1,7 +1,7 @@
 import { Component, Input, OnChanges, OnInit, SimpleChanges } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TranslateModule } from '@ngx-translate/core';
-import { MatchService } from '@core';
+import { MatchService, TournamentFormat } from '@core';
 import { MatchSummaryResponse } from '../../../core/models/response';
 
 interface BracketMatch {
@@ -15,12 +15,14 @@ interface BracketMatch {
   winnerId: number | null;
   status: string;
   matchDate?: string;
+  round?: string;
 }
 
 interface BracketRound {
   name: string;
   order: number;
   matches: BracketMatch[];
+  bracketType?: 'winners' | 'losers' | 'grand_final';
 }
 
 @Component({
@@ -32,12 +34,21 @@ interface BracketRound {
 })
 export class TournamentBracketComponent implements OnInit, OnChanges {
   @Input() tournamentId!: number;
+  @Input() tournamentFormat: TournamentFormat = 'SINGLE_ELIMINATION';
 
+  // Single elimination
   rounds: BracketRound[] = [];
+
+  // Double elimination
+  winnersBracket: BracketRound[] = [];
+  losersBracket: BracketRound[] = [];
+  grandFinal: BracketRound | null = null;
+
   loading = false;
   error: string | null = null;
 
-  private roundOrder: { [key: string]: number } = {
+  // Single elimination round order
+  private singleEliminationOrder: { [key: string]: number } = {
     'ROUND_OF_64': 1,
     'ROUND_OF_32': 2,
     'ROUND_OF_16': 3,
@@ -47,7 +58,30 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
     'FINAL': 7,
   };
 
-  private roundNames: { [key: string]: string } = {
+  // Double elimination round order
+  private doubleEliminationOrder: { [key: string]: number } = {
+    // Winners Bracket
+    'WB_ROUND_1': 1,
+    'WB_ROUND_2': 2,
+    'WB_ROUND_3': 3,
+    'WB_QUARTER_FINALS': 4,
+    'WB_SEMI_FINALS': 5,
+    'WB_FINAL': 6,
+    // Losers Bracket
+    'LB_ROUND_1': 11,
+    'LB_ROUND_2': 12,
+    'LB_ROUND_3': 13,
+    'LB_ROUND_4': 14,
+    'LB_ROUND_5': 15,
+    'LB_QUARTER_FINALS': 16,
+    'LB_SEMI_FINALS': 17,
+    'LB_FINAL': 18,
+    // Grand Final
+    'GRAND_FINAL': 100,
+    'GRAND_FINAL_RESET': 101,
+  };
+
+  private singleEliminationNames: { [key: string]: string } = {
     'ROUND_OF_64': 'Ronda de 64',
     'ROUND_OF_32': 'Ronda de 32',
     'ROUND_OF_16': 'Octavos de Final',
@@ -55,6 +89,28 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
     'SEMI_FINALS': 'Semifinales',
     'THIRD_PLACE': 'Tercer Puesto',
     'FINAL': 'Final',
+  };
+
+  private doubleEliminationNames: { [key: string]: string } = {
+    // Winners Bracket
+    'WB_ROUND_1': 'WB Ronda 1',
+    'WB_ROUND_2': 'WB Ronda 2',
+    'WB_ROUND_3': 'WB Ronda 3',
+    'WB_QUARTER_FINALS': 'WB Cuartos',
+    'WB_SEMI_FINALS': 'WB Semifinal',
+    'WB_FINAL': 'WB Final',
+    // Losers Bracket
+    'LB_ROUND_1': 'LB Ronda 1',
+    'LB_ROUND_2': 'LB Ronda 2',
+    'LB_ROUND_3': 'LB Ronda 3',
+    'LB_ROUND_4': 'LB Ronda 4',
+    'LB_ROUND_5': 'LB Ronda 5',
+    'LB_QUARTER_FINALS': 'LB Cuartos',
+    'LB_SEMI_FINALS': 'LB Semifinal',
+    'LB_FINAL': 'LB Final',
+    // Grand Final
+    'GRAND_FINAL': 'Gran Final',
+    'GRAND_FINAL_RESET': 'Gran Final (Reset)',
   };
 
   constructor(private matchService: MatchService) {}
@@ -69,16 +125,27 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
     if (changes['tournamentId'] && this.tournamentId && !changes['tournamentId'].firstChange) {
       this.loadBracket();
     }
+    if (changes['tournamentFormat'] && !changes['tournamentFormat'].firstChange) {
+      this.loadBracket();
+    }
+  }
+
+  get isDoubleElimination(): boolean {
+    return this.tournamentFormat === 'DOUBLE_ELIMINATION';
   }
 
   loadBracket(): void {
     this.loading = true;
     this.error = null;
 
-    this.matchService.getByTournament(this.tournamentId, 0, 100).subscribe({
+    this.matchService.getByTournament(this.tournamentId, 0, 200).subscribe({
       next: (response) => {
         const matches = response.body.data;
-        this.rounds = this.organizeMatchesIntoRounds(matches);
+        if (this.isDoubleElimination) {
+          this.organizeDoubleEliminationBracket(matches);
+        } else {
+          this.rounds = this.organizeMatchesIntoRounds(matches);
+        }
         this.loading = false;
       },
       error: (err) => {
@@ -112,20 +179,102 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
         winnerId: winnerId,
         status: match.status,
         matchDate: match.matchDate,
+        round: roundKey,
       });
     });
 
     const rounds: BracketRound[] = [];
-    roundsMap.forEach((matches, roundKey) => {
+    roundsMap.forEach((matchList, roundKey) => {
       rounds.push({
-        name: this.roundNames[roundKey] || roundKey,
-        order: this.roundOrder[roundKey] || 0,
-        matches: matches.sort((a, b) => a.id - b.id),
+        name: this.singleEliminationNames[roundKey] || roundKey,
+        order: this.singleEliminationOrder[roundKey] || 0,
+        matches: matchList.sort((a, b) => a.id - b.id),
       });
     });
 
-    // Sort rounds by order
     return rounds.sort((a, b) => a.order - b.order);
+  }
+
+  private organizeDoubleEliminationBracket(matches: MatchSummaryResponse[]): void {
+    const winnersMap = new Map<string, BracketMatch[]>();
+    const losersMap = new Map<string, BracketMatch[]>();
+    const grandFinalMatches: BracketMatch[] = [];
+
+    matches.forEach((match) => {
+      const roundKey = match.phaseName || match.round || 'Unknown';
+      const winnerId = this.determineWinner(match);
+
+      const bracketMatch: BracketMatch = {
+        id: match.id,
+        homeTeam: match.homeTeamName ?? null,
+        awayTeam: match.awayTeamName ?? null,
+        homeScore: match.homeScore ?? null,
+        awayScore: match.awayScore ?? null,
+        homePenalties: match.homePenalties ?? null,
+        awayPenalties: match.awayPenalties ?? null,
+        winnerId: winnerId,
+        status: match.status,
+        matchDate: match.matchDate,
+        round: roundKey,
+      };
+
+      // Categorize by bracket type
+      if (roundKey.startsWith('WB_')) {
+        if (!winnersMap.has(roundKey)) {
+          winnersMap.set(roundKey, []);
+        }
+        winnersMap.get(roundKey)!.push(bracketMatch);
+      } else if (roundKey.startsWith('LB_')) {
+        if (!losersMap.has(roundKey)) {
+          losersMap.set(roundKey, []);
+        }
+        losersMap.get(roundKey)!.push(bracketMatch);
+      } else if (roundKey.startsWith('GRAND_FINAL')) {
+        grandFinalMatches.push(bracketMatch);
+      } else {
+        // Fallback: try to determine by round name pattern
+        if (!winnersMap.has(roundKey)) {
+          winnersMap.set(roundKey, []);
+        }
+        winnersMap.get(roundKey)!.push(bracketMatch);
+      }
+    });
+
+    // Build winners bracket
+    this.winnersBracket = [];
+    winnersMap.forEach((matchList, roundKey) => {
+      this.winnersBracket.push({
+        name: this.doubleEliminationNames[roundKey] || roundKey,
+        order: this.doubleEliminationOrder[roundKey] || 0,
+        matches: matchList.sort((a, b) => a.id - b.id),
+        bracketType: 'winners',
+      });
+    });
+    this.winnersBracket.sort((a, b) => a.order - b.order);
+
+    // Build losers bracket
+    this.losersBracket = [];
+    losersMap.forEach((matchList, roundKey) => {
+      this.losersBracket.push({
+        name: this.doubleEliminationNames[roundKey] || roundKey,
+        order: this.doubleEliminationOrder[roundKey] || 0,
+        matches: matchList.sort((a, b) => a.id - b.id),
+        bracketType: 'losers',
+      });
+    });
+    this.losersBracket.sort((a, b) => a.order - b.order);
+
+    // Build grand final
+    if (grandFinalMatches.length > 0) {
+      this.grandFinal = {
+        name: 'Gran Final',
+        order: 100,
+        matches: grandFinalMatches.sort((a, b) => a.id - b.id),
+        bracketType: 'grand_final',
+      };
+    } else {
+      this.grandFinal = null;
+    }
   }
 
   private determineWinner(match: MatchSummaryResponse): number | null {
@@ -158,7 +307,6 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
     if (!match.winnerId || match.status !== 'FINISHED') {
       return false;
     }
-    // We don't have teamId in BracketMatch, so we determine by score
     if (team === 'home') {
       const homeTotal = (match.homeScore ?? 0) + (match.homePenalties ?? 0);
       const awayTotal = (match.awayScore ?? 0) + (match.awayPenalties ?? 0);
@@ -193,5 +341,31 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
       score += ` (${match.homePenalties}-${match.awayPenalties} pen)`;
     }
     return score;
+  }
+
+  getChampion(): string | null {
+    if (this.isDoubleElimination) {
+      // Check grand final for champion
+      if (this.grandFinal && this.grandFinal.matches.length > 0) {
+        const lastMatch = this.grandFinal.matches[this.grandFinal.matches.length - 1];
+        if (lastMatch.status === 'FINISHED') {
+          return this.isWinner(lastMatch, 'home') ? lastMatch.homeTeam : lastMatch.awayTeam;
+        }
+      }
+    } else {
+      // Check final for single elimination
+      const finalRound = this.rounds.find(r => r.name === 'Final' || r.name.includes('Final'));
+      if (finalRound && finalRound.matches.length > 0) {
+        const finalMatch = finalRound.matches[0];
+        if (finalMatch.status === 'FINISHED') {
+          return this.isWinner(finalMatch, 'home') ? finalMatch.homeTeam : finalMatch.awayTeam;
+        }
+      }
+    }
+    return null;
+  }
+
+  hasChampion(): boolean {
+    return this.getChampion() !== null;
   }
 }

@@ -228,6 +228,130 @@
   color: #212529;
 }
 
+// =====================
+// Double Elimination Styles
+// =====================
+
+.double-bracket-section {
+  margin-bottom: 2rem;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.section-header {
+  padding: 1rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+}
+
+// Winners Bracket
+.winners-section {
+  border: 2px solid #28a745;
+  background-color: #f8fff8;
+}
+
+.winners-header {
+  background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+  color: #fff;
+}
+
+.winners-round-header {
+  border-bottom-color: #28a745;
+
+  .round-title {
+    color: #155724;
+  }
+}
+
+.winners-match {
+  border-left: 3px solid #28a745;
+}
+
+// Losers Bracket
+.losers-section {
+  border: 2px solid #dc3545;
+  background-color: #fff8f8;
+}
+
+.losers-header {
+  background: linear-gradient(135deg, #dc3545 0%, #fd7e14 100%);
+  color: #fff;
+}
+
+.losers-round-header {
+  border-bottom-color: #dc3545;
+
+  .round-title {
+    color: #721c24;
+  }
+}
+
+.losers-match {
+  border-left: 3px solid #dc3545;
+}
+
+// Grand Final
+.grand-final-section {
+  border: 3px solid #ffc107;
+  background: linear-gradient(135deg, #fffef0 0%, #fff8e1 100%);
+}
+
+.grand-final-header {
+  background: linear-gradient(135deg, #ffc107 0%, #ffb700 100%);
+  color: #212529;
+  font-size: 1.25rem;
+}
+
+.grand-final-wrapper {
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.grand-final-match {
+  width: 100%;
+  max-width: 400px;
+  border: 2px solid #ffc107;
+  box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+
+  &:hover {
+    box-shadow: 0 6px 16px rgba(255, 193, 7, 0.4);
+  }
+}
+
+.grand-final-label {
+  background-color: #ffc107;
+  color: #212529;
+  text-align: center;
+  padding: 0.25rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.team-badge {
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 0.15rem 0.4rem;
+  border-radius: 3px;
+  margin-right: 0.5rem;
+  text-transform: uppercase;
+}
+
+.winners-badge {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.losers-badge {
+  background-color: #dc3545;
+  color: #fff;
+}
+
 // Responsive adjustments
 @media (max-width: 768px) {
   .bracket {
@@ -246,5 +370,14 @@
 
   .champion-info {
     align-items: center;
+  }
+
+  .section-header {
+    font-size: 1rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .grand-final-match {
+    max-width: 100%;
   }
 }
