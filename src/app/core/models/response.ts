@@ -617,6 +617,7 @@ export type TournamentStatus =
 
 export type TournamentFormat =
   | 'LEAGUE'
+  | 'LEAGUE_SPLIT'
   | 'SINGLE_ELIMINATION'
   | 'DOUBLE_ELIMINATION'
   | 'GROUP_STAGE'
@@ -1506,7 +1507,8 @@ export type PhaseStatus = 'PENDING' | 'IN_PROGRESS' | 'COMPLETED';
 export type PhaseMode =
   | 'KNOCKOUT'
   | 'ROUND_ROBIN'
-  | 'GROUP_STAGE';
+  | 'GROUP_STAGE'
+  | 'SPLIT_BY_POSITION';
 
 export type QualificationRuleType =
   | 'TOP_N_ADVANCE'

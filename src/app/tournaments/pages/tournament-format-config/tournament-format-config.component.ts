@@ -41,6 +41,7 @@ export class TournamentFormatConfigComponent implements OnInit {
   // Format options
   formats: { value: TournamentFormat; label: string; icon: string; description: string }[] = [
     { value: 'LEAGUE', label: 'Liga', icon: 'fa-list-ol', description: 'Todos contra todos, se acumulan puntos' },
+    { value: 'LEAGUE_SPLIT', label: 'Liga con Liguillas', icon: 'fa-random', description: 'Liga regular + división en grupos (Campeonato/Permanencia)' },
     { value: 'SINGLE_ELIMINATION', label: 'Eliminacion Simple', icon: 'fa-sitemap', description: 'Pierde y queda eliminado' },
     { value: 'DOUBLE_ELIMINATION', label: 'Eliminacion Doble', icon: 'fa-code-branch', description: 'Dos derrotas para ser eliminado' },
     { value: 'GROUP_STAGE', label: 'Fase de Grupos', icon: 'fa-th', description: 'Grupos clasificatorios' },
@@ -54,6 +55,7 @@ export class TournamentFormatConfigComponent implements OnInit {
     { value: 'KNOCKOUT', label: 'Eliminacion Directa' },
     { value: 'ROUND_ROBIN', label: 'Todos contra Todos' },
     { value: 'GROUP_STAGE', label: 'Fase de Grupos' },
+    { value: 'SPLIT_BY_POSITION', label: 'Division por Posicion (Liguillas)' },
   ];
 
   phaseTypes: { value: PhaseType; label: string }[] = [

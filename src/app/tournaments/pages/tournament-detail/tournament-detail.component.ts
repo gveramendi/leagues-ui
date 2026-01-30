@@ -173,8 +173,8 @@ export class TournamentDetailComponent implements OnInit {
         this.loading = false;
         // Check if can advance for tournaments IN_PROGRESS
         if (this.tournament?.status === 'IN_PROGRESS') {
-          if (this.isGroupStageFormat() || this.isSwissFormat()) {
-            // For GROUP_STAGE and SWISS: load phase status which includes canAdvance
+          if (this.isGroupStageFormat() || this.isSwissFormat() || this.isLeagueSplitFormat()) {
+            // For GROUP_STAGE, SWISS, and LEAGUE_SPLIT: load phase status which includes canAdvance
             this.loadPhaseStatus();
           } else if (this.isEliminationFormat()) {
             // For SINGLE_ELIMINATION/DOUBLE_ELIMINATION: check can advance knockout
@@ -493,6 +493,14 @@ export class TournamentDetailComponent implements OnInit {
     return this.tournament?.format === 'SWISS';
   }
 
+  isLeagueSplitFormat(): boolean {
+    return this.tournament?.format === 'LEAGUE_SPLIT';
+  }
+
+  isInSplitPhase(): boolean {
+    return this.phaseStatus?.currentPhaseType === 'SPLIT_PHASE';
+  }
+
   /**
    * Checks if in playoff phase (used in SWISS format)
    */
@@ -532,7 +540,7 @@ export class TournamentDetailComponent implements OnInit {
   }
 
   supportsPhaseAdvancement(): boolean {
-    return this.isGroupStageFormat() || this.isEliminationFormat() || this.isSwissFormat();
+    return this.isGroupStageFormat() || this.isEliminationFormat() || this.isSwissFormat() || this.isLeagueSplitFormat();
   }
 
   private checkCanAdvanceKnockout(): void {

@@ -57,6 +57,7 @@ export class TournamentListComponent implements OnInit {
   // Dropdown options
   formats = [
     { value: 'LEAGUE', label: 'Liga' },
+    { value: 'LEAGUE_SPLIT', label: 'Liga con Liguillas' },
     { value: 'SINGLE_ELIMINATION', label: 'Eliminacion Simple' },
     { value: 'DOUBLE_ELIMINATION', label: 'Eliminacion Doble' },
     { value: 'GROUP_STAGE', label: 'Fase de Grupos' },
