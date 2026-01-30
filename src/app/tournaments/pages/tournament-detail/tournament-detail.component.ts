@@ -173,8 +173,8 @@ export class TournamentDetailComponent implements OnInit {
         this.loading = false;
         // Check if can advance for tournaments IN_PROGRESS
         if (this.tournament?.status === 'IN_PROGRESS') {
-          if (this.isGroupStageFormat()) {
-            // For GROUP_STAGE: load phase status which includes canAdvance
+          if (this.isGroupStageFormat() || this.isSwissFormat()) {
+            // For GROUP_STAGE and SWISS: load phase status which includes canAdvance
             this.loadPhaseStatus();
           } else if (this.isEliminationFormat()) {
             // For SINGLE_ELIMINATION/DOUBLE_ELIMINATION: check can advance knockout
@@ -272,8 +272,17 @@ export class TournamentDetailComponent implements OnInit {
   }
 
   isInKnockout(): boolean {
-    const knockoutPhases = ['ROUND_OF_16', 'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL', 'KNOCKOUT'];
+    const knockoutPhases = [
+      'PLAYOFF', 'PLAYOFF_ROUND',
+      'ROUND_OF_64', 'ROUND_OF_32', 'ROUND_OF_16',
+      'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL', 'KNOCKOUT'
+    ];
     return this.phaseStatus?.currentPhaseType ? knockoutPhases.includes(this.phaseStatus.currentPhaseType) : false;
+  }
+
+  isInSwissPhase(): boolean {
+    return this.phaseStatus?.currentPhaseType === 'SWISS' ||
+           this.phaseStatus?.currentPhaseType === 'SWISS_ROUND';
   }
 
   getNextPhaseName(): string {
@@ -480,11 +489,24 @@ export class TournamentDetailComponent implements OnInit {
            this.tournament?.format === 'DOUBLE_ELIMINATION';
   }
 
+  isSwissFormat(): boolean {
+    return this.tournament?.format === 'SWISS';
+  }
+
+  /**
+   * Checks if in playoff phase (used in SWISS format)
+   */
+  isInPlayoff(): boolean {
+    return this.phaseStatus?.currentPhaseType === 'PLAYOFF' ||
+           this.phaseStatus?.currentPhaseType === 'PLAYOFF_ROUND';
+  }
+
   /**
    * Determines if the bracket tab should be shown.
    * Shows for:
    * - Pure elimination formats (SINGLE_ELIMINATION, DOUBLE_ELIMINATION)
    * - GROUP_STAGE formats when in knockout phase
+   * - SWISS format when in playoff or knockout phase
    */
   shouldShowBracket(): boolean {
     if (this.isEliminationFormat()) {
@@ -494,19 +516,23 @@ export class TournamentDetailComponent implements OnInit {
     if (this.isGroupStageFormat() && this.isInKnockout()) {
       return true;
     }
+    // For SWISS format, show bracket when in playoff or knockout phase
+    if (this.isSwissFormat() && (this.isInPlayoff() || this.isInKnockout())) {
+      return true;
+    }
     return false;
   }
 
   /**
    * Determines if the standings tab should be shown.
-   * Shows for LEAGUE and GROUP_STAGE formats.
+   * Shows for LEAGUE, GROUP_STAGE and SWISS formats.
    */
   shouldShowStandings(): boolean {
     return !this.isEliminationFormat();
   }
 
   supportsPhaseAdvancement(): boolean {
-    return this.isGroupStageFormat() || this.isEliminationFormat();
+    return this.isGroupStageFormat() || this.isEliminationFormat() || this.isSwissFormat();
   }
 
   private checkCanAdvanceKnockout(): void {

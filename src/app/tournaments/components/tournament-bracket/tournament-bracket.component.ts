@@ -47,17 +47,6 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
   loading = false;
   error: string | null = null;
 
-  // Single elimination round order
-  private singleEliminationOrder: { [key: string]: number } = {
-    'ROUND_OF_64': 1,
-    'ROUND_OF_32': 2,
-    'ROUND_OF_16': 3,
-    'QUARTER_FINALS': 4,
-    'SEMI_FINALS': 5,
-    'THIRD_PLACE': 6,
-    'FINAL': 7,
-  };
-
   // Double elimination round order
   private doubleEliminationOrder: { [key: string]: number } = {
     // Winners Bracket
@@ -82,6 +71,12 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
   };
 
   private singleEliminationNames: { [key: string]: string } = {
+    // Playoff rounds (SWISS format)
+    'PLAYOFF': 'Playoff',
+    'PLAYOFF_ROUND': 'Playoff',
+    'PLAYOFF_ROUND_1': 'Playoff Ida',
+    'PLAYOFF_ROUND_2': 'Playoff Vuelta',
+    // Standard knockout rounds
     'ROUND_OF_64': 'Ronda de 64',
     'ROUND_OF_32': 'Ronda de 32',
     'ROUND_OF_16': 'Octavos de Final',
@@ -89,6 +84,20 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
     'SEMI_FINALS': 'Semifinales',
     'THIRD_PLACE': 'Tercer Puesto',
     'FINAL': 'Final',
+  };
+
+  private singleEliminationOrder: { [key: string]: number } = {
+    'PLAYOFF': 0,
+    'PLAYOFF_ROUND': 0,
+    'PLAYOFF_ROUND_1': 0,
+    'PLAYOFF_ROUND_2': 1,
+    'ROUND_OF_64': 2,
+    'ROUND_OF_32': 3,
+    'ROUND_OF_16': 4,
+    'QUARTER_FINALS': 5,
+    'SEMI_FINALS': 6,
+    'THIRD_PLACE': 7,
+    'FINAL': 8,
   };
 
   private doubleEliminationNames: { [key: string]: string } = {
@@ -131,8 +140,7 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
   }
 
   get isDoubleElimination(): boolean {
-    return this.tournamentFormat === 'DOUBLE_ELIMINATION' ||
-           this.tournamentFormat === 'GROUP_STAGE_DOUBLE';
+    return this.tournamentFormat === 'DOUBLE_ELIMINATION';
   }
 
   get isGroupStageFormat(): boolean {
@@ -141,8 +149,21 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
            this.tournamentFormat === 'GROUP_STAGE_DOUBLE';
   }
 
-  // Knockout round identifiers
+  get isSwissFormat(): boolean {
+    return this.tournamentFormat === 'SWISS';
+  }
+
+  /**
+   * Determines if bracket should show double elimination layout.
+   * GROUP_STAGE_DOUBLE uses single elimination for knockout (not double elimination).
+   */
+  get useDoubleEliminationLayout(): boolean {
+    return this.tournamentFormat === 'DOUBLE_ELIMINATION';
+  }
+
+  // Knockout round identifiers (includes Playoff for SWISS format)
   private knockoutRounds = [
+    'PLAYOFF', 'PLAYOFF_ROUND',
     'ROUND_OF_64', 'ROUND_OF_32', 'ROUND_OF_16',
     'QUARTER_FINALS', 'SEMI_FINALS', 'THIRD_PLACE', 'FINAL'
   ];
@@ -154,13 +175,11 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
     this.matchService.getByTournament(this.tournamentId, 0, 200).subscribe({
       next: (response) => {
         const matches = response.body.data;
-        if (this.isDoubleElimination) {
-          this.organizeDoubleEliminationBracket(matches);
-        } else if (this.tournamentFormat === 'GROUP_STAGE_DOUBLE') {
-          // GROUP_STAGE_DOUBLE advances to double elimination knockout
+        if (this.useDoubleEliminationLayout) {
+          // Pure DOUBLE_ELIMINATION format
           this.organizeDoubleEliminationBracket(matches);
         } else {
-          // SINGLE_ELIMINATION, GROUP_STAGE, GROUP_STAGE_SINGLE use single elimination bracket
+          // SINGLE_ELIMINATION, GROUP_STAGE*, SWISS use single elimination bracket
           this.rounds = this.organizeMatchesIntoRounds(matches);
         }
         this.loading = false;
@@ -182,6 +201,11 @@ export class TournamentBracketComponent implements OnInit, OnChanges {
       // For GROUP_STAGE formats, only include knockout rounds in bracket
       if (this.isGroupStageFormat && !this.isKnockoutRound(roundKey)) {
         return; // Skip group stage matches
+      }
+
+      // For SWISS format, only include Playoff and knockout rounds in bracket
+      if (this.isSwissFormat && !this.isKnockoutRound(roundKey)) {
+        return; // Skip Swiss league phase matches
       }
 
       if (!roundsMap.has(roundKey)) {
